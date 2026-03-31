@@ -159,7 +159,7 @@ class Vendor {
     ctx.font = 'bold 10px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    const labelY = hasSpriteRuntime ? spriteTop - 12 : y + tileSize * 0.02;
+    const labelY = hasSpriteRuntime ? spriteTop + drawSize * 0.40 - 12 : y + tileSize * 0.02;
     ctx.fillText(this.shopType === 'crafting' ? 'Artisan' : 'Shop', x + tileSize * 0.5, labelY);
 
     ctx.restore();

@@ -166,7 +166,7 @@ class Monster {
       const bh = 6;
       const bx = sx - bw / 2;
       const by = drewSprite && hasSpriteRuntime
-        ? spriteTop - 12
+        ? spriteTop + drawSize * 0.40 - 12
         : sy - r - 12;
       const hpPct = this.currentHitpoints / this.maxHitpoints;
 

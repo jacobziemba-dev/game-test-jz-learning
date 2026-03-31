@@ -558,69 +558,98 @@ class Player {
   }
 
   render(ctx, camera) {
-    if (this._renderSprite(ctx, camera)) {
-      return;
-    }
-
     const ts = this.tileSize;
     const radius = ts * 0.35;
+    const clipConfig = SpriteManifest?.clips?.player;
+    const hasSpriteRuntime = !!clipConfig && !!this.world?.spriteSystem;
+    const drawScale = clipConfig?.drawScale ?? 4.8;
+    const drawSize = ts * drawScale;
 
-    // Walk bob offset
-    let bobY = 0;
-    if (this.state === PlayerState.WALKING) {
-      bobY = Math.sin(this.bobTime * 12) * 3;
+    const drewSprite = this._renderSprite(ctx, camera);
+
+    if (!drewSprite) {
+      // Walk bob offset
+      let bobY = 0;
+      if (this.state === PlayerState.WALKING) {
+        bobY = Math.sin(this.bobTime * 12) * 3;
+      }
+
+      const sx = this.x - camera.x;
+      const sy = this.y - camera.y + bobY;
+
+      ctx.save();
+      ctx.translate(sx, sy);
+
+      // Shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.25)';
+      ctx.beginPath();
+      ctx.ellipse(0, radius * 0.7, radius * 0.7, radius * 0.25, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Body circle
+      ctx.fillStyle = '#4fc3f7';
+      ctx.beginPath();
+      ctx.arc(0, 0, radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = '#0288d1';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Direction dot
+      const dotOffset = radius * 0.6;
+      let dotX = 0, dotY = 0;
+      if (this.direction === 'UP')    dotY = -dotOffset;
+      if (this.direction === 'DOWN')  dotY =  dotOffset;
+      if (this.direction === 'LEFT')  dotX = -dotOffset;
+      if (this.direction === 'RIGHT') dotX =  dotOffset;
+
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(dotX, dotY, radius * 0.22, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Spinning axe while chopping
+      if (this.state === PlayerState.CHOPPING) {
+        this._drawSpinningAxe(ctx, radius);
+      }
+
+      // Combat targeting indicator
+      if (this.targetMonster && this.targetMonster.isAlive) {
+        ctx.strokeStyle = '#ff8a65';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, radius + 4, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      ctx.restore();
     }
 
+    // HP bar + name label
     const sx = this.x - camera.x;
-    const sy = this.y - camera.y + bobY;
+    const sy = this.y - camera.y;
+    const groundY = sy + ts * 0.245;
+    const spriteTop = groundY - drawSize * 0.62;
+    const bw = ts * 0.65;
+    const bh = 6;
+    const bx = sx - bw / 2;
+    const by = drewSprite && hasSpriteRuntime
+      ? spriteTop + drawSize * 0.40 - 12
+      : sy - radius - 12;
+    const hpPct = this.currentHitpoints / this.maxHitpoints;
 
     ctx.save();
-    ctx.translate(sx, sy);
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillRect(bx, by, bw, bh);
+    ctx.fillStyle = '#43a047';
+    ctx.fillRect(bx + 1, by + 1, (bw - 2) * hpPct, bh - 2);
 
-    // Shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
-    ctx.beginPath();
-    ctx.ellipse(0, radius * 0.7, radius * 0.7, radius * 0.25, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Body circle
-    ctx.fillStyle = '#4fc3f7';
-    ctx.beginPath();
-    ctx.arc(0, 0, radius, 0, Math.PI * 2);
-    ctx.fill();
-    
-
-    ctx.strokeStyle = '#0288d1';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // Direction dot
-    const dotOffset = radius * 0.6;
-    let dotX = 0, dotY = 0;
-    if (this.direction === 'UP')    dotY = -dotOffset;
-    if (this.direction === 'DOWN')  dotY =  dotOffset;
-    if (this.direction === 'LEFT')  dotX = -dotOffset;
-    if (this.direction === 'RIGHT') dotX =  dotOffset;
-
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.arc(dotX, dotY, radius * 0.22, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Spinning axe while chopping
-    if (this.state === PlayerState.CHOPPING) {
-      this._drawSpinningAxe(ctx, radius);
-    }
-
-    // Combat targeting indicator
-    if (this.targetMonster && this.targetMonster.isAlive) {
-      ctx.strokeStyle = '#ff8a65';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(0, 0, radius + 4, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-
+    ctx.fillStyle = '#f5f5f5';
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(`Player (Lv ${this.getCombatLevel()})`, sx, by - 2);
     ctx.restore();
   }
 
