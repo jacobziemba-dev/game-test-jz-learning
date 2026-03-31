@@ -6,6 +6,7 @@ const PlayerState = {
 };
 
 const WALK_SPEED = 5.5; // tiles per second
+const COMBAT_STYLES = ['balanced', 'attack', 'strength', 'defence'];
 
 class Player {
   constructor(world) {
@@ -36,6 +37,7 @@ class Player {
     this.currentHitpoints = this.maxHitpoints;
     this._lootPickupQueue = [];
     this.deathVersion = 0;
+    this.combatStyle = 'balanced';
 
     // Chopping
     this.chopTarget = null;
@@ -317,8 +319,16 @@ class Player {
     const died = this.targetMonster.takeDamage(damage);
 
     if (damage > 0) {
-      this.skills.gainXP('attack', damage * 2);
-      this.skills.gainXP('strength', damage * 2);
+      if (this.combatStyle === 'attack') {
+        this.skills.gainXP('attack', damage * 4);
+      } else if (this.combatStyle === 'strength') {
+        this.skills.gainXP('strength', damage * 4);
+      } else if (this.combatStyle === 'defence') {
+        this.skills.gainXP('defence', damage * 4);
+      } else {
+        this.skills.gainXP('attack', damage * 2);
+        this.skills.gainXP('strength', damage * 2);
+      }
       this.skills.gainXP('hitpoints', Math.ceil(damage * 1.33));
     }
 
@@ -381,8 +391,15 @@ class Player {
     return Math.floor(base + Math.max(melee, rangedStyle, magicStyle));
   }
 
-  queueLootPickup(itemName, quantity) {
-    this._lootPickupQueue.push({ itemName, quantity });
+  cycleCombatStyle() {
+    const idx = COMBAT_STYLES.indexOf(this.combatStyle);
+    const next = (idx + 1) % COMBAT_STYLES.length;
+    this.combatStyle = COMBAT_STYLES[next];
+    return this.combatStyle;
+  }
+
+  queueLootPickup(itemName, quantity, rarity = 'common') {
+    this._lootPickupQueue.push({ itemName, quantity, rarity });
     if (this._lootPickupQueue.length > 8) this._lootPickupQueue.shift();
   }
 
@@ -417,6 +434,7 @@ class Player {
       direction: this.direction,
       currentHitpoints: this.currentHitpoints,
       maxHitpoints: this.maxHitpoints,
+      combatStyle: this.combatStyle,
       deathVersion: this.deathVersion,
       inventory: this.inventory.serialize(),
       equipment: this.equipment.serialize(),
@@ -438,6 +456,7 @@ class Player {
     this.direction = data.direction ?? this.direction;
     this.maxHitpoints = Math.max(1, Math.floor(data.maxHitpoints ?? this.maxHitpoints));
     this.currentHitpoints = Math.max(1, Math.min(this.maxHitpoints, Math.floor(data.currentHitpoints ?? this.maxHitpoints)));
+    this.combatStyle = COMBAT_STYLES.includes(data.combatStyle) ? data.combatStyle : this.combatStyle;
     this.deathVersion = Math.max(0, Math.floor(data.deathVersion ?? this.deathVersion));
 
     this.inventory.deserialize(data.inventory);

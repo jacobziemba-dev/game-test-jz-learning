@@ -275,7 +275,7 @@ class CraftingUI {
     const inputStrs = recipe.inputs.map(i => {
       const item = ItemRegistry.get(i.itemId);
       const have = this.inventory.countItem(i.itemId);
-      const color = have >= i.qty ? '#aaa' : '#ff8y88';
+      const color = have >= i.qty ? '#aaa' : '#ff8888';
       return { text: `${i.qty}x ${item?.name ?? i.itemId}`, color };
     });
 

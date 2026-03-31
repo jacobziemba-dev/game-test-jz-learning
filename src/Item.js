@@ -14,7 +14,19 @@
  *   draw        {function} (ctx, x, y, size) => void — renders icon inside a (size × size) box at (x, y)
  */
 class Item {
-  constructor({ id, name, description = '', type = 'misc', stackable = true, maxStack = 1000, equipSlot = null, bonuses = {}, draw }) {
+  constructor({
+    id,
+    name,
+    description = '',
+    type = 'misc',
+    stackable = true,
+    maxStack = 1000,
+    equipSlot = null,
+    bonuses = {},
+    rarity = 'common',
+    requiredSkills = [],
+    draw,
+  }) {
     this.id          = id;
     this.name        = name;
     this.description = description;
@@ -23,6 +35,8 @@ class Item {
     this.maxStack    = maxStack;
     this.equipSlot   = equipSlot;
     this.bonuses     = bonuses;
+    this.rarity      = rarity;
+    this.requiredSkills = Array.isArray(requiredSkills) ? requiredSkills : [];
     this._draw       = draw;
   }
 

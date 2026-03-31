@@ -32,12 +32,39 @@ class Equipment {
    * Equip an item into its designated slot.
    * Returns the previously equipped item (or null) so the caller can return it to the inventory.
    */
-  equip(item) {
+  canEquip(item, skillManager = null) {
+    if (!item) return { ok: false, reason: 'No item selected.' };
     const slotId = item.equipSlot;
-    if (!slotId || !(slotId in this._slots)) return null;
+    if (!slotId || !(slotId in this._slots)) {
+      return { ok: false, reason: 'Item is not equippable.' };
+    }
+
+    if (!skillManager || !Array.isArray(item.requiredSkills) || item.requiredSkills.length === 0) {
+      return { ok: true };
+    }
+
+    const unmet = item.requiredSkills.find(req => skillManager.getLevel(req.skillId) < req.level);
+    if (!unmet) return { ok: true };
+
+    const skillName = unmet.skillId.charAt(0).toUpperCase() + unmet.skillId.slice(1);
+    return { ok: false, reason: `${skillName} level ${unmet.level} required.` };
+  }
+
+  equip(item, skillManager = null) {
+    const slotId = item.equipSlot;
+
+    const canEquip = this.canEquip(item, skillManager);
+    if (!canEquip.ok) {
+      return { ok: false, displaced: null, reason: canEquip.reason };
+    }
+
+    if (!slotId || !(slotId in this._slots)) {
+      return { ok: false, displaced: null, reason: 'Invalid equipment slot.' };
+    }
+
     const displaced = this._slots[slotId];
     this._slots[slotId] = item;
-    return displaced;
+    return { ok: true, displaced, reason: null };
   }
 
   /**

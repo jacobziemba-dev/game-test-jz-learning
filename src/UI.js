@@ -26,10 +26,11 @@ class UI {
     if (this._toasts.length > 4) this._toasts.shift();
   }
 
-  pushLoot(itemName, quantity) {
+  pushLoot(itemName, quantity, rarity = 'common') {
+    const rarityColor = ItemRegistry.getRarityColor(rarity);
     this._toasts.push({
       text:   `+${quantity} ${itemName}`,
-      color:  '#9ccc65',
+      color:  rarityColor,
       ttl:    2.5,
       maxTtl: 2.5,
     });
@@ -142,7 +143,7 @@ class UI {
   }
 
   _renderKeybindHints(ctx, player) {
-    const hints = ['[I] Inventory', '[C] Crafting', '[K] Skills', '[P] Character', '[H] Help', '[O] Save', '[L] Load'];
+    const hints = ['[I] Inventory', '[C] Crafting', '[K] Skills', '[J] Journal', '[1..8] Hotbar', '[B] Toggle bar', '[O] Save', '[L] Load'];
     ctx.save();
     ctx.fillStyle    = 'rgba(255,255,255,0.3)';
     ctx.font         = '10px monospace';

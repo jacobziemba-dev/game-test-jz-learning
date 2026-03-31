@@ -30,7 +30,18 @@ const ItemRegistry = (() => {
     return Object.values(_items);
   }
 
-  return { register, get, all };
+  function getRarityColor(rarity) {
+    const colors = {
+      common: '#f5f5f5',
+      uncommon: '#81c784',
+      rare: '#64b5f6',
+      epic: '#ba68c8',
+      unique: '#ffb74d',
+    };
+    return colors[rarity] ?? colors.common;
+  }
+
+  return { register, get, all, getRarityColor };
 })();
 
 // ─── Item Definitions ────────────────────────────────────────────────────────
@@ -244,9 +255,11 @@ ItemRegistry.register({
   name: 'Bronze Sword',
   description: 'A basic sword forged from bronze.',
   type: 'weapon',
+  rarity: 'uncommon',
   stackable: false,
   maxStack: 1,
   equipSlot: 'weapon',
+  requiredSkills: [{ skillId: 'attack', level: 1 }],
   bonuses: { attack: 7, strength: 3 },
   draw(ctx, x, y, size) {
     const cx = x + size / 2, cy = y + size / 2;
@@ -284,9 +297,11 @@ ItemRegistry.register({
   name: 'Iron Sword',
   description: 'A sturdy sword forged from iron.',
   type: 'weapon',
+  rarity: 'rare',
   stackable: false,
   maxStack: 1,
   equipSlot: 'weapon',
+  requiredSkills: [{ skillId: 'attack', level: 10 }],
   bonuses: { attack: 10, strength: 5 },
   draw(ctx, x, y, size) {
     const cx = x + size / 2, cy = y + size / 2;
@@ -331,9 +346,11 @@ ItemRegistry.register({
   name: 'Bronze Shield',
   description: 'A kite shield of bronze. Good for blocking.',
   type: 'armor',
+  rarity: 'uncommon',
   stackable: false,
   maxStack: 1,
   equipSlot: 'offhand',
+  requiredSkills: [{ skillId: 'defence', level: 4 }],
   bonuses: { defence: 5 },
   draw(ctx, x, y, size) {
     const cx = x + size / 2, cy = y + size / 2;
@@ -377,9 +394,11 @@ ItemRegistry.register({
   name: 'Leather Body',
   description: 'A simple leather chest piece. Lightweight protection.',
   type: 'armor',
+  rarity: 'uncommon',
   stackable: false,
   maxStack: 1,
   equipSlot: 'body',
+  requiredSkills: [{ skillId: 'defence', level: 5 }],
   bonuses: { defence: 8 },
   draw(ctx, x, y, size) {
     const cx = x + size / 2, cy = y + size / 2;
@@ -418,9 +437,11 @@ ItemRegistry.register({
   name: 'Leather Legs',
   description: 'Leather leg protection. Covers the lower body.',
   type: 'armor',
+  rarity: 'common',
   stackable: false,
   maxStack: 1,
   equipSlot: 'legs',
+  requiredSkills: [{ skillId: 'defence', level: 3 }],
   bonuses: { defence: 5 },
   draw(ctx, x, y, size) {
     const cx = x + size / 2, cy = y + size / 2;
@@ -455,9 +476,11 @@ ItemRegistry.register({
   name: 'Leather Coif',
   description: 'A close-fitting leather cap that protects the head.',
   type: 'armor',
+  rarity: 'common',
   stackable: false,
   maxStack: 1,
   equipSlot: 'head',
+  requiredSkills: [{ skillId: 'defence', level: 2 }],
   bonuses: { defence: 2 },
   draw(ctx, x, y, size) {
     const cx = x + size / 2, cy = y + size / 2;
@@ -485,9 +508,11 @@ ItemRegistry.register({
   name: 'Leather Gloves',
   description: 'Simple leather gloves.',
   type: 'armor',
+  rarity: 'common',
   stackable: false,
   maxStack: 1,
   equipSlot: 'hands',
+  requiredSkills: [{ skillId: 'defence', level: 1 }],
   bonuses: { defence: 1 },
   draw(ctx, x, y, size) {
     const cx = x + size / 2, cy = y + size / 2;
@@ -521,9 +546,11 @@ ItemRegistry.register({
   name: 'Leather Boots',
   description: 'Sturdy leather boots.',
   type: 'armor',
+  rarity: 'common',
   stackable: false,
   maxStack: 1,
   equipSlot: 'boots',
+  requiredSkills: [{ skillId: 'defence', level: 1 }],
   bonuses: { defence: 2 },
   draw(ctx, x, y, size) {
     const cx = x + size / 2, cy = y + size / 2;
@@ -625,6 +652,7 @@ ItemRegistry.register({
   name: 'Bronze Bar',
   description: 'A bronze bar ready to smith into basic equipment.',
   type: 'resource',
+  rarity: 'common',
   stackable: true,
   maxStack: 1000,
   draw(ctx, x, y, size) {
@@ -651,6 +679,95 @@ ItemRegistry.register({
     ctx.moveTo(x0 + 4, y0 + 4);
     ctx.lineTo(x0 + w - 4, y0 + 4);
     ctx.stroke();
+  },
+});
+
+ItemRegistry.register({
+  id: 'goblin_charm',
+  name: 'Goblin Charm',
+  description: 'A carved trinket stolen from a goblin war camp.',
+  type: 'misc',
+  rarity: 'rare',
+  stackable: false,
+  maxStack: 1,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    const r = size * 0.32;
+
+    ctx.fillStyle = '#6d4c41';
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = '#3e2723';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.fillStyle = '#81c784';
+    ctx.beginPath();
+    ctx.arc(cx, cy, r * 0.35, 0, Math.PI * 2);
+    ctx.fill();
+  },
+});
+
+ItemRegistry.register({
+  id: 'bandit_cache',
+  name: 'Bandit Cache',
+  description: 'A small pouch of valuables looted from desert bandits.',
+  type: 'misc',
+  rarity: 'epic',
+  stackable: false,
+  maxStack: 1,
+  draw(ctx, x, y, size) {
+    const w = size * 0.62;
+    const h = size * 0.48;
+    const x0 = x + (size - w) / 2;
+    const y0 = y + (size - h) / 2;
+
+    ctx.fillStyle = '#6d4c41';
+    ctx.beginPath();
+    ctx.roundRect(x0, y0, w, h, 4);
+    ctx.fill();
+
+    ctx.strokeStyle = '#4e342e';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffcc80';
+    ctx.fillRect(x0 + w * 0.42, y0 + h * 0.1, w * 0.16, h * 0.8);
+  },
+});
+
+ItemRegistry.register({
+  id: 'giant_relic',
+  name: 'Giant Relic',
+  description: 'A unique relic dropped by an ancient giant.',
+  type: 'misc',
+  rarity: 'unique',
+  stackable: false,
+  maxStack: 1,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+
+    ctx.fillStyle = '#b0bec5';
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - size * 0.32);
+    ctx.lineTo(cx + size * 0.24, cy);
+    ctx.lineTo(cx, cy + size * 0.32);
+    ctx.lineTo(cx - size * 0.24, cy);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.strokeStyle = '#78909c';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffb74d';
+    ctx.beginPath();
+    ctx.arc(cx, cy, size * 0.09, 0, Math.PI * 2);
+    ctx.fill();
   },
 });
 

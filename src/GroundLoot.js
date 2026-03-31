@@ -28,11 +28,17 @@ class GroundLoot {
 
     ctx.save();
 
-    // Ground marker
+    // Ground marker + rarity accent
     ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
     ctx.beginPath();
     ctx.ellipse(cx, cy + iconSize * 0.35, iconSize * 0.7, iconSize * 0.24, 0, 0, Math.PI * 2);
     ctx.fill();
+
+    ctx.strokeStyle = ItemRegistry.getRarityColor(item.rarity ?? 'common');
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + iconSize * 0.35, iconSize * 0.72, iconSize * 0.26, 0, 0, Math.PI * 2);
+    ctx.stroke();
 
     item.draw(ctx, cx - iconSize / 2, cy - iconSize / 2, iconSize);
 

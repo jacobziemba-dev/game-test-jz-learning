@@ -79,7 +79,7 @@ class PlayerUI {
         const overflow = this.player.inventory.addItem(item.id, 1);
         if (overflow > 0) {
           // Inventory full — re-equip
-          this.player.equipment.equip(item);
+          this.player.equipment.equip(item, this.player.skills);
         }
       }
     }

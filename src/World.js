@@ -13,6 +13,61 @@ const TREE_COUNT = 80;
 const MONSTER_COUNT = 16;
 const ORE_NODE_COUNT = 18;
 
+const MONSTER_ARCHETYPES = [
+  {
+    name: 'Goblin',
+    family: 'goblin',
+    dropTableId: 'goblin_common',
+    level: 2,
+    attack: 3,
+    strength: 3,
+    defence: 2,
+    maxHitpoints: 8,
+    respawnMin: 7,
+    respawnMax: 12,
+    weight: 54,
+  },
+  {
+    name: 'Skeleton',
+    family: 'skeleton',
+    dropTableId: 'skeleton_guard',
+    level: 5,
+    attack: 6,
+    strength: 5,
+    defence: 5,
+    maxHitpoints: 14,
+    respawnMin: 11,
+    respawnMax: 16,
+    weight: 28,
+  },
+  {
+    name: 'Bandit',
+    family: 'bandit',
+    dropTableId: 'bandit_raider',
+    level: 8,
+    attack: 8,
+    strength: 8,
+    defence: 7,
+    maxHitpoints: 20,
+    respawnMin: 12,
+    respawnMax: 18,
+    weight: 16,
+  },
+  {
+    name: 'Ancient Giant',
+    family: 'giant',
+    dropTableId: 'ancient_giant_boss',
+    level: 16,
+    attack: 13,
+    strength: 14,
+    defence: 11,
+    maxHitpoints: 38,
+    respawnMin: 30,
+    respawnMax: 45,
+    weight: 2,
+  },
+];
+
 class World {
   constructor() {
     this.tileSize = TILE_SIZE;
@@ -84,22 +139,26 @@ class World {
       if (this.grid[row][col] !== TILE.GRASS) continue;
       if (this.monsters.some(m => m.col === col && m.row === row)) continue;
 
+      const archetype = this._chooseWeightedDrop(MONSTER_ARCHETYPES);
+      if (!archetype) continue;
+
+      const table = DropTableRegistry.get(archetype.dropTableId);
+      if (!table) continue;
+
       const monster = new Monster(col, row, this, {
-        name: 'Goblin',
-        level: 2,
-        attack: 3,
-        strength: 3,
-        defence: 2,
-        maxHitpoints: 8,
-        guaranteedDrops: [
-          { itemId: 'coins', min: 2, max: 9 },
-        ],
-        randomDrops: [
-          { itemId: 'log', min: 1, max: 1, weight: 55 },
-          { itemId: 'arrow_shaft', min: 3, max: 8, weight: 35 },
-          { itemId: 'bronze_sword', min: 1, max: 1, weight: 10 },
-        ],
-        randomDropRolls: 1,
+        name: archetype.name,
+        family: archetype.family,
+        dropTableId: archetype.dropTableId,
+        level: archetype.level,
+        attack: archetype.attack,
+        strength: archetype.strength,
+        defence: archetype.defence,
+        maxHitpoints: archetype.maxHitpoints,
+        respawnMin: archetype.respawnMin,
+        respawnMax: archetype.respawnMax,
+        guaranteedDrops: table.guaranteed,
+        randomDrops: table.random,
+        randomDropRolls: table.randomDropRolls,
       });
       this.monsters.push(monster);
       placed++;
@@ -156,7 +215,19 @@ class World {
   }
 
   getLootAt(col, row) {
-    return this.groundLoot.find(l => l.col === col && l.row === row && !l.isExpired) || null;
+    const stack = this.getLootStackAt(col, row);
+    return stack[0] ?? null;
+  }
+
+  getLootStackAt(col, row) {
+    return this.groundLoot
+      .filter(l => l.col === col && l.row === row && !l.isExpired)
+      .sort((a, b) => {
+        const aRank = this._rarityRank(ItemRegistry.get(a.itemId)?.rarity);
+        const bRank = this._rarityRank(ItemRegistry.get(b.itemId)?.rarity);
+        if (aRank !== bRank) return bRank - aRank;
+        return b.quantity - a.quantity;
+      });
   }
 
   spawnGroundLoot(col, row, itemId, quantity) {
@@ -176,7 +247,8 @@ class World {
       }
     }
 
-    this.groundLoot.push(new GroundLoot(col, row, itemId, quantity, 30));
+    const ttl = this._getLootTtl(item);
+    this.groundLoot.push(new GroundLoot(col, row, itemId, quantity, ttl));
   }
 
   spawnDropsForMonster(monster) {
@@ -211,7 +283,20 @@ class World {
       this._removeLoot(loot);
     }
 
-    return { itemName: item.name, quantity: picked };
+    return { itemName: item.name, quantity: picked, rarity: item.rarity ?? 'common' };
+  }
+
+  pickupAllLootAt(col, row, inventory, filterFn = null) {
+    const stack = this.getLootStackAt(col, row);
+    const pickups = [];
+
+    for (const loot of stack) {
+      if (filterFn && !filterFn(loot)) continue;
+      const pickup = this.pickupLoot(loot, inventory);
+      if (pickup) pickups.push(pickup);
+    }
+
+    return pickups;
   }
 
   update(dt, player) {
@@ -314,6 +399,23 @@ class World {
     if (idx >= 0) this.groundLoot.splice(idx, 1);
   }
 
+  _getLootTtl(item) {
+    const rarity = item?.rarity ?? 'common';
+    if (rarity === 'unique') return 180;
+    if (rarity === 'epic') return 120;
+    if (rarity === 'rare') return 90;
+    if (rarity === 'uncommon') return 55;
+    return 35;
+  }
+
+  _rarityRank(rarity) {
+    if (rarity === 'unique') return 5;
+    if (rarity === 'epic') return 4;
+    if (rarity === 'rare') return 3;
+    if (rarity === 'uncommon') return 2;
+    return 1;
+  }
+
   serialize() {
     return {
       trees: this.trees.map(t => ({
@@ -364,6 +466,8 @@ class World {
         .map(m => {
           const monster = new Monster(m.col, m.row, this, {
             name: m.name,
+            family: m.family,
+            dropTableId: m.dropTableId,
             level: m.level,
             attack: m.attack,
             strength: m.strength,

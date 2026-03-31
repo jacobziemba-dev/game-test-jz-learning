@@ -18,16 +18,19 @@ class HelpUI {
       { key: 'I',      desc: 'Inventory' },
       { key: 'C',      desc: 'Crafting' },
       { key: 'K',      desc: 'Skills' },
+      { key: 'J',      desc: 'Skill Journal (unlocks book)' },
       { key: 'P',      desc: 'Character (equipment + stats)' },
       { key: 'H',      desc: 'Help (this panel)' },
+      { key: '1..8',   desc: 'Hotbar actions' },
+      { key: 'B',      desc: 'Toggle hotbar' },
       { key: 'O',      desc: 'Manual save' },
       { key: 'L',      desc: 'Load latest save' },
       { key: 'Escape', desc: 'Close all panels' },
     ];
 
     this._mouseControls = [
-      { key: 'Left click',  desc: 'Walk / Chop tree' },
-      { key: 'Right click', desc: 'Context menu' },
+      { key: 'Left click',  desc: 'Walk / Attack / Gather / Take top loot' },
+      { key: 'Right click', desc: 'Context menu (includes Take all loot)' },
     ];
 
     // Compute panel height

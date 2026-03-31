@@ -121,7 +121,7 @@ class ContextMenu {
 // ─────────────────────────────────────────────
 
 class InputHandler {
-  constructor(canvas, camera, world, player, inventoryUI, craftingUI, skillsUI, playerUI, helpUI, actions = {}) {
+  constructor(canvas, camera, world, player, inventoryUI, craftingUI, skillsUI, skillJournalUI, playerUI, helpUI, hotbarUI, actions = {}) {
     this.canvas      = canvas;
     this.camera      = camera;
     this.world       = world;
@@ -129,8 +129,10 @@ class InputHandler {
     this.inventoryUI = inventoryUI;
     this.craftingUI  = craftingUI;
     this.skillsUI    = skillsUI;
+    this.skillJournalUI = skillJournalUI;
     this.playerUI    = playerUI;
     this.helpUI      = helpUI;
+    this.hotbarUI    = hotbarUI;
     this.actions     = actions;
 
     this.clickMarker = null; // { x, y, alpha }
@@ -147,6 +149,7 @@ class InputHandler {
     if (key === 'i') { this.inventoryUI.toggle(); this.menu.close(); }
     if (key === 'c') { this.craftingUI.toggle();  this.menu.close(); }
     if (key === 'k') { this.skillsUI.toggle();    this.menu.close(); }
+    if (key === 'j') { this.skillJournalUI.toggle(); this.menu.close(); }
     if (key === 'p') { this.playerUI.toggle();    this.menu.close(); }
     if (key === 'h') { this.helpUI.toggle();      this.menu.close(); }
     if (key === 'o') {
@@ -157,10 +160,18 @@ class InputHandler {
       this.actions.onManualLoad?.();
       this.menu.close();
     }
+    if (key === 'b') {
+      this.hotbarUI.toggle();
+      this.menu.close();
+    }
+    if (this.hotbarUI.onKey(key)) {
+      this.menu.close();
+    }
     if (e.key === 'Escape') {
       this.inventoryUI.close();
       this.craftingUI.close();
       this.skillsUI.close();
+      this.skillJournalUI.close();
       this.playerUI.close();
       this.helpUI.close();
       this.menu.close();
@@ -179,8 +190,10 @@ class InputHandler {
     if (this.inventoryUI.onClick(sx, sy)) return;
     if (this.craftingUI.onClick(sx, sy))  return;
     if (this.skillsUI.onClick(sx, sy))    return;
+    if (this.skillJournalUI.onClick(sx, sy)) return;
     if (this.playerUI.onClick(sx, sy))    return;
     if (this.helpUI.onClick(sx, sy))      return;
+    if (this.hotbarUI.onClick(sx, sy))    return;
 
     // If context menu is open, let it consume the click
     if (this.menu.visible) {
@@ -194,7 +207,7 @@ class InputHandler {
     const loot = this.world.getLootAt(col, row);
     if (loot) {
       const pickup = this.world.pickupLoot(loot, this.player.inventory);
-      if (pickup) this.player.queueLootPickup(pickup.itemName, pickup.quantity);
+      if (pickup) this.player.queueLootPickup(pickup.itemName, pickup.quantity, pickup.rarity);
       return;
     }
 
@@ -243,9 +256,23 @@ class InputHandler {
         color: '#9ccc65',
         action: () => {
           const pickup = this.world.pickupLoot(loot, this.player.inventory);
-          if (pickup) this.player.queueLootPickup(pickup.itemName, pickup.quantity);
+          if (pickup) this.player.queueLootPickup(pickup.itemName, pickup.quantity, pickup.rarity);
         },
       });
+
+      const stack = this.world.getLootStackAt(col, row);
+      if (stack.length > 1) {
+        items.push({
+          label: `Take all (${stack.length})`,
+          color: '#80cbc4',
+          action: () => {
+            const pickups = this.world.pickupAllLootAt(col, row, this.player.inventory);
+            for (const pickup of pickups) {
+              this.player.queueLootPickup(pickup.itemName, pickup.quantity, pickup.rarity);
+            }
+          },
+        });
+      }
     }
 
     const monster = this.world.getMonsterAt(col, row);
@@ -313,7 +340,9 @@ class InputHandler {
     this.menu.onMouseMove(sx, sy);
     this.inventoryUI.onMouseMove(sx, sy);
     this.craftingUI.onMouseMove(sx, sy);
+    this.skillJournalUI.onMouseMove(sx, sy);
     this.playerUI.onMouseMove(sx, sy);
+    this.hotbarUI.onMouseMove(sx, sy);
   }
 
   update(dt) {

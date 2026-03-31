@@ -5,9 +5,11 @@
  * Renders a 4×7 grid of item slots. Hovering a slot shows a tooltip.
  */
 class InventoryUI {
-  constructor(inventory, equipment = null) {
+  constructor(inventory, equipment = null, skillManager = null, onMessage = null) {
     this.inventory   = inventory;
     this.equipment   = equipment; // optional — enables click-to-equip
+    this.skillManager = skillManager;
+    this.onMessage   = onMessage;
     this.isOpen      = false;
 
     // Layout constants
@@ -50,7 +52,13 @@ class InventoryUI {
       if (idx >= 0) {
         const slot = this.inventory.getSlot(idx);
         if (slot && !slot.isEmpty && slot.item.equipSlot) {
-          const displaced = this.equipment.equip(slot.item);
+          const equipResult = this.equipment.equip(slot.item, this.skillManager);
+          if (!equipResult.ok) {
+            this.onMessage?.(equipResult.reason ?? 'Cannot equip item.', '#ef9a9a');
+            return true;
+          }
+
+          const displaced = equipResult.displaced;
           this.inventory.removeItem(slot.item.id, 1);
           if (displaced) {
             // Swap displaced item back into inventory
@@ -59,6 +67,7 @@ class InventoryUI {
               // Inventory full — undo the equip
               this.equipment.unequip(slot.item.equipSlot);
               this.inventory.addItem(slot.item.id, 1);
+              this.onMessage?.('Inventory full. Could not swap equipment.', '#ffcc80');
             }
           }
         }
@@ -181,10 +190,17 @@ class InventoryUI {
     
     const wrapped = [];
     wrapped.push({ text: item.name, isTitle: true });
+    wrapped.push({ text: `Rarity: ${(item.rarity ?? 'common').toUpperCase()}`, isTitle: false, color: ItemRegistry.getRarityColor(item.rarity ?? 'common') });
+    if (Array.isArray(item.requiredSkills) && item.requiredSkills.length > 0) {
+      const reqText = item.requiredSkills
+        .map(req => `${req.skillId.charAt(0).toUpperCase() + req.skillId.slice(1)} ${req.level}`)
+        .join(', ');
+      wrapped.push({ text: `Requires: ${reqText}`, isTitle: false, color: '#ffcc80' });
+    }
     if (item.description) {
       const maxTextW = tipW - tipPad * 2;
       const descLines = this._wrapText(ctx, item.description, maxTextW, '11px sans-serif');
-      for (const line of descLines) wrapped.push({ text: line, isTitle: false });
+      for (const line of descLines) wrapped.push({ text: line, isTitle: false, color: '#aaaaaa' });
     }
     
     const tipH = tipPad * 2 + wrapped.length * lineH;
@@ -206,7 +222,7 @@ class InventoryUI {
     ctx.textBaseline = 'top';
     wrapped.forEach((line, i) => {
       ctx.font      = line.isTitle ? 'bold 12px sans-serif' : '11px sans-serif';
-      ctx.fillStyle = line.isTitle ? '#c8a45a' : '#aaaaaa';
+      ctx.fillStyle = line.isTitle ? '#c8a45a' : (line.color ?? '#aaaaaa');
       ctx.fillText(line.text, tx + tipPad, ty + tipPad + i * lineH);
     });
   }

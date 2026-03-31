@@ -10,14 +10,37 @@ class Game {
     this.camera      = new Camera(this.canvas.width, this.canvas.height, this.world);
     this.player      = new Player(this.world);
     this.ui          = new UI();
-    this.inventoryUI = new InventoryUI(this.player.inventory, this.player.equipment);
+    this.inventoryUI = new InventoryUI(
+      this.player.inventory,
+      this.player.equipment,
+      this.player.skills,
+      (text, color) => this.ui.pushSystem(text, color)
+    );
     this.craftingUI  = new CraftingUI(this.player.inventory, this.player.skills);
     this.skillsUI    = new SkillsUI(this.player.skills);
+    this.skillJournalUI = new SkillJournalUI(this.player.skills);
     this.playerUI    = new PlayerUI(this.player);
     this.helpUI      = new HelpUI();
+    this.hotbarUI    = new HotbarUI([
+      { key: '1', label: 'Save', action: () => this.manualSave() },
+      { key: '2', label: 'Load', action: () => this.manualLoad() },
+      { key: '3', label: 'Inventory', action: () => this.inventoryUI.toggle() },
+      { key: '4', label: 'Crafting', action: () => this.craftingUI.toggle() },
+      {
+        key: '5',
+        label: 'Style',
+        action: () => {
+          const style = this.player.cycleCombatStyle();
+          this.ui.pushSystem(`Combat style: ${style}`, '#90caf9');
+        },
+      },
+      { key: '6', label: 'Journal', action: () => this.skillJournalUI.toggle() },
+      { key: '7', label: 'Skills', action: () => this.skillsUI.toggle() },
+      { key: '8', label: 'Character', action: () => this.playerUI.toggle() },
+    ]);
     this.input       = new InputHandler(
       this.canvas, this.camera, this.world, this.player,
-      this.inventoryUI, this.craftingUI, this.skillsUI, this.playerUI, this.helpUI,
+      this.inventoryUI, this.craftingUI, this.skillsUI, this.skillJournalUI, this.playerUI, this.helpUI, this.hotbarUI,
       {
         onManualSave: () => this.manualSave(),
         onManualLoad: () => this.manualLoad(),
@@ -72,9 +95,14 @@ class Game {
       this._markDirty();
     }
 
+    for (const evt of this.player.skills.popUnlocks()) {
+      this.ui.pushSystem(`Unlock: ${evt.skillName} Lv ${evt.level} - ${evt.title}`, '#64b5f6');
+      this._markDirty();
+    }
+
     // Poll for loot pickup events and push them to the toast system
     for (const evt of this.player.popLootPickups()) {
-      this.ui.pushLoot(evt.itemName, evt.quantity);
+      this.ui.pushLoot(evt.itemName, evt.quantity, evt.rarity);
       this._markDirty();
     }
 
@@ -104,8 +132,10 @@ class Game {
     this.inventoryUI.render(ctx, this.canvas.width, this.canvas.height);
     this.craftingUI.render(ctx, this.canvas.width, this.canvas.height);
     this.skillsUI.render(ctx, this.canvas.width, this.canvas.height);
+    this.skillJournalUI.render(ctx, this.canvas.width, this.canvas.height);
     this.playerUI.render(ctx, this.canvas.width, this.canvas.height);
     this.helpUI.render(ctx, this.canvas.width, this.canvas.height);
+    this.hotbarUI.render(ctx, this.canvas.width, this.canvas.height);
   }
 
   _markDirty() {

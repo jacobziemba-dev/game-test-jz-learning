@@ -19,6 +19,8 @@ class Monster {
     this.strength = config.strength ?? 3;
     this.defence = config.defence ?? 2;
     this.maxHitpoints = config.maxHitpoints ?? 8;
+    this.family = config.family ?? 'goblin';
+    this.dropTableId = config.dropTableId ?? 'goblin_common';
     this.respawnMin = config.respawnMin ?? 8;
     this.respawnMax = config.respawnMax ?? 14;
     this.guaranteedDrops = config.guaranteedDrops ?? [];
@@ -205,6 +207,8 @@ class Monster {
       strength: this.strength,
       defence: this.defence,
       maxHitpoints: this.maxHitpoints,
+      family: this.family,
+      dropTableId: this.dropTableId,
       currentHitpoints: this.currentHitpoints,
       respawnMin: this.respawnMin,
       respawnMax: this.respawnMax,
