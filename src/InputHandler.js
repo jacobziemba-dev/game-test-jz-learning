@@ -238,15 +238,6 @@ class InputHandler {
       return;
     }
 
-    const station = this.world.getStationAt(col, row);
-    if (station) {
-      const adj = Pathfinder.findAdjacentTile(this.player.col, this.player.row, station.col, station.row, this.world);
-      if (adj) {
-        this.player.walkTo(adj.col, adj.row);
-      }
-      return;
-    }
-
     const vendor = this.world.getVendorAt(col, row);
     if (vendor) {
       const adj = Pathfinder.findAdjacentTile(this.player.col, this.player.row, vendor.col, vendor.row, this.world);
@@ -341,21 +332,6 @@ class InputHandler {
         label: `Mine ${oreNode.name.toLowerCase()}`,
         color: '#90a4ae',
         action: () => this.player.mineOreNode(oreNode),
-      });
-    }
-
-    const station = this.world.getStationAt(col, row);
-    if (station) {
-      const stationName = station.stationType.split('_').join(' ');
-      items.push({
-        label: `Use ${stationName}`,
-        color: '#90caf9',
-        action: () => {
-          const adj = Pathfinder.findAdjacentTile(this.player.col, this.player.row, station.col, station.row, this.world);
-          if (adj) this.player.walkTo(adj.col, adj.row);
-          this.craftingUI.open();
-          this.craftingUI.setPreferredStation?.(station.stationType);
-        },
       });
     }
 

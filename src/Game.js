@@ -16,7 +16,7 @@ class Game {
       this.player.skills,
       (text, color) => this.ui.pushSystem(text, color)
     );
-    this.craftingUI  = new CraftingUI(this.player.inventory, this.player.skills, this.player, this.world);
+    this.craftingUI  = new CraftingUI(this.player.inventory, this.player.skills);
     this.shopUI      = new ShopUI(this.player, (text, color) => this.ui.pushSystem(text, color));
     this.skillsUI    = new SkillsUI(this.player.skills);
     this.skillJournalUI = new SkillJournalUI(this.player.skills);

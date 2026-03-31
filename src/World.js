@@ -2,7 +2,6 @@ const TILE = {
   GRASS: 0,
   TREE: 1,
   ROCK: 2,
-  STATION: 3,
   NPC: 4,
 };
 
@@ -14,15 +13,6 @@ const WORLD_ROWS = 40;
 const TREE_COUNT = 80;
 const MONSTER_COUNT = 16;
 const ORE_NODE_COUNT = 18;
-
-const STATION_LAYOUT = [
-  { stationType: 'furnace', dc: 4, dr: 0 },
-  { stationType: 'tanner', dc: 4, dr: 2 },
-  { stationType: 'spinning_wheel', dc: -4, dr: 1 },
-  { stationType: 'pottery_wheel', dc: -4, dr: -1 },
-  { stationType: 'pottery_oven', dc: -3, dr: -1 },
-  { stationType: 'water_source', dc: 1, dr: -4 },
-];
 
 const VENDOR_LAYOUT = [
   {
@@ -146,30 +136,9 @@ class World {
     // Ground loot objects
     this.groundLoot = [];
 
-    // Physical crafting stations
-    this.stations = [];
-    this._spawnStations();
-
     // Town vendors (starter economy)
     this.vendors = [];
     this._spawnVendors();
-  }
-
-  _spawnStations() {
-    const spawnCol = Math.floor(this.cols / 2);
-    const spawnRow = Math.floor(this.rows / 2);
-
-    for (const def of STATION_LAYOUT) {
-      const col = Math.max(1, Math.min(this.cols - 2, spawnCol + def.dc));
-      const row = Math.max(1, Math.min(this.rows - 2, spawnRow + def.dr));
-
-      this.trees = this.trees.filter(t => !(t.col === col && t.row === row));
-      this.oreNodes = this.oreNodes.filter(n => !(n.col === col && n.row === row));
-      this.monsters = this.monsters.filter(m => !(m.col === col && m.row === row));
-
-      this.grid[row][col] = TILE.STATION;
-      this.stations.push(new CraftingStation(col, row, this, def.stationType));
-    }
   }
 
   _spawnTrees() {
@@ -305,19 +274,8 @@ class World {
     return this.oreNodes.find(n => n.col === col && n.row === row && n.state !== 'DEPLETED') || null;
   }
 
-  getStationAt(col, row) {
-    return this.stations.find(s => s.col === col && s.row === row) ?? null;
-  }
-
   getVendorAt(col, row) {
     return this.vendors.find(v => v.col === col && v.row === row) ?? null;
-  }
-
-  getStationsNear(col, row, radius = 1) {
-    return this.stations.filter(s =>
-      Math.abs(s.col - col) <= radius &&
-      Math.abs(s.row - row) <= radius
-    );
   }
 
   getLootAt(col, row) {
@@ -476,15 +434,6 @@ class World {
       oreNode.render(ctx, camera, ts);
     }
 
-    const visibleStations = this.stations.filter(s =>
-      s.col >= startCol - 1 && s.col <= endCol + 1 &&
-      s.row >= startRow - 1 && s.row <= endRow + 1
-    );
-    visibleStations.sort((a, b) => a.row - b.row);
-    for (const station of visibleStations) {
-      station.render(ctx, camera, ts);
-    }
-
     const visibleVendors = this.vendors.filter(v =>
       v.col >= startCol - 1 && v.col <= endCol + 1 &&
       v.row >= startRow - 1 && v.row <= endRow + 1
@@ -571,11 +520,6 @@ class World {
         quantity: l.quantity,
         ttl: l.ttl,
       })),
-      stations: this.stations.map(s => ({
-        col: s.col,
-        row: s.row,
-        stationType: s.stationType,
-      })),
       vendors: this.vendors.map(v => v.serialize()),
     };
   }
@@ -645,17 +589,6 @@ class World {
         const ttl = Math.max(0.1, Number(l.ttl ?? 30));
         this.groundLoot.push(new GroundLoot(Math.floor(l.col), Math.floor(l.row), l.itemId, qty, ttl));
       }
-    }
-
-    if (Array.isArray(data.stations)) {
-      this.stations = data.stations
-        .filter(s => Number.isFinite(s?.col) && Number.isFinite(s?.row) && typeof s?.stationType === 'string')
-        .map(s => {
-          const col = Math.max(1, Math.min(this.cols - 2, Math.floor(s.col)));
-          const row = Math.max(1, Math.min(this.rows - 2, Math.floor(s.row)));
-          this.grid[row][col] = TILE.STATION;
-          return new CraftingStation(col, row, this, s.stationType);
-        });
     }
 
     if (Array.isArray(data.vendors)) {

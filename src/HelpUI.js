@@ -16,7 +16,7 @@ class HelpUI {
 
     this._keybinds = [
       { key: 'I',      desc: 'Inventory' },
-      { key: 'C',      desc: 'Crafting (near stations)' },
+      { key: 'C',      desc: 'Crafting' },
       { key: 'K',      desc: 'Skills' },
       { key: 'J',      desc: 'Skill Journal (unlocks book)' },
       { key: 'F',      desc: 'Loot filter panel' },
@@ -31,7 +31,7 @@ class HelpUI {
 
     this._mouseControls = [
       { key: 'Left click',  desc: 'Walk / Attack / Gather / Take top loot' },
-      { key: 'Right click', desc: 'Context menu (loot, stations, and trading)' },
+      { key: 'Right click', desc: 'Context menu (loot and trading)' },
     ];
 
     // Compute panel height
