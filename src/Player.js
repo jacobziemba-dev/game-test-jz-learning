@@ -63,6 +63,12 @@ class Player {
     // Walk animation
     this.bobTime = 0;
 
+    // Sprite animation runtime (falls back to procedural draw until atlases exist).
+    this._visual = {
+      anim: new AnimationStateMachine(SpriteManifest?.clips?.player?.clips ?? {}, 'idle_down'),
+      clip: 'idle_down',
+    };
+
     // Inventory
     this.inventory = new Inventory();
 
@@ -204,6 +210,29 @@ class Player {
     }
 
     this._updateCombat(dt);
+    this._updateVisual(dt);
+  }
+
+  _updateVisual(dt) {
+    const dir = this._directionSuffix();
+    let nextClip = `idle_${dir}`;
+
+    if (this.state === PlayerState.WALKING) nextClip = `walk_${dir}`;
+    if (this.state === PlayerState.MINING || this.state === PlayerState.CHOPPING) nextClip = `mining_${dir}`;
+
+    if (!this._visual.anim.setClip(nextClip)) {
+      this._visual.anim.setClip(`idle_${dir}`);
+    }
+
+    this._visual.clip = this._visual.anim.currentClip ?? this._visual.clip;
+    this._visual.anim.update(dt);
+  }
+
+  _directionSuffix() {
+    if (this.direction === 'UP') return 'up';
+    if (this.direction === 'LEFT') return 'left';
+    if (this.direction === 'RIGHT') return 'right';
+    return 'down';
   }
 
   _cancelGatheringActions() {
@@ -522,6 +551,10 @@ class Player {
   }
 
   render(ctx, camera) {
+    if (this._renderSprite(ctx, camera)) {
+      return;
+    }
+
     const ts = this.tileSize;
     const radius = ts * 0.35;
 
@@ -582,6 +615,53 @@ class Player {
     }
 
     ctx.restore();
+  }
+
+  _renderSprite(ctx, camera) {
+    const clipConfig = SpriteManifest?.clips?.player;
+    const spriteSystem = this.world?.spriteSystem;
+    if (!clipConfig || !spriteSystem) return false;
+
+    const frameKey = this._visual.anim.getFrameKey();
+    if (!frameKey) return false;
+
+    const ts = this.tileSize;
+    const sx = this.x - camera.x;
+    const sy = this.y - camera.y;
+    const drawSize = ts * (clipConfig.drawScale ?? 1.4);
+
+    const shadowR = ts * 0.28;
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0.22)';
+    ctx.beginPath();
+    ctx.ellipse(sx, sy + ts * 0.23, shadowR, shadowR * 0.34, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    const drawn = spriteSystem.drawFrame(
+      ctx,
+      clipConfig.atlasId,
+      frameKey,
+      sx,
+      sy + ts * 0.28,
+      drawSize,
+      drawSize,
+      { anchorX: 0.5, anchorY: 1, pixelPerfect: true }
+    );
+
+    if (!drawn) return false;
+
+    if (this.targetMonster && this.targetMonster.isAlive) {
+      ctx.save();
+      ctx.strokeStyle = '#ff8a65';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(sx, sy, ts * 0.42, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    return true;
   }
 
   _drawSpinningAxe(ctx, radius) {

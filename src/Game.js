@@ -7,6 +7,9 @@ class Game {
     window.addEventListener('resize', () => this.resize());
 
     this.world       = new World();
+    this.spriteSystem = new SpriteSystem({ basePath: 'assets/sprites/' });
+    this.spriteSystem.registerManifest(SpriteManifest.atlases);
+    this.world.spriteSystem = this.spriteSystem;
     this.camera      = new Camera(this.canvas.width, this.canvas.height, this.world);
     this.player      = new Player(this.world);
     this.ui          = new UI();

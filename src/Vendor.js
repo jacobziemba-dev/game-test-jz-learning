@@ -11,6 +11,10 @@ class Vendor {
 
     this._restockTick = 0;
     this._restockEvery = 12;
+    this._animTimer = 0;
+    this._visual = {
+      anim: new AnimationStateMachine(SpriteManifest?.clips?.vendor?.clips ?? {}, 'idle'),
+    };
 
     this.stock = new Map();
     this._seedStock(Array.isArray(config.stock) ? config.stock : []);
@@ -76,6 +80,11 @@ class Vendor {
 
   update(dt) {
     this._restockTick += dt;
+    this._animTimer += dt;
+
+    this._visual.anim.setClip('idle');
+    this._visual.anim.update(dt);
+
     if (this._restockTick < this._restockEvery) return;
     this._restockTick = 0;
 
@@ -124,19 +133,21 @@ class Vendor {
     ctx.ellipse(x + tileSize * 0.5, y + tileSize * 0.8, tileSize * 0.24, tileSize * 0.1, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = this.shopType === 'crafting' ? '#ffe0b2' : '#b3e5fc';
-    ctx.beginPath();
-    ctx.arc(x + tileSize * 0.5, y + tileSize * 0.38, tileSize * 0.24, 0, Math.PI * 2);
-    ctx.fill();
+    if (!this._renderSprite(ctx, camera, tileSize, x, y)) {
+      ctx.fillStyle = this.shopType === 'crafting' ? '#ffe0b2' : '#b3e5fc';
+      ctx.beginPath();
+      ctx.arc(x + tileSize * 0.5, y + tileSize * 0.38, tileSize * 0.24, 0, Math.PI * 2);
+      ctx.fill();
 
-    ctx.fillStyle = this.shopType === 'crafting' ? '#8d6e63' : '#455a64';
-    ctx.beginPath();
-    ctx.roundRect(x + tileSize * 0.26, y + tileSize * 0.48, tileSize * 0.48, tileSize * 0.28, 5);
-    ctx.fill();
+      ctx.fillStyle = this.shopType === 'crafting' ? '#8d6e63' : '#455a64';
+      ctx.beginPath();
+      ctx.roundRect(x + tileSize * 0.26, y + tileSize * 0.48, tileSize * 0.48, tileSize * 0.28, 5);
+      ctx.fill();
 
-    ctx.strokeStyle = '#26323866';
-    ctx.lineWidth = 1;
-    ctx.stroke();
+      ctx.strokeStyle = '#26323866';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
 
     ctx.fillStyle = '#fff9';
     ctx.font = 'bold 10px sans-serif';
@@ -145,5 +156,26 @@ class Vendor {
     ctx.fillText(this.shopType === 'crafting' ? 'Artisan' : 'Shop', x + tileSize * 0.5, y + tileSize * 0.02);
 
     ctx.restore();
+  }
+
+  _renderSprite(ctx, camera, tileSize, x, y) {
+    const clipConfig = SpriteManifest?.clips?.vendor;
+    const spriteSystem = this.world?.spriteSystem;
+    if (!clipConfig || !spriteSystem) return false;
+
+    const frameKey = this._visual.anim.getFrameKey();
+    if (!frameKey) return false;
+
+    const drawSize = tileSize * (clipConfig.drawScale ?? 1.2);
+    return spriteSystem.drawFrame(
+      ctx,
+      clipConfig.atlasId,
+      frameKey,
+      x + tileSize * 0.5,
+      y + tileSize * 0.78,
+      drawSize,
+      drawSize,
+      { anchorX: 0.5, anchorY: 1, pixelPerfect: true }
+    );
   }
 }

@@ -35,6 +35,9 @@ class Monster {
     this.attackSpeed = 1.8;
 
     this._pendingHitsplats = [];
+    this._visual = {
+      anim: new AnimationStateMachine(SpriteManifest?.clips?.monster?.clips ?? {}, 'idle'),
+    };
   }
 
   get isAlive() {
@@ -69,6 +72,9 @@ class Monster {
   }
 
   update(dt, player) {
+    this._visual.anim.setClip('idle');
+    this._visual.anim.update(dt);
+
     for (const hs of this._pendingHitsplats) hs.ttl -= dt;
     this._pendingHitsplats = this._pendingHitsplats.filter(hs => hs.ttl > 0);
 
@@ -116,21 +122,23 @@ class Monster {
     ctx.fill();
 
     // Body
-    ctx.fillStyle = '#8bc34a';
-    ctx.beginPath();
-    ctx.arc(sx, sy, r, 0, Math.PI * 2);
-    ctx.fill();
+    if (!this._renderSprite(ctx, camera, sx, sy, r)) {
+      ctx.fillStyle = '#8bc34a';
+      ctx.beginPath();
+      ctx.arc(sx, sy, r, 0, Math.PI * 2);
+      ctx.fill();
 
-    ctx.strokeStyle = '#33691e';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+      ctx.strokeStyle = '#33691e';
+      ctx.lineWidth = 2;
+      ctx.stroke();
 
-    // Eyes
-    ctx.fillStyle = '#1b1b1b';
-    ctx.beginPath();
-    ctx.arc(sx - r * 0.22, sy - r * 0.1, r * 0.1, 0, Math.PI * 2);
-    ctx.arc(sx + r * 0.22, sy - r * 0.1, r * 0.1, 0, Math.PI * 2);
-    ctx.fill();
+      // Eyes
+      ctx.fillStyle = '#1b1b1b';
+      ctx.beginPath();
+      ctx.arc(sx - r * 0.22, sy - r * 0.1, r * 0.1, 0, Math.PI * 2);
+      ctx.arc(sx + r * 0.22, sy - r * 0.1, r * 0.1, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     // HP bar
     const bw = this.tileSize * 0.65;
@@ -165,6 +173,29 @@ class Monster {
     }
 
     ctx.restore();
+  }
+
+  _renderSprite(ctx, camera, sx, sy) {
+    const clipConfig = SpriteManifest?.clips?.monster;
+    const spriteSystem = this.world?.spriteSystem;
+    if (!clipConfig || !spriteSystem) return false;
+
+    const frameKey = this._visual.anim.getFrameKey();
+    if (!frameKey) return false;
+
+    const ts = this.tileSize;
+    const drawSize = ts * (clipConfig.drawScale ?? 1.2);
+
+    return spriteSystem.drawFrame(
+      ctx,
+      clipConfig.atlasId,
+      frameKey,
+      sx,
+      sy + ts * 0.26,
+      drawSize,
+      drawSize,
+      { anchorX: 0.5, anchorY: 1, pixelPerfect: true }
+    );
   }
 
   _die() {
