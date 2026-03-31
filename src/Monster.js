@@ -109,13 +109,13 @@ class Monster {
     this.attackTimer = this.attackSpeed;
     this._attackAnimTimer = 0.22;
     const hitChance = this._rollHitChanceAgainstPlayer(player);
-    if (Math.random() > hitChance) {
+    if (CryptoUtils.secureRandom() > hitChance) {
       player.takeDamage(0);
       return;
     }
 
     const maxHit = Math.max(1, Math.floor(this.strength / 2));
-    const damage = 1 + Math.floor(Math.random() * maxHit);
+    const damage = 1 + Math.floor(CryptoUtils.secureRandom() * maxHit);
     player.takeDamage(damage);
   }
 
@@ -226,7 +226,7 @@ class Monster {
   _die() {
     this.world.spawnDropsForMonster(this);
     this.state = MonsterState.DEAD;
-    this.respawnTimer = this.respawnMin + Math.random() * (this.respawnMax - this.respawnMin);
+    this.respawnTimer = this.respawnMin + CryptoUtils.secureRandom() * (this.respawnMax - this.respawnMin);
     this._deathAnimTimer = 0.55;
     this._attackAnimTimer = 0;
     this._hurtAnimTimer = 0;

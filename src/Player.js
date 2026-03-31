@@ -369,7 +369,7 @@ class Player {
     }
 
     const hitChance = this._rollHitChanceAgainstMonster(this.targetMonster);
-    const landed = Math.random() <= hitChance;
+    const landed = CryptoUtils.secureRandom() <= hitChance;
     const damage = landed ? this._rollMaxHit() : 0;
     const died = this.targetMonster.takeDamage(damage);
 
@@ -414,7 +414,7 @@ class Player {
 
   _rollMaxHit() {
     const maxHit = Math.max(1, Math.floor(this.getEffectiveStrength() / 4));
-    return 1 + Math.floor(Math.random() * maxHit);
+    return 1 + Math.floor(CryptoUtils.secureRandom() * maxHit);
   }
 
   getEffectiveAttack() {
