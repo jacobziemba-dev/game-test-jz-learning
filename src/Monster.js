@@ -38,6 +38,7 @@ class Monster {
     this._deathAnimTimer = 0;
 
     this._pendingHitsplats = [];
+    this._facingLeft = false;
     this._visual = {
       anim: new AnimationStateMachine(SpriteManifest?.clips?.monster?.clips ?? {}, 'idle'),
     };
@@ -79,6 +80,8 @@ class Monster {
     this._attackAnimTimer = Math.max(0, this._attackAnimTimer - dt);
     this._hurtAnimTimer = Math.max(0, this._hurtAnimTimer - dt);
     this._deathAnimTimer = Math.max(0, this._deathAnimTimer - dt);
+
+    if (player) this._facingLeft = player.x < this.x;
 
     if (!this.isAlive) this._visual.anim.setClip('death');
     else if (this._hurtAnimTimer > 0) this._visual.anim.setClip('hurt');
@@ -219,7 +222,7 @@ class Monster {
       groundY,
       drawSize,
       drawSize,
-      { anchorX: 0.5, anchorY: 0.62, pixelPerfect: true }
+      { anchorX: 0.5, anchorY: 0.62, pixelPerfect: true, flipX: this._facingLeft }
     );
   }
 

@@ -683,7 +683,7 @@ class Player {
       groundY,
       drawSize,
       drawSize,
-      { anchorX: 0.5, anchorY: 0.62, pixelPerfect: true }
+      { anchorX: 0.5, anchorY: 0.62, pixelPerfect: true, flipX: this.direction === 'LEFT' }
     );
 
     if (!drawn) return false;
