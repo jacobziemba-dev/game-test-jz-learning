@@ -101,6 +101,36 @@ RecipeRegistry.register({
   grantXP:        [{ skillId: 'smithing', amount: 40 }],
 });
 
+RecipeRegistry.register({
+  id:             'forge_bronze_sword',
+  name:           'Forge Bronze Sword',
+  category:       'Smithing',
+  inputs:         [{ itemId: 'bronze_bar', qty: 2 }],
+  outputs:        [{ itemId: 'bronze_sword', qty: 1 }],
+  requiredSkills: [{ skillId: 'smithing', level: 8 }],
+  grantXP:        [{ skillId: 'smithing', amount: 25 }],
+});
+
+RecipeRegistry.register({
+  id:             'forge_bronze_shield',
+  name:           'Forge Bronze Shield',
+  category:       'Smithing',
+  inputs:         [{ itemId: 'bronze_bar', qty: 3 }],
+  outputs:        [{ itemId: 'bronze_shield', qty: 1 }],
+  requiredSkills: [{ skillId: 'smithing', level: 10 }],
+  grantXP:        [{ skillId: 'smithing', amount: 30 }],
+});
+
+RecipeRegistry.register({
+  id:             'forge_leather_body',
+  name:           'Craft Leather Body',
+  category:       'Smithing',
+  inputs:         [{ itemId: 'bronze_bar', qty: 1 }],
+  outputs:        [{ itemId: 'leather_body', qty: 1 }],
+  requiredSkills: [{ skillId: 'smithing', level: 6 }],
+  grantXP:        [{ skillId: 'smithing', amount: 18 }],
+});
+
 // ─── Future recipe categories (add when those skills exist) ──────────────────
 // RecipeRegistry.register({ id: 'iron_bar', name: 'Iron Bar', category: 'Smithing', ... });
 // RecipeRegistry.register({ id: 'cooked_fish', name: 'Cooked Fish', category: 'Cooking', ... });
