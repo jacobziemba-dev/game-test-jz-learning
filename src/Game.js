@@ -14,9 +14,10 @@ class Game {
     this.craftingUI  = new CraftingUI(this.player.inventory, this.player.skills);
     this.skillsUI    = new SkillsUI(this.player.skills);
     this.playerUI    = new PlayerUI(this.player);
+    this.helpUI      = new HelpUI();
     this.input       = new InputHandler(
       this.canvas, this.camera, this.world, this.player,
-      this.inventoryUI, this.craftingUI, this.skillsUI, this.playerUI
+      this.inventoryUI, this.craftingUI, this.skillsUI, this.playerUI, this.helpUI
     );
 
     this.camera.follow(this.player);
@@ -76,5 +77,6 @@ class Game {
     this.craftingUI.render(ctx, this.canvas.width, this.canvas.height);
     this.skillsUI.render(ctx, this.canvas.width, this.canvas.height);
     this.playerUI.render(ctx, this.canvas.width, this.canvas.height);
+    this.helpUI.render(ctx, this.canvas.width, this.canvas.height);
   }
 }

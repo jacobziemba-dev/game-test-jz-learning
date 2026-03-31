@@ -88,7 +88,7 @@ class UI {
   }
 
   _renderKeybindHints(ctx, player) {
-    const hints = ['[I] Inventory', '[C] Crafting', '[K] Skills', '[P] Character'];
+    const hints = ['[I] Inventory', '[C] Crafting', '[K] Skills', '[P] Character', '[H] Help'];
     ctx.save();
     ctx.fillStyle    = 'rgba(255,255,255,0.3)';
     ctx.font         = '10px monospace';
