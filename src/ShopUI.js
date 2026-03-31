@@ -152,7 +152,7 @@ class ShopUI {
     ctx.fillStyle = 'rgba(18, 12, 6, 0.97)';
     ctx.strokeStyle = '#c8a45a';
     ctx.lineWidth = 2;
-    this._rrect(ctx, this._px, this._py, this.panelW, this.panelH, 8);
+    DrawingUtils.rrect(ctx, this._px, this._py, this.panelW, this.panelH, 8);
     ctx.fill();
     ctx.stroke();
 
@@ -182,7 +182,7 @@ class ShopUI {
     const b = this._listBounds;
 
     ctx.fillStyle = 'rgba(255,255,255,0.02)';
-    this._rrect(ctx, b.x, b.y, b.w, b.h, 6);
+    DrawingUtils.rrect(ctx, b.x, b.y, b.w, b.h, 6);
     ctx.fill();
 
     const rowH = 44;
@@ -223,7 +223,7 @@ class ShopUI {
     const b = this._detailBounds;
 
     ctx.fillStyle = 'rgba(255,255,255,0.02)';
-    this._rrect(ctx, b.x, b.y, b.w, b.h, 6);
+    DrawingUtils.rrect(ctx, b.x, b.y, b.w, b.h, 6);
     ctx.fill();
 
     if (!entry) {
@@ -269,7 +269,7 @@ class ShopUI {
       const active = i === this.quantityIndex;
       ctx.fillStyle = active ? 'rgba(200,164,90,0.28)' : 'rgba(255,255,255,0.04)';
       ctx.strokeStyle = active ? '#c8a45a' : '#ffffff1a';
-      this._rrect(ctx, x, qtyY, 56, 24, 4);
+      DrawingUtils.rrect(ctx, x, qtyY, 56, 24, 4);
       ctx.fill();
       ctx.stroke();
 
@@ -431,7 +431,7 @@ class ShopUI {
   _drawTab(ctx, x, y, w, active, label) {
     ctx.fillStyle = active ? 'rgba(200,164,90,0.28)' : 'rgba(255,255,255,0.04)';
     ctx.strokeStyle = active ? '#c8a45a' : '#ffffff1f';
-    this._rrect(ctx, x, y, w, 22, 4);
+    DrawingUtils.rrect(ctx, x, y, w, 22, 4);
     ctx.fill();
     ctx.stroke();
 
@@ -445,7 +445,7 @@ class ShopUI {
   _drawActionButton(ctx, x, y, w, h, label, color) {
     ctx.fillStyle = `${color}33`;
     ctx.strokeStyle = color;
-    this._rrect(ctx, x, y, w, h, 5);
+    DrawingUtils.rrect(ctx, x, y, w, h, 5);
     ctx.fill();
     ctx.stroke();
 
@@ -471,19 +471,5 @@ class ShopUI {
 
   _inside(sx, sy, x, y, w, h) {
     return sx >= x && sx <= x + w && sy >= y && sy <= y + h;
-  }
-
-  _rrect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
   }
 }

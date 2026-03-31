@@ -102,7 +102,7 @@ class PlayerUI {
     ctx.fillStyle   = 'rgba(18,12,6,0.97)';
     ctx.strokeStyle = '#c8a45a';
     ctx.lineWidth   = 2;
-    this._rrect(ctx, px, py, this.panelW, this.panelH, 6);
+    DrawingUtils.rrect(ctx, px, py, this.panelW, this.panelH, 6);
     ctx.fill();
     ctx.stroke();
 
@@ -173,13 +173,13 @@ class PlayerUI {
     ctx.fillStyle = item
       ? (hovered ? 'rgba(200,164,90,0.22)' : 'rgba(255,255,255,0.07)')
       : 'rgba(255,255,255,0.03)';
-    this._rrect(ctx, x, y, s, s, 4);
+    DrawingUtils.rrect(ctx, x, y, s, s, 4);
     ctx.fill();
 
     // Border
     ctx.strokeStyle = hovered && item ? '#c8a45a' : (item ? '#c8a45a77' : '#ffffff18');
     ctx.lineWidth   = 1;
-    this._rrect(ctx, x, y, s, s, 4);
+    DrawingUtils.rrect(ctx, x, y, s, s, 4);
     ctx.stroke();
 
     if (item) {
@@ -217,7 +217,7 @@ class PlayerUI {
     ctx.fillStyle   = 'rgba(18,12,6,0.97)';
     ctx.strokeStyle = '#c8a45a';
     ctx.lineWidth   = 1;
-    this._rrect(ctx, tx, ty, tipW, tipH, 4);
+    DrawingUtils.rrect(ctx, tx, ty, tipW, tipH, 4);
     ctx.fill();
     ctx.stroke();
 
@@ -321,7 +321,7 @@ class PlayerUI {
 
     // Color square icon
     ctx.fillStyle = skill.color;
-    this._rrect(ctx, x, iconY, s, s, 2);
+    DrawingUtils.rrect(ctx, x, iconY, s, s, 2);
     ctx.fill();
 
     // Skill name
@@ -373,19 +373,5 @@ class PlayerUI {
     ctx.moveTo(x + 8, y);
     ctx.lineTo(x + w - 8, y);
     ctx.stroke();
-  }
-
-  _rrect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
   }
 }

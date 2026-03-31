@@ -62,7 +62,7 @@ class LootFilterUI {
     ctx.fillStyle = 'rgba(18,12,6,0.97)';
     ctx.strokeStyle = '#c8a45a';
     ctx.lineWidth = 2;
-    this._rrect(ctx, this._px, this._py, this.panelW, this.panelH, 6);
+    DrawingUtils.rrect(ctx, this._px, this._py, this.panelW, this.panelH, 6);
     ctx.fill();
     ctx.stroke();
 
@@ -85,12 +85,12 @@ class LootFilterUI {
         : (this.player.lootFilter.allow[row.id] ?? true);
 
       ctx.fillStyle = enabled ? 'rgba(129,199,132,0.18)' : 'rgba(255,255,255,0.04)';
-      this._rrect(ctx, this._px + 10, y, this.panelW - 20, rowH - 4, 4);
+      DrawingUtils.rrect(ctx, this._px + 10, y, this.panelW - 20, rowH - 4, 4);
       ctx.fill();
 
       ctx.strokeStyle = enabled ? '#81c78466' : '#ffffff20';
       ctx.lineWidth = 1;
-      this._rrect(ctx, this._px + 10, y, this.panelW - 20, rowH - 4, 4);
+      DrawingUtils.rrect(ctx, this._px + 10, y, this.panelW - 20, rowH - 4, 4);
       ctx.stroke();
 
       ctx.fillStyle = row.type === 'rarity' ? ItemRegistry.getRarityColor(row.id) : '#f0f0f0';
@@ -123,17 +123,4 @@ class LootFilterUI {
     ctx.stroke();
   }
 
-  _rrect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
-  }
 }

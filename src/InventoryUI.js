@@ -94,7 +94,7 @@ class InventoryUI {
     ctx.fillStyle   = 'rgba(18, 12, 6, 0.96)';
     ctx.strokeStyle = '#c8a45a';
     ctx.lineWidth   = 2;
-    this._rrect(ctx, px, py, this.panelW, this.panelH, 6);
+    DrawingUtils.rrect(ctx, px, py, this.panelW, this.panelH, 6);
     ctx.fill();
     ctx.stroke();
 
@@ -148,13 +148,13 @@ class InventoryUI {
 
     // Slot background
     ctx.fillStyle = hovered ? 'rgba(200,164,90,0.18)' : 'rgba(255,255,255,0.05)';
-    this._rrect(ctx, sx, sy, s, s, 4);
+    DrawingUtils.rrect(ctx, sx, sy, s, s, 4);
     ctx.fill();
 
     // Slot border
     ctx.strokeStyle = hovered ? '#c8a45a' : '#ffffff22';
     ctx.lineWidth   = 1;
-    this._rrect(ctx, sx, sy, s, s, 4);
+    DrawingUtils.rrect(ctx, sx, sy, s, s, 4);
     ctx.stroke();
 
     if (!slot || slot.isEmpty) return;
@@ -214,7 +214,7 @@ class InventoryUI {
     ctx.fillStyle   = 'rgba(18,12,6,0.97)';
     ctx.strokeStyle = '#c8a45a';
     ctx.lineWidth   = 1;
-    this._rrect(ctx, tx, ty, tipW, tipH, 4);
+    DrawingUtils.rrect(ctx, tx, ty, tipW, tipH, 4);
     ctx.fill();
     ctx.stroke();
 
@@ -277,17 +277,4 @@ class InventoryUI {
     return r * this.inventory.cols + c;
   }
 
-  _rrect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
-  }
 }

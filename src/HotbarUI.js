@@ -63,7 +63,7 @@ class HotbarUI {
       ctx.fillStyle = hovered ? 'rgba(200,164,90,0.22)' : 'rgba(18,12,6,0.9)';
       ctx.strokeStyle = hovered ? '#c8a45a' : '#ffffff20';
       ctx.lineWidth = 1;
-      this._rrect(ctx, x, y, this.slotW, this.slotH, 5);
+      DrawingUtils.rrect(ctx, x, y, this.slotW, this.slotH, 5);
       ctx.fill();
       ctx.stroke();
 
@@ -99,19 +99,5 @@ class HotbarUI {
   _indexFromKey(key) {
     const map = ['1', '2', '3', '4', '5', '6', '7', '8'];
     return map.indexOf(key);
-  }
-
-  _rrect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
   }
 }

@@ -117,7 +117,7 @@ class CraftingUI {
     ctx.fillStyle = 'rgba(18, 12, 6, 0.97)';
     ctx.strokeStyle = '#c8a45a';
     ctx.lineWidth = 2;
-    this._rrect(ctx, this._px, this._py, this.panelW, this.panelH, 8);
+    DrawingUtils.rrect(ctx, this._px, this._py, this.panelW, this.panelH, 8);
     ctx.fill();
     ctx.stroke();
 
@@ -262,12 +262,12 @@ class CraftingUI {
       const x = this._px + 8 + i * tabW;
       const active = i === this.activeCategory;
       ctx.fillStyle = active ? 'rgba(80, 140, 90, 0.35)' : 'rgba(255, 255, 255, 0.05)';
-      this._rrect(ctx, x + 1, y + 3, tabW - 3, this.tabH - 6, 4);
+      DrawingUtils.rrect(ctx, x + 1, y + 3, tabW - 3, this.tabH - 6, 4);
       ctx.fill();
 
       ctx.strokeStyle = active ? '#66bb6a' : '#ffffff22';
       ctx.lineWidth = 1;
-      this._rrect(ctx, x + 1, y + 3, tabW - 3, this.tabH - 6, 4);
+      DrawingUtils.rrect(ctx, x + 1, y + 3, tabW - 3, this.tabH - 6, 4);
       ctx.stroke();
 
       ctx.fillStyle = active ? '#e8f5e9' : '#c7c7c7';
@@ -292,12 +292,12 @@ class CraftingUI {
       if (x + buttonW > this._px + this.panelW - 8) break;
       const selected = station === this.selectedStation;
       ctx.fillStyle = selected ? 'rgba(100, 160, 220, 0.35)' : 'rgba(255,255,255,0.05)';
-      this._rrect(ctx, x, y + 4, buttonW, this.stationH - 8, 4);
+      DrawingUtils.rrect(ctx, x, y + 4, buttonW, this.stationH - 8, 4);
       ctx.fill();
 
       ctx.strokeStyle = selected ? '#64b5f6' : '#ffffff22';
       ctx.lineWidth = 1;
-      this._rrect(ctx, x, y + 4, buttonW, this.stationH - 8, 4);
+      DrawingUtils.rrect(ctx, x, y + 4, buttonW, this.stationH - 8, 4);
       ctx.stroke();
 
       ctx.fillStyle = selected ? '#e3f2fd' : '#d0d0d0';
@@ -311,13 +311,13 @@ class CraftingUI {
   _drawRecipeList(ctx) {
     const b = this._listBounds;
     ctx.fillStyle = 'rgba(255,255,255,0.03)';
-    this._rrect(ctx, b.x, b.y, b.w, b.h, 5);
+    DrawingUtils.rrect(ctx, b.x, b.y, b.w, b.h, 5);
     ctx.fill();
     ctx.strokeStyle = '#ffffff1a';
     ctx.stroke();
 
     ctx.save();
-    this._rrect(ctx, b.x + 1, b.y + 1, b.w - 2, b.h - 2, 4);
+    DrawingUtils.rrect(ctx, b.x + 1, b.y + 1, b.w - 2, b.h - 2, 4);
     ctx.clip();
 
     let y = b.y - this.recipeScroll;
@@ -368,7 +368,7 @@ class CraftingUI {
   _drawRecipeDetail(ctx) {
     const b = this._detailBounds;
     ctx.fillStyle = 'rgba(255,255,255,0.03)';
-    this._rrect(ctx, b.x, b.y, b.w, b.h, 5);
+    DrawingUtils.rrect(ctx, b.x, b.y, b.w, b.h, 5);
     ctx.fill();
     ctx.strokeStyle = '#ffffff1a';
     ctx.stroke();
@@ -473,7 +473,7 @@ class CraftingUI {
     for (let i = 0; i < this.quantityOptions.length; i++) {
       const selected = i === this.quantityIndex;
       ctx.fillStyle = selected ? 'rgba(100, 149, 237, 0.35)' : 'rgba(255,255,255,0.06)';
-      this._rrect(ctx, qx, qtyY, qtyW, 24, 4);
+      DrawingUtils.rrect(ctx, qx, qtyY, qtyW, 24, 4);
       ctx.fill();
       ctx.strokeStyle = selected ? '#64b5f6' : '#ffffff22';
       ctx.stroke();
@@ -489,7 +489,7 @@ class CraftingUI {
     const craftBtnX = b.x + b.w - craftBtnW - 10;
     const canPress = state.canCraft && maxCraftable > 0;
     ctx.fillStyle = canPress ? 'rgba(102, 187, 106, 0.35)' : 'rgba(180, 180, 180, 0.2)';
-    this._rrect(ctx, craftBtnX, qtyY, craftBtnW, 24, 4);
+    DrawingUtils.rrect(ctx, craftBtnX, qtyY, craftBtnW, 24, 4);
     ctx.fill();
     ctx.strokeStyle = canPress ? '#66bb6a' : '#888';
     ctx.stroke();
@@ -532,20 +532,5 @@ class CraftingUI {
 
   _inside(px, py, x, y, w, h) {
     return px >= x && px <= x + w && py >= y && py <= y + h;
-  }
-
-  _rrect(ctx, x, y, w, h, r) {
-    if (w <= 0 || h <= 0) return;
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
   }
 }
