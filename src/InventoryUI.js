@@ -175,11 +175,19 @@ class InventoryUI {
 
   _drawTooltip(ctx, slot, slotSx, slotSy, canvasW, canvasH) {
     const item    = slot.item;
-    const lines   = [item.name, item.description].filter(Boolean);
-    const tipW    = 180;
-    const lineH   = 16;
+    const tipW    = 220;
+    const lineH   = 15;
     const tipPad  = 8;
-    const tipH    = tipPad * 2 + lines.length * lineH;
+    
+    const wrapped = [];
+    wrapped.push({ text: item.name, isTitle: true });
+    if (item.description) {
+      const maxTextW = tipW - tipPad * 2;
+      const descLines = this._wrapText(ctx, item.description, maxTextW, '11px sans-serif');
+      for (const line of descLines) wrapped.push({ text: line, isTitle: false });
+    }
+    
+    const tipH = tipPad * 2 + wrapped.length * lineH;
 
     // Position tooltip to the right of the slot, or left if near edge
     let tx = slotSx + this.slotSize + 6;
@@ -196,11 +204,34 @@ class InventoryUI {
 
     ctx.textAlign    = 'left';
     ctx.textBaseline = 'top';
-    lines.forEach((line, i) => {
-      ctx.font      = i === 0 ? 'bold 12px sans-serif' : '11px sans-serif';
-      ctx.fillStyle = i === 0 ? '#c8a45a' : '#aaaaaa';
-      ctx.fillText(line, tx + tipPad, ty + tipPad + i * lineH);
+    wrapped.forEach((line, i) => {
+      ctx.font      = line.isTitle ? 'bold 12px sans-serif' : '11px sans-serif';
+      ctx.fillStyle = line.isTitle ? '#c8a45a' : '#aaaaaa';
+      ctx.fillText(line.text, tx + tipPad, ty + tipPad + i * lineH);
     });
+  }
+
+  _wrapText(ctx, text, maxWidth, font) {
+    ctx.save();
+    if (font) ctx.font = font;
+
+    const words = text.split(/\s+/).filter(Boolean);
+    const lines = [];
+    let current = '';
+
+    for (const word of words) {
+      const next = current ? `${current} ${word}` : word;
+      if (ctx.measureText(next).width <= maxWidth) {
+        current = next;
+      } else {
+        if (current) lines.push(current);
+        current = word;
+      }
+    }
+
+    if (current) lines.push(current);
+    ctx.restore();
+    return lines;
   }
 
   /** Returns flat slot index under screen point (sx, sy), or -1 if none. */
