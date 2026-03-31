@@ -118,10 +118,10 @@ const SpriteManifest = (() => {
       },
     },
     vendor: {
-      atlasId: 'soldier',
+      atlasId: 'orc',
       drawScale: 4.2,
       clips: {
-        idle: { frames: ['soldier_idle_0', 'soldier_idle_1', 'soldier_idle_2', 'soldier_idle_3', 'soldier_idle_4', 'soldier_idle_5'], fps: 6, loop: true },
+        idle: { frames: ['orc_idle_0', 'orc_idle_1', 'orc_idle_2', 'orc_idle_3', 'orc_idle_4', 'orc_idle_5'], fps: 6, loop: true },
       },
     },
   };
