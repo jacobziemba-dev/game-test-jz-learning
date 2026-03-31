@@ -9,6 +9,7 @@ const WORLD_ROWS = 40;
 
 // How many trees to scatter (avoid 5x5 spawn area in center)
 const TREE_COUNT = 80;
+const MONSTER_COUNT = 16;
 
 class World {
   constructor() {
@@ -27,6 +28,10 @@ class World {
     // Trees list
     this.trees = [];
     this._spawnTrees();
+
+    // Monsters list
+    this.monsters = [];
+    this._spawnMonsters();
   }
 
   _spawnTrees() {
@@ -52,6 +57,37 @@ class World {
     }
   }
 
+  _spawnMonsters() {
+    const spawnCol = Math.floor(this.cols / 2);
+    const spawnRow = Math.floor(this.rows / 2);
+    let placed = 0;
+    let attempts = 0;
+
+    while (placed < MONSTER_COUNT && attempts < MONSTER_COUNT * 40) {
+      attempts++;
+      const col = Math.floor(Math.random() * this.cols);
+      const row = Math.floor(Math.random() * this.rows);
+
+      const dc = Math.abs(col - spawnCol);
+      const dr = Math.abs(row - spawnRow);
+      if (dc <= 4 && dr <= 4) continue;
+
+      if (this.grid[row][col] !== TILE.GRASS) continue;
+      if (this.monsters.some(m => m.col === col && m.row === row)) continue;
+
+      const monster = new Monster(col, row, this, {
+        name: 'Goblin',
+        level: 2,
+        attack: 3,
+        strength: 3,
+        defence: 2,
+        maxHitpoints: 8,
+      });
+      this.monsters.push(monster);
+      placed++;
+    }
+  }
+
   isWalkable(col, row) {
     if (col < 0 || row < 0 || col >= this.cols || row >= this.rows) return false;
     return this.grid[row][col] === TILE.GRASS;
@@ -61,9 +97,17 @@ class World {
     return this.trees.find(t => t.col === col && t.row === row && t.state !== 'STUMP') || null;
   }
 
-  update(dt) {
+  getMonsterAt(col, row) {
+    return this.monsters.find(m => m.col === col && m.row === row && m.isAlive) || null;
+  }
+
+  update(dt, player) {
     for (const tree of this.trees) {
       tree.update(dt, this);
+    }
+
+    for (const monster of this.monsters) {
+      monster.update(dt, player);
     }
   }
 
@@ -95,6 +139,15 @@ class World {
     visibleTrees.sort((a, b) => a.row - b.row);
     for (const tree of visibleTrees) {
       tree.render(ctx, camera, ts);
+    }
+
+    const visibleMonsters = this.monsters.filter(m =>
+      m.col >= startCol - 1 && m.col <= endCol + 1 &&
+      m.row >= startRow - 1 && m.row <= endRow + 1
+    );
+    visibleMonsters.sort((a, b) => a.row - b.row);
+    for (const monster of visibleMonsters) {
+      monster.render(ctx, camera);
     }
   }
 }

@@ -49,7 +49,7 @@ class Game {
 
   update(dt) {
     this.player.update(dt);
-    this.world.update(dt);
+    this.world.update(dt, this.player);
     this.camera.update();
     this.input.update(dt);
     this.ui.update(dt);

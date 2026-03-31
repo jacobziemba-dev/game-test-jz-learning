@@ -182,6 +182,12 @@ class InputHandler {
     const { col, row } = this.camera.screenToTile(sx, sy);
     if (col < 0 || row < 0 || col >= this.world.cols || row >= this.world.rows) return;
 
+    const monster = this.world.getMonsterAt(col, row);
+    if (monster) {
+      this.player.attackMonster(monster);
+      return;
+    }
+
     const tree = this.world.getTreeAt(col, row);
     if (tree) {
       // Left-click on tree → default action: cut tree
@@ -205,8 +211,17 @@ class InputHandler {
     const { col, row } = this.camera.screenToTile(sx, sy);
     if (col < 0 || row < 0 || col >= this.world.cols || row >= this.world.rows) return;
 
-    const tree = this.world.getTreeAt(col, row);
     const items = [];
+    const monster = this.world.getMonsterAt(col, row);
+    if (monster) {
+      items.push({
+        label: `Attack ${monster.name.toLowerCase()}`,
+        color: '#ff8a65',
+        action: () => this.player.attackMonster(monster),
+      });
+    }
+
+    const tree = this.world.getTreeAt(col, row);
 
     if (tree) {
       items.push({

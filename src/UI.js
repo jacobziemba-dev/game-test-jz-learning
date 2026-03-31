@@ -38,7 +38,7 @@ class UI {
     const panelX  = padding;
     const panelY  = padding;
     const panelW  = 190;
-    const panelH  = 52;
+    const panelH  = 68;
 
     ctx.save();
     ctx.fillStyle   = 'rgba(0,0,0,0.65)';
@@ -83,6 +83,16 @@ class UI {
     ctx.textAlign    = 'left';
     ctx.textBaseline = 'top';
     ctx.fillText(xpText, barX, barY + barH + 4);
+
+    // HP display for combat testing
+    ctx.fillStyle = '#ff8a80';
+    ctx.font = 'bold 10px monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(
+      `HP ${player.currentHitpoints}/${player.maxHitpoints}`,
+      panelX + panelW - 10,
+      barY + barH + 4
+    );
 
     ctx.restore();
   }
