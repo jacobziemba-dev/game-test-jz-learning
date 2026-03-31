@@ -59,6 +59,11 @@ class Game {
     for (const evt of this.player.skills.popLevelUps()) {
       this.ui.pushLevelUp(evt.skillName, evt.level);
     }
+
+    // Poll for loot pickup events and push them to the toast system
+    for (const evt of this.player.popLootPickups()) {
+      this.ui.pushLoot(evt.itemName, evt.quantity);
+    }
   }
 
   render() {

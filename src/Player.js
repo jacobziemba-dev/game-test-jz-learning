@@ -32,6 +32,7 @@ class Player {
     this._combatRepathTimer = 0;
     this.maxHitpoints = 10;
     this.currentHitpoints = this.maxHitpoints;
+    this._lootPickupQueue = [];
 
     // Chopping
     this.chopTarget = null;
@@ -279,6 +280,15 @@ class Player {
 
   getEffectiveDefence() {
     return this.skills.getLevel('defence') + this.equipment.getBonuses().defence;
+  }
+
+  queueLootPickup(itemName, quantity) {
+    this._lootPickupQueue.push({ itemName, quantity });
+    if (this._lootPickupQueue.length > 8) this._lootPickupQueue.shift();
+  }
+
+  popLootPickups() {
+    return this._lootPickupQueue.splice(0);
   }
 
   takeDamage(amount) {

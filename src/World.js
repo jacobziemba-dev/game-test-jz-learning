@@ -32,6 +32,9 @@ class World {
     // Monsters list
     this.monsters = [];
     this._spawnMonsters();
+
+    // Ground loot objects
+    this.groundLoot = [];
   }
 
   _spawnTrees() {
@@ -82,6 +85,15 @@ class World {
         strength: 3,
         defence: 2,
         maxHitpoints: 8,
+        guaranteedDrops: [
+          { itemId: 'coins', min: 2, max: 9 },
+        ],
+        randomDrops: [
+          { itemId: 'log', min: 1, max: 1, weight: 55 },
+          { itemId: 'arrow_shaft', min: 3, max: 8, weight: 35 },
+          { itemId: 'bronze_sword', min: 1, max: 1, weight: 10 },
+        ],
+        randomDropRolls: 1,
       });
       this.monsters.push(monster);
       placed++;
@@ -101,6 +113,65 @@ class World {
     return this.monsters.find(m => m.col === col && m.row === row && m.isAlive) || null;
   }
 
+  getLootAt(col, row) {
+    return this.groundLoot.find(l => l.col === col && l.row === row && !l.isExpired) || null;
+  }
+
+  spawnGroundLoot(col, row, itemId, quantity) {
+    if (quantity <= 0) return;
+
+    const item = ItemRegistry.get(itemId);
+    if (!item) return;
+
+    if (item.stackable) {
+      const existing = this.groundLoot.find(l =>
+        l.col === col && l.row === row && l.itemId === itemId && !l.isExpired
+      );
+      if (existing) {
+        existing.quantity += quantity;
+        existing.ttl = Math.max(existing.ttl, 20);
+        return;
+      }
+    }
+
+    this.groundLoot.push(new GroundLoot(col, row, itemId, quantity, 30));
+  }
+
+  spawnDropsForMonster(monster) {
+    const col = monster.col;
+    const row = monster.row;
+
+    for (const drop of monster.guaranteedDrops) {
+      const qty = this._rollQuantity(drop.min, drop.max);
+      this.spawnGroundLoot(col, row, drop.itemId, qty);
+    }
+
+    for (let i = 0; i < monster.randomDropRolls; i++) {
+      const chosen = this._chooseWeightedDrop(monster.randomDrops);
+      if (!chosen) continue;
+      const qty = this._rollQuantity(chosen.min, chosen.max);
+      this.spawnGroundLoot(col, row, chosen.itemId, qty);
+    }
+  }
+
+  pickupLoot(loot, inventory) {
+    if (!loot || loot.isExpired) return null;
+
+    const item = ItemRegistry.get(loot.itemId);
+    if (!item) return null;
+
+    const overflow = inventory.addItem(loot.itemId, loot.quantity);
+    const picked = loot.quantity - overflow;
+    if (picked <= 0) return null;
+
+    loot.quantity = overflow;
+    if (loot.quantity <= 0) {
+      this._removeLoot(loot);
+    }
+
+    return { itemName: item.name, quantity: picked };
+  }
+
   update(dt, player) {
     for (const tree of this.trees) {
       tree.update(dt, this);
@@ -109,6 +180,11 @@ class World {
     for (const monster of this.monsters) {
       monster.update(dt, player);
     }
+
+    for (const loot of this.groundLoot) {
+      loot.update(dt);
+    }
+    this.groundLoot = this.groundLoot.filter(l => !l.isExpired);
   }
 
   render(ctx, camera) {
@@ -149,5 +225,37 @@ class World {
     for (const monster of visibleMonsters) {
       monster.render(ctx, camera);
     }
+
+    const visibleLoot = this.groundLoot.filter(l =>
+      l.col >= startCol - 1 && l.col <= endCol + 1 &&
+      l.row >= startRow - 1 && l.row <= endRow + 1
+    );
+    visibleLoot.sort((a, b) => a.row - b.row);
+    for (const loot of visibleLoot) {
+      loot.render(ctx, camera, ts);
+    }
+  }
+
+  _rollQuantity(min, max) {
+    if (max <= min) return min;
+    return min + Math.floor(Math.random() * (max - min + 1));
+  }
+
+  _chooseWeightedDrop(options) {
+    if (!options || options.length === 0) return null;
+    const totalWeight = options.reduce((sum, o) => sum + (o.weight ?? 0), 0);
+    if (totalWeight <= 0) return options[0] ?? null;
+
+    let roll = Math.random() * totalWeight;
+    for (const opt of options) {
+      roll -= (opt.weight ?? 0);
+      if (roll <= 0) return opt;
+    }
+    return options[options.length - 1];
+  }
+
+  _removeLoot(loot) {
+    const idx = this.groundLoot.indexOf(loot);
+    if (idx >= 0) this.groundLoot.splice(idx, 1);
   }
 }

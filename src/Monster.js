@@ -21,6 +21,9 @@ class Monster {
     this.maxHitpoints = config.maxHitpoints ?? 8;
     this.respawnMin = config.respawnMin ?? 8;
     this.respawnMax = config.respawnMax ?? 14;
+    this.guaranteedDrops = config.guaranteedDrops ?? [];
+    this.randomDrops = config.randomDrops ?? [];
+    this.randomDropRolls = config.randomDropRolls ?? 1;
 
     this.currentHitpoints = this.maxHitpoints;
     this.state = MonsterState.ALIVE;
@@ -163,6 +166,7 @@ class Monster {
   }
 
   _die() {
+    this.world.spawnDropsForMonster(this);
     this.state = MonsterState.DEAD;
     this.respawnTimer = this.respawnMin + Math.random() * (this.respawnMax - this.respawnMin);
   }

@@ -182,6 +182,13 @@ class InputHandler {
     const { col, row } = this.camera.screenToTile(sx, sy);
     if (col < 0 || row < 0 || col >= this.world.cols || row >= this.world.rows) return;
 
+    const loot = this.world.getLootAt(col, row);
+    if (loot) {
+      const pickup = this.world.pickupLoot(loot, this.player.inventory);
+      if (pickup) this.player.queueLootPickup(pickup.itemName, pickup.quantity);
+      return;
+    }
+
     const monster = this.world.getMonsterAt(col, row);
     if (monster) {
       this.player.attackMonster(monster);
@@ -212,6 +219,20 @@ class InputHandler {
     if (col < 0 || row < 0 || col >= this.world.cols || row >= this.world.rows) return;
 
     const items = [];
+    const loot = this.world.getLootAt(col, row);
+    if (loot) {
+      const item = ItemRegistry.get(loot.itemId);
+      const label = item ? `Take ${item.name.toLowerCase()}` : 'Take loot';
+      items.push({
+        label,
+        color: '#9ccc65',
+        action: () => {
+          const pickup = this.world.pickupLoot(loot, this.player.inventory);
+          if (pickup) this.player.queueLootPickup(pickup.itemName, pickup.quantity);
+        },
+      });
+    }
+
     const monster = this.world.getMonsterAt(col, row);
     if (monster) {
       items.push({

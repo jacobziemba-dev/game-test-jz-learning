@@ -12,10 +12,21 @@ class UI {
   pushLevelUp(skillName, level) {
     this._toasts.push({
       text:   `⬆ ${skillName} level up! (${level})`,
+      color:  '#ffd54f',
       ttl:    3.5,
       maxTtl: 3.5,
     });
     // Cap to 4 simultaneous toasts
+    if (this._toasts.length > 4) this._toasts.shift();
+  }
+
+  pushLoot(itemName, quantity) {
+    this._toasts.push({
+      text:   `+${quantity} ${itemName}`,
+      color:  '#9ccc65',
+      ttl:    2.5,
+      maxTtl: 2.5,
+    });
     if (this._toasts.length > 4) this._toasts.shift();
   }
 
@@ -130,7 +141,7 @@ class UI {
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle    = '#ffd54f';
+      ctx.fillStyle    = toast.color || '#ffd54f';
       ctx.font         = 'bold 13px sans-serif';
       ctx.textAlign    = 'center';
       ctx.textBaseline = 'middle';

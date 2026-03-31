@@ -78,6 +78,35 @@ ItemRegistry.register({
   },
 });
 
+ItemRegistry.register({
+  id: 'coins',
+  name: 'Coins',
+  description: 'A stack of gold coins.',
+  type: 'currency',
+  stackable: true,
+  maxStack: 1000000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    const r = size * 0.18;
+    const offsets = [
+      [-r * 1.1, r * 0.6],
+      [0, r * 0.2],
+      [r * 1.1, -r * 0.2],
+    ];
+
+    for (const [ox, oy] of offsets) {
+      ctx.fillStyle = '#fbc02d';
+      ctx.beginPath();
+      ctx.ellipse(cx + ox, cy + oy, r * 1.25, r * 0.8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#f57f17';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+  },
+});
+
 // ─── Woodcutting crafting outputs ────────────────────────────────────────────
 
 ItemRegistry.register({
