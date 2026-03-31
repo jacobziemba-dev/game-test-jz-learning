@@ -121,13 +121,14 @@ class ContextMenu {
 // ─────────────────────────────────────────────
 
 class InputHandler {
-  constructor(canvas, camera, world, player, inventoryUI, craftingUI, skillsUI, skillJournalUI, lootFilterUI, playerUI, helpUI, hotbarUI, actions = {}) {
+  constructor(canvas, camera, world, player, inventoryUI, craftingUI, shopUI, skillsUI, skillJournalUI, lootFilterUI, playerUI, helpUI, hotbarUI, actions = {}) {
     this.canvas      = canvas;
     this.camera      = camera;
     this.world       = world;
     this.player      = player;
     this.inventoryUI = inventoryUI;
     this.craftingUI  = craftingUI;
+    this.shopUI      = shopUI;
     this.skillsUI    = skillsUI;
     this.skillJournalUI = skillJournalUI;
     this.lootFilterUI = lootFilterUI;
@@ -173,6 +174,7 @@ class InputHandler {
     if (e.key === 'Escape') {
       this.inventoryUI.close();
       this.craftingUI.close();
+      this.shopUI.close();
       this.skillsUI.close();
       this.skillJournalUI.close();
       this.lootFilterUI.close();
@@ -193,6 +195,7 @@ class InputHandler {
     // UI panels consume clicks when open
     if (this.inventoryUI.onClick(sx, sy)) return;
     if (this.craftingUI.onClick(sx, sy))  return;
+    if (this.shopUI.onClick(sx, sy))      return;
     if (this.skillsUI.onClick(sx, sy))    return;
     if (this.skillJournalUI.onClick(sx, sy)) return;
     if (this.lootFilterUI.onClick(sx, sy)) return;
@@ -232,6 +235,24 @@ class InputHandler {
     const oreNode = this.world.getOreNodeAt(col, row);
     if (oreNode) {
       this.player.mineOreNode(oreNode);
+      return;
+    }
+
+    const station = this.world.getStationAt(col, row);
+    if (station) {
+      const adj = Pathfinder.findAdjacentTile(this.player.col, this.player.row, station.col, station.row, this.world);
+      if (adj) {
+        this.player.walkTo(adj.col, adj.row);
+      }
+      return;
+    }
+
+    const vendor = this.world.getVendorAt(col, row);
+    if (vendor) {
+      const adj = Pathfinder.findAdjacentTile(this.player.col, this.player.row, vendor.col, vendor.row, this.world);
+      if (adj) {
+        this.player.walkTo(adj.col, adj.row);
+      }
       return;
     }
 
@@ -323,6 +344,35 @@ class InputHandler {
       });
     }
 
+    const station = this.world.getStationAt(col, row);
+    if (station) {
+      const stationName = station.stationType.split('_').join(' ');
+      items.push({
+        label: `Use ${stationName}`,
+        color: '#90caf9',
+        action: () => {
+          const adj = Pathfinder.findAdjacentTile(this.player.col, this.player.row, station.col, station.row, this.world);
+          if (adj) this.player.walkTo(adj.col, adj.row);
+          this.craftingUI.open();
+          this.craftingUI.setPreferredStation?.(station.stationType);
+        },
+      });
+    }
+
+    const vendor = this.world.getVendorAt(col, row);
+    if (vendor) {
+      items.push({
+        label: `Trade ${vendor.name}`,
+        color: '#81c784',
+        action: () => {
+          const adj = Pathfinder.findAdjacentTile(this.player.col, this.player.row, vendor.col, vendor.row, this.world);
+          if (adj) this.player.walkTo(adj.col, adj.row);
+          this.shopUI.openForVendor(vendor);
+          this.actions.onSystemMessage?.(vendor.greeting, '#90caf9');
+        },
+      });
+    }
+
     // "Walk here" — navigate to nearest walkable tile
     items.push({
       label: 'Walk here',
@@ -360,6 +410,7 @@ class InputHandler {
     this.menu.onMouseMove(sx, sy);
     this.inventoryUI.onMouseMove(sx, sy);
     this.craftingUI.onMouseMove(sx, sy);
+    this.shopUI.onMouseMove(sx, sy);
     this.skillJournalUI.onMouseMove(sx, sy);
     this.lootFilterUI.onMouseMove(sx, sy);
     this.playerUI.onMouseMove(sx, sy);
@@ -367,8 +418,10 @@ class InputHandler {
   }
 
   _onWheel(e) {
-    if (!this.craftingUI.isOpen) return;
-    const consumed = this.craftingUI.onWheel(e.deltaY);
+    if (!this.craftingUI.isOpen && !this.shopUI.isOpen) return;
+    const consumed = this.shopUI.isOpen
+      ? this.shopUI.onWheel(e.deltaY)
+      : this.craftingUI.onWheel(e.deltaY);
     if (consumed) e.preventDefault();
   }
 

@@ -1,6 +1,7 @@
 const SaveSystem = (() => {
-  const SAVE_KEY = 'rpg_save_v1';
-  const SCHEMA_VERSION = 1;
+  const SAVE_KEY = 'rpg_save_v2';
+  const LEGACY_KEYS = ['rpg_save_v1'];
+  const SCHEMA_VERSION = 2;
 
   function saveGame(player, world) {
     try {
@@ -20,24 +21,51 @@ const SaveSystem = (() => {
 
   function loadGame() {
     try {
-      const raw = localStorage.getItem(SAVE_KEY);
+      let raw = localStorage.getItem(SAVE_KEY);
+      if (!raw) {
+        for (const legacyKey of LEGACY_KEYS) {
+          raw = localStorage.getItem(legacyKey);
+          if (raw) break;
+        }
+      }
       if (!raw) return { ok: true, data: null };
 
       const payload = JSON.parse(raw);
-      if (!payload || payload.schemaVersion !== SCHEMA_VERSION) {
+      const migrated = _migratePayload(payload);
+      if (!migrated) {
         console.warn('SaveSystem: schema mismatch or invalid payload; ignoring save.');
         return { ok: false, data: null };
       }
 
-      return { ok: true, data: payload };
+      return { ok: true, data: migrated };
     } catch (err) {
       console.warn('SaveSystem: load failed; ignoring corrupted save.', err);
       return { ok: false, data: null, error: err };
     }
   }
 
+  function _migratePayload(payload) {
+    if (!payload || typeof payload !== 'object') return null;
+
+    if (payload.schemaVersion === SCHEMA_VERSION) return payload;
+
+    if (payload.schemaVersion === 1) {
+      return {
+        schemaVersion: SCHEMA_VERSION,
+        savedAt: payload.savedAt ?? Date.now(),
+        player: payload.player,
+        world: payload.world,
+      };
+    }
+
+    return null;
+  }
+
   function clear() {
     localStorage.removeItem(SAVE_KEY);
+    for (const legacyKey of LEGACY_KEYS) {
+      localStorage.removeItem(legacyKey);
+    }
   }
 
   return {

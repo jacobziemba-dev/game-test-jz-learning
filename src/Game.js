@@ -16,7 +16,8 @@ class Game {
       this.player.skills,
       (text, color) => this.ui.pushSystem(text, color)
     );
-    this.craftingUI  = new CraftingUI(this.player.inventory, this.player.skills);
+    this.craftingUI  = new CraftingUI(this.player.inventory, this.player.skills, this.player, this.world);
+    this.shopUI      = new ShopUI(this.player, (text, color) => this.ui.pushSystem(text, color));
     this.skillsUI    = new SkillsUI(this.player.skills);
     this.skillJournalUI = new SkillJournalUI(this.player.skills);
     this.lootFilterUI = new LootFilterUI(this.player);
@@ -48,7 +49,7 @@ class Game {
     ]);
     this.input       = new InputHandler(
       this.canvas, this.camera, this.world, this.player,
-      this.inventoryUI, this.craftingUI, this.skillsUI, this.skillJournalUI, this.lootFilterUI, this.playerUI, this.helpUI, this.hotbarUI,
+      this.inventoryUI, this.craftingUI, this.shopUI, this.skillsUI, this.skillJournalUI, this.lootFilterUI, this.playerUI, this.helpUI, this.hotbarUI,
       {
         onManualSave: () => this.manualSave(),
         onManualLoad: () => this.manualLoad(),
@@ -97,6 +98,7 @@ class Game {
     this.input.update(dt);
     this.ui.update(dt);
     this.craftingUI.update(dt);
+    this.shopUI.update(dt);
 
     // Poll for level-up events and push them to the toast system
     for (const evt of this.player.skills.popLevelUps()) {
@@ -140,6 +142,7 @@ class Game {
     // Toggleable panels — render last so they sit on top
     this.inventoryUI.render(ctx, this.canvas.width, this.canvas.height);
     this.craftingUI.render(ctx, this.canvas.width, this.canvas.height);
+    this.shopUI.render(ctx, this.canvas.width, this.canvas.height);
     this.skillsUI.render(ctx, this.canvas.width, this.canvas.height);
     this.skillJournalUI.render(ctx, this.canvas.width, this.canvas.height);
     this.lootFilterUI.render(ctx, this.canvas.width, this.canvas.height);

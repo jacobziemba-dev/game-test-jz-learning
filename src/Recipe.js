@@ -74,7 +74,7 @@ class Recipe {
       }));
 
     const stationRequired = this.station !== 'any';
-    const stationBlocked = stationRequired && station !== 'any' && station !== this.station;
+    const stationBlocked = stationRequired && station !== this.station;
 
     return {
       canCraft: missingSkills.length === 0 && missingTools.length === 0 && missingInputs.length === 0 && !stationBlocked,

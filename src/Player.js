@@ -72,6 +72,7 @@ class Player {
     this.inventory.addItem('ring_mould', 1);
     this.inventory.addItem('necklace_mould', 1);
     this.inventory.addItem('amulet_mould', 1);
+    this.inventory.addItem('coins', 120);
 
     // Equipment — items worn by the player
     this.equipment = new Equipment();

@@ -1,7 +1,9 @@
 class CraftingUI {
-  constructor(inventory, skillManager) {
+  constructor(inventory, skillManager, player, world) {
     this.inventory = inventory;
     this.skillManager = skillManager;
+    this.player = player;
+    this.world = world;
     this.isOpen = false;
 
     this.panelW = 760;
@@ -14,6 +16,7 @@ class CraftingUI {
     this.categories = [];
     this.activeCategory = 0;
     this.stationOptions = ['any'];
+    this.nearbyStations = [];
     this.selectedStation = 'any';
 
     this.recipes = [];
@@ -37,8 +40,17 @@ class CraftingUI {
     if (this.isOpen) this._rebuild();
   }
 
+  open() {
+    this.isOpen = true;
+    this._rebuild();
+  }
+
   close() {
     this.isOpen = false;
+  }
+
+  setPreferredStation(stationType) {
+    this.selectedStation = stationType;
   }
 
   onMouseMove() {}
@@ -135,13 +147,15 @@ class CraftingUI {
 
   _rebuild() {
     this.categories = RecipeRegistry.categories();
-    this.stationOptions = ['any', ...RecipeRegistry.stations()];
+    this._refreshNearbyStations();
     if (!this.categories.length) this.categories = ['General'];
     this.activeCategory = Math.max(0, Math.min(this.activeCategory, this.categories.length - 1));
     this._rebuildRecipesOnly();
   }
 
   _rebuildRecipesOnly() {
+    this._refreshNearbyStations();
+
     const category = this.categories[this.activeCategory];
     this.recipes = category ? RecipeRegistry.forCategory(category) : [];
 
@@ -226,7 +240,12 @@ class CraftingUI {
     });
 
     if (result.attempted <= 0) {
-      this._feedback = { text: 'Cannot craft: requirements not met', color: '#ef9a9a', ttl: 2.2 };
+      const blocked = result.blockedReason;
+      let text = 'Cannot craft: requirements not met';
+      if (blocked?.stationBlocked) {
+        text = `Need nearby station: ${this._humanStation(recipe.station)}`;
+      }
+      this._feedback = { text, color: '#ef9a9a', ttl: 2.2 };
       return;
     }
 
@@ -274,7 +293,7 @@ class CraftingUI {
     ctx.font = '10px sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText('Station:', this._px + 10, y + this.stationH / 2);
+    ctx.fillText('Nearby:', this._px + 10, y + this.stationH / 2);
 
     const buttonW = 112;
     const gap = 6;
@@ -503,8 +522,29 @@ class CraftingUI {
 
     ctx.fillStyle = '#8f8f8f';
     ctx.font = '10px sans-serif';
+    ctx.textAlign = 'left';
+    const nearbyText = this.nearbyStations.length
+      ? `Near: ${this.nearbyStations.map(s => this._humanStation(s)).join(', ')}`
+      : 'Near: no crafting stations';
+    ctx.fillText(nearbyText, this._px + 12, y + this.footerH / 2 + 13);
+
     ctx.textAlign = 'right';
     ctx.fillText('[C] close  [Mouse wheel] scroll', this._px + this.panelW - 12, y + this.footerH / 2);
+  }
+
+  _refreshNearbyStations() {
+    const near = this.world.getStationsNear(this.player.col, this.player.row, 1);
+    const types = [...new Set(near.map(s => s.stationType))].sort();
+    this.nearbyStations = types;
+    this.stationOptions = ['any', ...types];
+
+    if (!this.stationOptions.includes(this.selectedStation)) {
+      this.selectedStation = 'any';
+    }
+
+    if (this.selectedStation === 'any' && types.length === 1) {
+      this.selectedStation = types[0];
+    }
   }
 
   _humanStation(station) {
