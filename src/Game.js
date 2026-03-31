@@ -19,6 +19,7 @@ class Game {
     this.craftingUI  = new CraftingUI(this.player.inventory, this.player.skills);
     this.skillsUI    = new SkillsUI(this.player.skills);
     this.skillJournalUI = new SkillJournalUI(this.player.skills);
+    this.lootFilterUI = new LootFilterUI(this.player);
     this.playerUI    = new PlayerUI(this.player);
     this.helpUI      = new HelpUI();
     this.hotbarUI    = new HotbarUI([
@@ -28,22 +29,30 @@ class Game {
       { key: '4', label: 'Crafting', action: () => this.craftingUI.toggle() },
       {
         key: '5',
-        label: 'Style',
+        label: () => `Style: ${this.player.combatStyle[0].toUpperCase()}`,
         action: () => {
           const style = this.player.cycleCombatStyle();
           this.ui.pushSystem(`Combat style: ${style}`, '#90caf9');
         },
       },
       { key: '6', label: 'Journal', action: () => this.skillJournalUI.toggle() },
-      { key: '7', label: 'Skills', action: () => this.skillsUI.toggle() },
+      {
+        key: '7',
+        label: () => this.player.lootFilter.enabled ? 'Loot: Filter' : 'Loot: All',
+        action: () => {
+          const enabled = this.player.toggleLootFilterEnabled();
+          this.ui.pushSystem(`Loot filter ${enabled ? 'enabled' : 'disabled'}`, enabled ? '#81c784' : '#ffcc80');
+        },
+      },
       { key: '8', label: 'Character', action: () => this.playerUI.toggle() },
     ]);
     this.input       = new InputHandler(
       this.canvas, this.camera, this.world, this.player,
-      this.inventoryUI, this.craftingUI, this.skillsUI, this.skillJournalUI, this.playerUI, this.helpUI, this.hotbarUI,
+      this.inventoryUI, this.craftingUI, this.skillsUI, this.skillJournalUI, this.lootFilterUI, this.playerUI, this.helpUI, this.hotbarUI,
       {
         onManualSave: () => this.manualSave(),
         onManualLoad: () => this.manualLoad(),
+        onSystemMessage: (text, color = '#90caf9') => this.ui.pushSystem(text, color),
       }
     );
 
@@ -133,6 +142,7 @@ class Game {
     this.craftingUI.render(ctx, this.canvas.width, this.canvas.height);
     this.skillsUI.render(ctx, this.canvas.width, this.canvas.height);
     this.skillJournalUI.render(ctx, this.canvas.width, this.canvas.height);
+    this.lootFilterUI.render(ctx, this.canvas.width, this.canvas.height);
     this.playerUI.render(ctx, this.canvas.width, this.canvas.height);
     this.helpUI.render(ctx, this.canvas.width, this.canvas.height);
     this.hotbarUI.render(ctx, this.canvas.width, this.canvas.height);

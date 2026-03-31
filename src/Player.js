@@ -38,6 +38,16 @@ class Player {
     this._lootPickupQueue = [];
     this.deathVersion = 0;
     this.combatStyle = 'balanced';
+    this.lootFilter = {
+      enabled: false,
+      allow: {
+        common: true,
+        uncommon: true,
+        rare: true,
+        epic: true,
+        unique: true,
+      },
+    };
 
     // Chopping
     this.chopTarget = null;
@@ -398,6 +408,21 @@ class Player {
     return this.combatStyle;
   }
 
+  toggleLootFilterEnabled() {
+    this.lootFilter.enabled = !this.lootFilter.enabled;
+    return this.lootFilter.enabled;
+  }
+
+  setLootRarityAllowed(rarity, allowed) {
+    if (!(rarity in this.lootFilter.allow)) return;
+    this.lootFilter.allow[rarity] = !!allowed;
+  }
+
+  allowsLootRarity(rarity) {
+    if (!this.lootFilter.enabled) return true;
+    return this.lootFilter.allow[rarity ?? 'common'] ?? false;
+  }
+
   queueLootPickup(itemName, quantity, rarity = 'common') {
     this._lootPickupQueue.push({ itemName, quantity, rarity });
     if (this._lootPickupQueue.length > 8) this._lootPickupQueue.shift();
@@ -435,6 +460,7 @@ class Player {
       currentHitpoints: this.currentHitpoints,
       maxHitpoints: this.maxHitpoints,
       combatStyle: this.combatStyle,
+      lootFilter: this.lootFilter,
       deathVersion: this.deathVersion,
       inventory: this.inventory.serialize(),
       equipment: this.equipment.serialize(),
@@ -457,6 +483,16 @@ class Player {
     this.maxHitpoints = Math.max(1, Math.floor(data.maxHitpoints ?? this.maxHitpoints));
     this.currentHitpoints = Math.max(1, Math.min(this.maxHitpoints, Math.floor(data.currentHitpoints ?? this.maxHitpoints)));
     this.combatStyle = COMBAT_STYLES.includes(data.combatStyle) ? data.combatStyle : this.combatStyle;
+    if (data.lootFilter && typeof data.lootFilter === 'object') {
+      this.lootFilter.enabled = !!data.lootFilter.enabled;
+      if (data.lootFilter.allow && typeof data.lootFilter.allow === 'object') {
+        for (const rarity of Object.keys(this.lootFilter.allow)) {
+          if (rarity in data.lootFilter.allow) {
+            this.lootFilter.allow[rarity] = !!data.lootFilter.allow[rarity];
+          }
+        }
+      }
+    }
     this.deathVersion = Math.max(0, Math.floor(data.deathVersion ?? this.deathVersion));
 
     this.inventory.deserialize(data.inventory);

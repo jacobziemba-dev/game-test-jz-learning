@@ -121,7 +121,7 @@ class ContextMenu {
 // ─────────────────────────────────────────────
 
 class InputHandler {
-  constructor(canvas, camera, world, player, inventoryUI, craftingUI, skillsUI, skillJournalUI, playerUI, helpUI, hotbarUI, actions = {}) {
+  constructor(canvas, camera, world, player, inventoryUI, craftingUI, skillsUI, skillJournalUI, lootFilterUI, playerUI, helpUI, hotbarUI, actions = {}) {
     this.canvas      = canvas;
     this.camera      = camera;
     this.world       = world;
@@ -130,6 +130,7 @@ class InputHandler {
     this.craftingUI  = craftingUI;
     this.skillsUI    = skillsUI;
     this.skillJournalUI = skillJournalUI;
+    this.lootFilterUI = lootFilterUI;
     this.playerUI    = playerUI;
     this.helpUI      = helpUI;
     this.hotbarUI    = hotbarUI;
@@ -152,6 +153,7 @@ class InputHandler {
     if (key === 'j') { this.skillJournalUI.toggle(); this.menu.close(); }
     if (key === 'p') { this.playerUI.toggle();    this.menu.close(); }
     if (key === 'h') { this.helpUI.toggle();      this.menu.close(); }
+    if (key === 'f') { this.lootFilterUI.toggle(); this.menu.close(); }
     if (key === 'o') {
       this.actions.onManualSave?.();
       this.menu.close();
@@ -172,6 +174,7 @@ class InputHandler {
       this.craftingUI.close();
       this.skillsUI.close();
       this.skillJournalUI.close();
+      this.lootFilterUI.close();
       this.playerUI.close();
       this.helpUI.close();
       this.menu.close();
@@ -191,6 +194,7 @@ class InputHandler {
     if (this.craftingUI.onClick(sx, sy))  return;
     if (this.skillsUI.onClick(sx, sy))    return;
     if (this.skillJournalUI.onClick(sx, sy)) return;
+    if (this.lootFilterUI.onClick(sx, sy)) return;
     if (this.playerUI.onClick(sx, sy))    return;
     if (this.helpUI.onClick(sx, sy))      return;
     if (this.hotbarUI.onClick(sx, sy))    return;
@@ -266,7 +270,22 @@ class InputHandler {
           label: `Take all (${stack.length})`,
           color: '#80cbc4',
           action: () => {
-            const pickups = this.world.pickupAllLootAt(col, row, this.player.inventory);
+            const pickups = this.world.pickupAllLootAt(
+              col,
+              row,
+              this.player.inventory,
+              this.player.lootFilter.enabled
+                ? (drop) => {
+                  const rarity = ItemRegistry.get(drop.itemId)?.rarity ?? 'common';
+                  return this.player.allowsLootRarity(rarity);
+                }
+                : null
+            );
+
+            if (pickups.length === 0 && this.player.lootFilter.enabled) {
+              this.actions.onSystemMessage?.('No allowed loot by current filter', '#ffcc80');
+            }
+
             for (const pickup of pickups) {
               this.player.queueLootPickup(pickup.itemName, pickup.quantity, pickup.rarity);
             }
@@ -341,6 +360,7 @@ class InputHandler {
     this.inventoryUI.onMouseMove(sx, sy);
     this.craftingUI.onMouseMove(sx, sy);
     this.skillJournalUI.onMouseMove(sx, sy);
+    this.lootFilterUI.onMouseMove(sx, sy);
     this.playerUI.onMouseMove(sx, sy);
     this.hotbarUI.onMouseMove(sx, sy);
   }

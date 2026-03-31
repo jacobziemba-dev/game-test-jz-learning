@@ -77,7 +77,8 @@ class HotbarUI {
       ctx.font = '10px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(slot.label, x + this.slotW / 2 + 6, y + this.slotH / 2 + 1);
+      const label = typeof slot.label === 'function' ? slot.label() : slot.label;
+      ctx.fillText(label, x + this.slotW / 2 + 6, y + this.slotH / 2 + 1);
     }
 
     ctx.restore();

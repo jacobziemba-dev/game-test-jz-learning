@@ -19,6 +19,7 @@ class HelpUI {
       { key: 'C',      desc: 'Crafting' },
       { key: 'K',      desc: 'Skills' },
       { key: 'J',      desc: 'Skill Journal (unlocks book)' },
+      { key: 'F',      desc: 'Loot filter panel' },
       { key: 'P',      desc: 'Character (equipment + stats)' },
       { key: 'H',      desc: 'Help (this panel)' },
       { key: '1..8',   desc: 'Hotbar actions' },
