@@ -771,6 +771,330 @@ ItemRegistry.register({
   },
 });
 
+// ─── Classic crafting tools and materials ───────────────────────────────────
+
+ItemRegistry.register({
+  id: 'needle',
+  name: 'Needle',
+  description: 'Used with thread for leather crafting.',
+  type: 'tool',
+  stackable: false,
+  maxStack: 1,
+});
+
+ItemRegistry.register({
+  id: 'thread',
+  name: 'Thread',
+  description: 'Used with a needle to stitch leather items.',
+  type: 'tool',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'chisel',
+  name: 'Chisel',
+  description: 'Used to cut uncut gems.',
+  type: 'tool',
+  stackable: false,
+  maxStack: 1,
+});
+
+ItemRegistry.register({
+  id: 'ring_mould',
+  name: 'Ring Mould',
+  description: 'A mould for crafting rings at a furnace.',
+  type: 'tool',
+  stackable: false,
+  maxStack: 1,
+});
+
+ItemRegistry.register({
+  id: 'necklace_mould',
+  name: 'Necklace Mould',
+  description: 'A mould for crafting necklaces at a furnace.',
+  type: 'tool',
+  stackable: false,
+  maxStack: 1,
+});
+
+ItemRegistry.register({
+  id: 'amulet_mould',
+  name: 'Amulet Mould',
+  description: 'A mould for crafting amulets at a furnace.',
+  type: 'tool',
+  stackable: false,
+  maxStack: 1,
+});
+
+ItemRegistry.register({
+  id: 'cowhide',
+  name: 'Cowhide',
+  description: 'Raw hide that can be tanned into leather.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'leather',
+  name: 'Leather',
+  description: 'Tanned hide used for leather armour crafting.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'hard_leather',
+  name: 'Hard Leather',
+  description: 'A sturdier form of leather for higher tiers.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'wool',
+  name: 'Wool',
+  description: 'Can be spun into a ball of wool.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'ball_of_wool',
+  name: 'Ball of Wool',
+  description: 'Used for stringing amulets and cloth work.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'flax',
+  name: 'Flax',
+  description: 'Spin this on a wheel to make bowstring.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'bowstring',
+  name: 'Bowstring',
+  description: 'A spun string used for bows and fletching.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'bucket',
+  name: 'Bucket',
+  description: 'An empty bucket.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'bucket_of_water',
+  name: 'Bucket of Water',
+  description: 'Used to soften clay for pottery.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'clay',
+  name: 'Clay',
+  description: 'Raw clay that can be softened and shaped.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'soft_clay',
+  name: 'Soft Clay',
+  description: 'Prepared clay for pottery wheel crafting.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'unfired_pot',
+  name: 'Unfired Pot',
+  description: 'Needs to be fired in a pottery oven.',
+  type: 'pottery',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'unfired_bowl',
+  name: 'Unfired Bowl',
+  description: 'Needs to be fired in a pottery oven.',
+  type: 'pottery',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'pot',
+  name: 'Pot',
+  description: 'A fired pottery pot.',
+  type: 'pottery',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'bowl',
+  name: 'Bowl',
+  description: 'A fired pottery bowl.',
+  type: 'pottery',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'broken_pottery',
+  name: 'Broken Pottery',
+  description: 'A failed pottery attempt.',
+  type: 'misc',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'crushed_gem',
+  name: 'Crushed Gem',
+  description: 'A gem that shattered while being cut.',
+  type: 'misc',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'silver_bar',
+  name: 'Silver Bar',
+  description: 'A bar of silver for crafting silver jewellery.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'gold_bar',
+  name: 'Gold Bar',
+  description: 'A bar of gold used to craft jewellery.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'uncut_sapphire',
+  name: 'Uncut Sapphire',
+  description: 'Can be cut with a chisel.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'uncut_emerald',
+  name: 'Uncut Emerald',
+  description: 'Can be cut with a chisel.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'uncut_ruby',
+  name: 'Uncut Ruby',
+  description: 'Can be cut with a chisel.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'uncut_diamond',
+  name: 'Uncut Diamond',
+  description: 'Can be cut with a chisel.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'sapphire',
+  name: 'Sapphire',
+  description: 'A cut gemstone used in jewellery.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'emerald',
+  name: 'Emerald',
+  description: 'A cut gemstone used in jewellery.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'ruby',
+  name: 'Ruby',
+  description: 'A cut gemstone used in jewellery.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({
+  id: 'diamond',
+  name: 'Diamond',
+  description: 'A cut gemstone used in jewellery.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+});
+
+ItemRegistry.register({ id: 'gold_ring', name: 'Gold Ring', description: 'A plain gold ring.', type: 'jewellery', stackable: false, maxStack: 1 });
+ItemRegistry.register({ id: 'gold_necklace', name: 'Gold Necklace', description: 'A plain gold necklace.', type: 'jewellery', stackable: false, maxStack: 1 });
+ItemRegistry.register({ id: 'gold_amulet_unstrung', name: 'Gold Amulet (u)', description: 'Needs stringing with wool.', type: 'jewellery', stackable: false, maxStack: 1 });
+ItemRegistry.register({ id: 'gold_amulet', name: 'Gold Amulet', description: 'A strung gold amulet.', type: 'jewellery', stackable: false, maxStack: 1 });
+
+ItemRegistry.register({ id: 'sapphire_ring', name: 'Sapphire Ring', description: 'A gold ring set with sapphire.', type: 'jewellery', stackable: false, maxStack: 1 });
+ItemRegistry.register({ id: 'sapphire_necklace', name: 'Sapphire Necklace', description: 'A gold necklace set with sapphire.', type: 'jewellery', stackable: false, maxStack: 1 });
+ItemRegistry.register({ id: 'sapphire_amulet_unstrung', name: 'Sapphire Amulet (u)', description: 'Needs stringing with wool.', type: 'jewellery', stackable: false, maxStack: 1 });
+ItemRegistry.register({ id: 'sapphire_amulet', name: 'Sapphire Amulet', description: 'A strung sapphire amulet.', type: 'jewellery', stackable: false, maxStack: 1 });
+
+ItemRegistry.register({ id: 'emerald_ring', name: 'Emerald Ring', description: 'A gold ring set with emerald.', type: 'jewellery', stackable: false, maxStack: 1 });
+ItemRegistry.register({ id: 'emerald_necklace', name: 'Emerald Necklace', description: 'A gold necklace set with emerald.', type: 'jewellery', stackable: false, maxStack: 1 });
+ItemRegistry.register({ id: 'emerald_amulet_unstrung', name: 'Emerald Amulet (u)', description: 'Needs stringing with wool.', type: 'jewellery', stackable: false, maxStack: 1 });
+ItemRegistry.register({ id: 'emerald_amulet', name: 'Emerald Amulet', description: 'A strung emerald amulet.', type: 'jewellery', stackable: false, maxStack: 1 });
+
+ItemRegistry.register({ id: 'ruby_ring', name: 'Ruby Ring', description: 'A gold ring set with ruby.', type: 'jewellery', stackable: false, maxStack: 1 });
+ItemRegistry.register({ id: 'ruby_necklace', name: 'Ruby Necklace', description: 'A gold necklace set with ruby.', type: 'jewellery', stackable: false, maxStack: 1 });
+ItemRegistry.register({ id: 'ruby_amulet_unstrung', name: 'Ruby Amulet (u)', description: 'Needs stringing with wool.', type: 'jewellery', stackable: false, maxStack: 1 });
+ItemRegistry.register({ id: 'ruby_amulet', name: 'Ruby Amulet', description: 'A strung ruby amulet.', type: 'jewellery', stackable: false, maxStack: 1 });
+
+ItemRegistry.register({ id: 'diamond_ring', name: 'Diamond Ring', description: 'A gold ring set with diamond.', type: 'jewellery', stackable: false, maxStack: 1 });
+ItemRegistry.register({ id: 'diamond_necklace', name: 'Diamond Necklace', description: 'A gold necklace set with diamond.', type: 'jewellery', stackable: false, maxStack: 1 });
+ItemRegistry.register({ id: 'diamond_amulet_unstrung', name: 'Diamond Amulet (u)', description: 'Needs stringing with wool.', type: 'jewellery', stackable: false, maxStack: 1 });
+ItemRegistry.register({ id: 'diamond_amulet', name: 'Diamond Amulet', description: 'A strung diamond amulet.', type: 'jewellery', stackable: false, maxStack: 1 });
+
 // ─── Future items (add as new skills are implemented) ────────────────────────
 // ItemRegistry.register({ id: 'iron_ore',  name: 'Iron Ore',   type: 'resource', ... });
 // ItemRegistry.register({ id: 'raw_fish',  name: 'Raw Fish',   type: 'resource', ... });

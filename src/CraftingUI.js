@@ -1,88 +1,86 @@
-/**
- * CraftingUI — improved canvas panel showing all recipes with tabs and better layout.
- *
- * Toggle with 'C'. Tab-based organization, scrollable content, better text wrapping.
- * Locked recipes (level too low) are shown grayed with a lock + required level.
- * Unlocked-but-missing-materials recipes are shown amber. Ready recipes are green and clickable.
- */
 class CraftingUI {
   constructor(inventory, skillManager) {
-    this.inventory    = inventory;
+    this.inventory = inventory;
     this.skillManager = skillManager;
-    this.isOpen       = false;
+    this.isOpen = false;
 
-    this.panelW    = 420;   // wider panel for better text layout
-    this.panelH    = 520;   // max height
-    this.headerH   = 32;
-    this.tabH      = 28;
-    this.recipeH   = 85;    // taller rows for better spacing
-    this.panelPad  = 10;
-    this.contentPad = 8;
+    this.panelW = 760;
+    this.panelH = 560;
+    this.headerH = 34;
+    this.tabH = 28;
+    this.stationH = 30;
+    this.footerH = 42;
 
-    this.categories = [];   // list of category names
-    this.activeCategory = 0; // which tab is selected
-    this.scrollY = 0;        // vertical scroll offset
-    this.recipes = [];       // filtered recipes for active category
+    this.categories = [];
+    this.activeCategory = 0;
+    this.stationOptions = ['any'];
+    this.selectedStation = 'any';
 
-    this.hoverRecipeId = -1;
+    this.recipes = [];
+    this.selectedRecipeIndex = 0;
+    this.recipeRowH = 48;
+    this.recipeScroll = 0;
+
+    this.quantityOptions = [1, 5, 10, 'MAX'];
+    this.quantityIndex = 0;
+
     this._px = 0;
     this._py = 0;
-    this._contentStartY = 0;
-    this._contentH = 0;
+    this._listBounds = null;
+    this._detailBounds = null;
 
-    this._feedback = null; // { text, color, ttl }
+    this._feedback = null;
   }
 
-  toggle() { this.isOpen = !this.isOpen; if (this.isOpen) this._buildCategories(); }
-  close()  { this.isOpen = false; }
+  toggle() {
+    this.isOpen = !this.isOpen;
+    if (this.isOpen) this._rebuild();
+  }
 
-  onMouseMove(sx, sy) {
-    if (!this.isOpen) return;
-    this._updateHover(sx, sy);
+  close() {
+    this.isOpen = false;
+  }
+
+  onMouseMove() {}
+
+  onWheel(deltaY) {
+    if (!this.isOpen || !this._listBounds) return false;
+    const maxScroll = Math.max(0, this.recipes.length * this.recipeRowH - this._listBounds.h);
+    this.recipeScroll = Math.max(0, Math.min(maxScroll, this.recipeScroll + (deltaY > 0 ? 28 : -28)));
+    return true;
   }
 
   onClick(sx, sy) {
     if (!this.isOpen) return false;
-    const inside = sx >= this._px && sx <= this._px + this.panelW &&
-                   sy >= this._py && sy <= this._py + this.panelH;
-    if (!inside) return false;
+    if (!this._inside(sx, sy, this._px, this._py, this.panelW, this.panelH)) return false;
 
-    // Check tab clicks
     const tabY = this._py + this.headerH;
-    if (sy >= tabY && sy < tabY + this.tabH) {
-      for (let i = 0; i < this.categories.length; i++) {
-        const tabW = (this.panelW - this.panelPad * 2) / this.categories.length;
-        const tabX = this._px + this.panelPad + i * tabW;
-        if (sx >= tabX && sx < tabX + tabW) {
-          this.activeCategory = i;
-          this.scrollY = 0;
-          this._buildRecipes();
-          return true;
-        }
-      }
+    const stationY = tabY + this.tabH;
+    const bodyY = stationY + this.stationH;
+
+    if (this._handleCategoryClick(sx, sy, tabY)) return true;
+    if (this._handleStationClick(sx, sy, stationY)) return true;
+
+    if (this._listBounds && this._inside(sx, sy, this._listBounds.x, this._listBounds.y, this._listBounds.w, this._listBounds.h)) {
+      const localY = sy - this._listBounds.y + this.recipeScroll;
+      const idx = Math.floor(localY / this.recipeRowH);
+      if (idx >= 0 && idx < this.recipes.length) this.selectedRecipeIndex = idx;
+      return true;
     }
 
-    // Check recipe clicks
-    const contentStartY = this._contentStartY;
-    const contentH = this._contentH;
-    if (sy >= contentStartY && sy < contentStartY + contentH) {
-      const relY = sy - contentStartY + this.scrollY;
-      const recipeIdx = Math.floor(relY / this.recipeH);
-      if (recipeIdx >= 0 && recipeIdx < this.recipes.length) {
-        this._tryCraft(this.recipes[recipeIdx]);
-      }
+    if (this._detailBounds && this._inside(sx, sy, this._detailBounds.x, this._detailBounds.y, this._detailBounds.w, this._detailBounds.h)) {
+      if (this._handleDetailClick(sx, sy, bodyY)) return true;
     }
 
     return true;
   }
 
   update(dt) {
+    if (!this.isOpen) return;
+    this._rebuildRecipesOnly();
     if (this._feedback) {
       this._feedback.ttl -= dt;
       if (this._feedback.ttl <= 0) this._feedback = null;
-    }
-    if (this.isOpen) {
-      this._buildRecipes();
     }
   }
 
@@ -91,258 +89,440 @@ class CraftingUI {
 
     this._px = Math.round((canvasW - this.panelW) / 2);
     this._py = Math.round((canvasH - this.panelH) / 2);
-    if (this._py < 8) this._py = 8;
+
+    const tabY = this._py + this.headerH;
+    const stationY = tabY + this.tabH;
+    const bodyY = stationY + this.stationH;
+    const bodyH = this.panelH - this.headerH - this.tabH - this.stationH - this.footerH;
+    const footerY = bodyY + bodyH;
+
+    const listW = 320;
+    const detailX = this._px + listW + 8;
+    const detailW = this.panelW - listW - 16;
+
+    this._listBounds = { x: this._px + 8, y: bodyY + 8, w: listW - 16, h: bodyH - 16 };
+    this._detailBounds = { x: detailX, y: bodyY + 8, w: detailW, h: bodyH - 16 };
 
     ctx.save();
 
-    // ─── Panel Background ───
-    ctx.fillStyle   = 'rgba(18,12,6,0.96)';
+    ctx.fillStyle = 'rgba(18, 12, 6, 0.97)';
     ctx.strokeStyle = '#c8a45a';
-    ctx.lineWidth   = 2;
-    this._rrect(ctx, this._px, this._py, this.panelW, this.panelH, 6);
+    ctx.lineWidth = 2;
+    this._rrect(ctx, this._px, this._py, this.panelW, this.panelH, 8);
     ctx.fill();
     ctx.stroke();
 
-    // ─── Header ───
-    ctx.fillStyle    = '#c8a45a';
-    ctx.font         = 'bold 14px sans-serif';
-    ctx.textAlign    = 'center';
+    ctx.fillStyle = '#c8a45a';
+    ctx.font = 'bold 15px sans-serif';
+    ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('Crafting', this._px + this.panelW / 2, this._py + this.headerH / 2);
+    ctx.fillText('Crafting - Classic Style', this._px + this.panelW / 2, this._py + this.headerH / 2);
 
-    this._divider(ctx, this._px, this._py + this.headerH, this.panelW);
+    this._divider(ctx, this._py + this.headerH);
+    this._drawCategoryTabs(ctx, tabY);
+    this._divider(ctx, tabY + this.tabH);
+    this._drawStationButtons(ctx, stationY);
+    this._divider(ctx, stationY + this.stationH);
 
-    // ─── Category Tabs ───
-    const tabY = this._py + this.headerH;
-    const tabW = (this.panelW - this.panelPad * 2) / Math.max(1, this.categories.length);
-    for (let i = 0; i < this.categories.length; i++) {
-      const tabX = this._px + this.panelPad + i * tabW;
-      this._drawTab(ctx, tabX, tabY, tabW, this.tabH, this.categories[i], i === this.activeCategory);
-    }
+    this._drawRecipeList(ctx);
+    this._drawRecipeDetail(ctx);
 
-    this._divider(ctx, this._px, tabY + this.tabH, this.panelW);
-
-    // ─── Content Area (scrollable recipes) ───
-    const contentY = tabY + this.tabH;
-    const contentH = this.panelH - this.headerH - this.tabH - 20; // leave room for feedback
-    this._contentStartY = contentY;
-    this._contentH = contentH;
-
-    // Clip content area
-    ctx.save();
-    this._rrect(ctx, this._px + this.contentPad, contentY, this.panelW - this.contentPad * 2, contentH, 4);
-    ctx.clip();
-
-    let curY = contentY - this.scrollY;
-    for (const recipe of this.recipes) {
-      if (curY + this.recipeH > contentY && curY < contentY + contentH) {
-        this._drawRecipeCard(ctx, recipe, curY, curY + this.recipeH > contentY && curY < contentY + contentH);
-      }
-      curY += this.recipeH;
-    }
-
-    ctx.restore();
-
-    // ─── Feedback Toast ───
-    if (this._feedback) {
-      ctx.fillStyle    = this._feedback.color;
-      ctx.font         = 'bold 11px sans-serif';
-      ctx.textAlign    = 'center';
-      ctx.textBaseline = 'top';
-      ctx.globalAlpha  = Math.min(1, this._feedback.ttl * 3);
-      ctx.fillText(this._feedback.text, this._px + this.panelW / 2, this._py + this.panelH - 18);
-      ctx.globalAlpha = 1;
-    }
-
-    // ─── Footer hint ───
-    ctx.fillStyle    = '#666';
-    ctx.font         = '10px sans-serif';
-    ctx.textAlign    = 'right';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText('[C] close', this._px + this.panelW - 10, this._py + this.panelH - 2);
+    this._divider(ctx, footerY);
+    this._drawFooter(ctx, footerY);
 
     ctx.restore();
   }
 
-  // ─── Private ─────────────────────────────────────────────────────────────
-
-  _buildCategories() {
+  _rebuild() {
     this.categories = RecipeRegistry.categories();
-    this.activeCategory = 0;
-    this._buildRecipes();
+    this.stationOptions = ['any', ...RecipeRegistry.stations()];
+    if (!this.categories.length) this.categories = ['General'];
+    this.activeCategory = Math.max(0, Math.min(this.activeCategory, this.categories.length - 1));
+    this._rebuildRecipesOnly();
   }
 
-  _buildRecipes() {
+  _rebuildRecipesOnly() {
     const category = this.categories[this.activeCategory];
     this.recipes = category ? RecipeRegistry.forCategory(category) : [];
+
+    if (this.selectedRecipeIndex >= this.recipes.length) {
+      this.selectedRecipeIndex = Math.max(0, this.recipes.length - 1);
+    }
+    const maxScroll = Math.max(0, this.recipes.length * this.recipeRowH - (this._listBounds?.h ?? 0));
+    this.recipeScroll = Math.max(0, Math.min(maxScroll, this.recipeScroll));
   }
 
-  _updateHover(sx, sy) {
-    const contentY = this._contentStartY;
-    if (sy >= contentY && sy < contentY + this._contentH) {
-      const relY = sy - contentY + this.scrollY;
-      this.hoverRecipeId = Math.floor(relY / this.recipeH);
-    } else {
-      this.hoverRecipeId = -1;
-    }
+  _activeRecipe() {
+    return this.recipes[this.selectedRecipeIndex] ?? null;
   }
 
-  _drawTab(ctx, x, y, w, h, label, active) {
-    // Tab background
-    if (active) {
-      ctx.fillStyle = 'rgba(100,150,100,0.3)';
-    } else {
-      ctx.fillStyle = 'rgba(255,255,255,0.05)';
+  _handleCategoryClick(sx, sy, tabY) {
+    if (sy < tabY || sy > tabY + this.tabH) return false;
+    const tabW = (this.panelW - 16) / Math.max(1, this.categories.length);
+    for (let i = 0; i < this.categories.length; i++) {
+      const x = this._px + 8 + i * tabW;
+      if (sx >= x && sx <= x + tabW) {
+        this.activeCategory = i;
+        this.recipeScroll = 0;
+        this.selectedRecipeIndex = 0;
+        this._rebuildRecipesOnly();
+        return true;
+      }
     }
-    this._rrect(ctx, x + 1, y + 1, w - 2, h - 2, 3);
-    ctx.fill();
-
-    // Tab border
-    ctx.strokeStyle = active ? '#66bb6a' : '#ffffff22';
-    ctx.lineWidth   = 1;
-    this._rrect(ctx, x + 1, y + 1, w - 2, h - 2, 3);
-    ctx.stroke();
-
-    // Tab text
-    ctx.fillStyle    = active ? '#a5d6a7' : '#aaa';
-    ctx.font         = active ? 'bold 11px sans-serif' : '11px sans-serif';
-    ctx.textAlign    = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(label, x + w / 2, y + h / 2);
+    return false;
   }
 
-  _drawRecipeCard(ctx, recipe, y, visible) {
-    if (!visible) return;
+  _handleStationClick(sx, sy, stationY) {
+    if (sy < stationY || sy > stationY + this.stationH) return false;
+    const buttonW = 112;
+    const gap = 6;
+    let x = this._px + 8;
+    for (const station of this.stationOptions) {
+      if (sx >= x && sx <= x + buttonW && sy >= stationY + 3 && sy <= stationY + this.stationH - 3) {
+        this.selectedStation = station;
+        return true;
+      }
+      x += buttonW + gap;
+      if (x + buttonW > this._px + this.panelW - 8) break;
+    }
+    return false;
+  }
 
-    const x = this._px + this.contentPad + 4;
-    const w = this.panelW - this.contentPad * 2 - 8;
+  _handleDetailClick(sx, sy) {
+    const qtyY = this._detailBounds.y + this._detailBounds.h - 62;
+    const qtyW = 64;
+    const qtyGap = 8;
+    let qx = this._detailBounds.x + 10;
 
-    const unlocked  = recipe.isUnlocked(this.skillManager);
-    const canCraft  = unlocked && recipe.canCraft(this.inventory, this.skillManager);
-    const missingMat = unlocked && !canCraft;
-
-    // ─── Card Background ───
-    let bgColor = 'rgba(255,255,255,0.04)';
-    let borderColor = '#ffffff11';
-    if (canCraft) {
-      bgColor = 'rgba(100,200,100,0.10)';
-      borderColor = '#66bb6a55';
-    } else if (missingMat) {
-      bgColor = 'rgba(255,200,80,0.08)';
-      borderColor = '#ffa72655';
+    for (let i = 0; i < this.quantityOptions.length; i++) {
+      if (this._inside(sx, sy, qx, qtyY, qtyW, 24)) {
+        this.quantityIndex = i;
+        return true;
+      }
+      qx += qtyW + qtyGap;
     }
 
-    ctx.fillStyle = bgColor;
-    this._rrect(ctx, x, y, w, this.recipeH - 2, 4);
-    ctx.fill();
-
-    ctx.strokeStyle = borderColor;
-    ctx.lineWidth   = 1;
-    this._rrect(ctx, x, y, w, this.recipeH - 2, 4);
-    ctx.stroke();
-
-    const alpha = unlocked ? 1.0 : 0.4;
-    ctx.globalAlpha = alpha;
-
-    // ─── Recipe Name ───
-    let nameColor = '#ffffff';
-    if (canCraft) nameColor = '#a5d6a7';
-    else if (missingMat) nameColor = '#ffcc80';
-    else if (!unlocked) nameColor = '#888888';
-
-    ctx.fillStyle    = nameColor;
-    ctx.font         = 'bold 12px sans-serif';
-    ctx.textAlign    = 'left';
-    ctx.textBaseline = 'top';
-    ctx.fillText(recipe.name, x + 8, y + 4);
-
-    // ─── Lock badge ───
-    if (!unlocked) {
-      const req = recipe.requiredSkills[0];
-      ctx.font      = 'bold 10px sans-serif';
-      ctx.fillStyle = '#ff8888';
-      ctx.textAlign = 'right';
-      ctx.fillText(`🔒 Lv.${req.level}`, x + w - 8, y + 4);
+    const craftBtnW = 120;
+    const craftBtnX = this._detailBounds.x + this._detailBounds.w - craftBtnW - 10;
+    if (this._inside(sx, sy, craftBtnX, qtyY, craftBtnW, 24)) {
+      this._craftSelected();
+      return true;
     }
 
-    // ─── Input / Output line ───
-    ctx.font         = '10px sans-serif';
-    ctx.textAlign    = 'left';
-    ctx.textBaseline = 'top';
-    ctx.fillStyle    = '#aaa';
+    return false;
+  }
 
-    // Inputs
-    const inputStrs = recipe.inputs.map(i => {
-      const item = ItemRegistry.get(i.itemId);
-      const have = this.inventory.countItem(i.itemId);
-      const color = have >= i.qty ? '#aaa' : '#ff8888';
-      return { text: `${i.qty}x ${item?.name ?? i.itemId}`, color };
+  _craftSelected() {
+    const recipe = this._activeRecipe();
+    if (!recipe) return;
+
+    const maxCraftable = recipe.maxCraftable(this.inventory, this.skillManager, this.selectedStation);
+    const selectedQty = this.quantityOptions[this.quantityIndex];
+    const requested = selectedQty === 'MAX' ? maxCraftable : selectedQty;
+
+    const result = recipe.executeBatch(this.inventory, this.skillManager, {
+      times: requested,
+      station: this.selectedStation,
     });
 
-    let tx = x + 8;
-    for (const inp of inputStrs) {
-      ctx.fillStyle = inp.color;
-      ctx.fillText(inp.text, tx, y + 20);
-      tx += ctx.measureText(inp.text).width + 4;
+    if (result.attempted <= 0) {
+      this._feedback = { text: 'Cannot craft: requirements not met', color: '#ef9a9a', ttl: 2.2 };
+      return;
     }
 
-    // Arrow separator
-    ctx.fillStyle = '#666';
-    ctx.fillText(' → ', tx, y + 20);
-    tx += ctx.measureText(' → ').width + 4;
+    if (result.failed > 0 && result.crafted === 0) {
+      this._feedback = { text: `Failed ${result.failed}/${result.attempted} attempts`, color: '#ffcc80', ttl: 2.2 };
+      return;
+    }
 
-    // Outputs
-    ctx.fillStyle = '#c8e6c9';
-    ctx.font      = 'bold 10px sans-serif';
-    const outputStrs = recipe.outputs.map(o => {
-      const item = ItemRegistry.get(o.itemId);
-      return `${o.qty}x ${item?.name ?? o.itemId}`;
-    }).join(', ');
-    ctx.fillText(outputStrs, tx, y + 20);
+    if (result.failed > 0) {
+      this._feedback = {
+        text: `Crafted ${result.crafted}/${result.attempted} (failed ${result.failed})`,
+        color: '#ffcc80',
+        ttl: 2.4,
+      };
+      return;
+    }
 
-    // ─── Bottom: XP + CRAFT button ───
-    ctx.font = '9px sans-serif';
-    ctx.textBaseline = 'top';
-    ctx.fillStyle = '#888';
+    this._feedback = { text: `Crafted ${result.crafted} item(s)`, color: '#81c784', ttl: 2.2 };
+  }
+
+  _drawCategoryTabs(ctx, y) {
+    const tabW = (this.panelW - 16) / Math.max(1, this.categories.length);
+    for (let i = 0; i < this.categories.length; i++) {
+      const x = this._px + 8 + i * tabW;
+      const active = i === this.activeCategory;
+      ctx.fillStyle = active ? 'rgba(80, 140, 90, 0.35)' : 'rgba(255, 255, 255, 0.05)';
+      this._rrect(ctx, x + 1, y + 3, tabW - 3, this.tabH - 6, 4);
+      ctx.fill();
+
+      ctx.strokeStyle = active ? '#66bb6a' : '#ffffff22';
+      ctx.lineWidth = 1;
+      this._rrect(ctx, x + 1, y + 3, tabW - 3, this.tabH - 6, 4);
+      ctx.stroke();
+
+      ctx.fillStyle = active ? '#e8f5e9' : '#c7c7c7';
+      ctx.font = active ? 'bold 11px sans-serif' : '11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(this.categories[i], x + tabW / 2, y + this.tabH / 2 + 1);
+    }
+  }
+
+  _drawStationButtons(ctx, y) {
+    ctx.fillStyle = '#b0bec5';
+    ctx.font = '10px sans-serif';
     ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Station:', this._px + 10, y + this.stationH / 2);
 
-    if (recipe.grantXP.length > 0) {
-      const xpStr = recipe.grantXP.map(xp => `+${xp.amount} ${xp.skillId}`).join(', ');
-      ctx.fillStyle = '#81c784';
-      ctx.fillText(xpStr, x + 8, y + 36);
-    }
+    const buttonW = 112;
+    const gap = 6;
+    let x = this._px + 66;
+    for (const station of this.stationOptions) {
+      if (x + buttonW > this._px + this.panelW - 8) break;
+      const selected = station === this.selectedStation;
+      ctx.fillStyle = selected ? 'rgba(100, 160, 220, 0.35)' : 'rgba(255,255,255,0.05)';
+      this._rrect(ctx, x, y + 4, buttonW, this.stationH - 8, 4);
+      ctx.fill();
 
-    // CRAFT button
-    if (canCraft) {
-      ctx.fillStyle = '#66bb6a';
-      ctx.font      = 'bold 10px sans-serif';
-      ctx.textAlign = 'right';
-      ctx.fillText('[ CRAFT ]', x + w - 8, y + 36);
-    }
+      ctx.strokeStyle = selected ? '#64b5f6' : '#ffffff22';
+      ctx.lineWidth = 1;
+      this._rrect(ctx, x, y + 4, buttonW, this.stationH - 8, 4);
+      ctx.stroke();
 
-    ctx.globalAlpha = 1;
-  }
-
-  _tryCraft(recipe) {
-    const success = recipe.execute(this.inventory, this.skillManager);
-    if (success) {
-      const outNames = recipe.outputs.map(o => {
-        const item = ItemRegistry.get(o.itemId);
-        return `${o.qty}x ${item?.name ?? o.itemId}`;
-      }).join(', ');
-      this._feedback = { text: `✓ Crafted: ${outNames}`, color: '#81c784', ttl: 2.0 };
-    } else {
-      this._feedback = { text: '✗ Missing materials or level too low', color: '#ef9a9a', ttl: 2.0 };
+      ctx.fillStyle = selected ? '#e3f2fd' : '#d0d0d0';
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(this._humanStation(station), x + buttonW / 2, y + this.stationH / 2 + 1);
+      x += buttonW + gap;
     }
   }
 
-  _divider(ctx, x, y, w) {
-    ctx.strokeStyle = '#c8a45a55';
-    ctx.lineWidth   = 1;
-    ctx.beginPath();
-    ctx.moveTo(x + 8, y);
-    ctx.lineTo(x + w - 8, y);
+  _drawRecipeList(ctx) {
+    const b = this._listBounds;
+    ctx.fillStyle = 'rgba(255,255,255,0.03)';
+    this._rrect(ctx, b.x, b.y, b.w, b.h, 5);
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff1a';
     ctx.stroke();
+
+    ctx.save();
+    this._rrect(ctx, b.x + 1, b.y + 1, b.w - 2, b.h - 2, 4);
+    ctx.clip();
+
+    let y = b.y - this.recipeScroll;
+    for (let i = 0; i < this.recipes.length; i++) {
+      const recipe = this.recipes[i];
+      const selected = i === this.selectedRecipeIndex;
+      if (y + this.recipeRowH >= b.y && y <= b.y + b.h) {
+        this._drawRecipeRow(ctx, recipe, y, selected);
+      }
+      y += this.recipeRowH;
+    }
+    ctx.restore();
+  }
+
+  _drawRecipeRow(ctx, recipe, y, selected) {
+    const x = this._listBounds.x;
+    const w = this._listBounds.w;
+    const rowH = this.recipeRowH;
+
+    const state = recipe.canCraftDetailed(this.inventory, this.skillManager, this.selectedStation);
+    const unlocked = recipe.isUnlocked(this.skillManager);
+
+    ctx.fillStyle = selected ? 'rgba(200, 164, 90, 0.25)' : 'rgba(255,255,255,0.02)';
+    ctx.fillRect(x + 2, y + 2, w - 4, rowH - 3);
+
+    if (state.canCraft) ctx.strokeStyle = '#66bb6a66';
+    else if (!unlocked) ctx.strokeStyle = '#ef9a9a66';
+    else ctx.strokeStyle = '#ffcc8066';
+    ctx.strokeRect(x + 2, y + 2, w - 4, rowH - 3);
+
+    ctx.fillStyle = '#f2f2f2';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillText(recipe.name, x + 8, y + 7);
+
+    const req = recipe.requiredSkills[0];
+    const reqText = req ? `${req.skillId} ${req.level}` : 'no req';
+    ctx.fillStyle = '#b0bec5';
+    ctx.font = '10px sans-serif';
+    ctx.fillText(`Req: ${reqText}`, x + 8, y + 24);
+
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#d7ccc8';
+    ctx.fillText(this._humanStation(recipe.station), x + w - 8, y + 24);
+  }
+
+  _drawRecipeDetail(ctx) {
+    const b = this._detailBounds;
+    ctx.fillStyle = 'rgba(255,255,255,0.03)';
+    this._rrect(ctx, b.x, b.y, b.w, b.h, 5);
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff1a';
+    ctx.stroke();
+
+    const recipe = this._activeRecipe();
+    if (!recipe) {
+      ctx.fillStyle = '#aaaaaa';
+      ctx.font = '12px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('No recipes in this category.', b.x + 10, b.y + 20);
+      return;
+    }
+
+    const state = recipe.canCraftDetailed(this.inventory, this.skillManager, this.selectedStation);
+    const maxCraftable = recipe.maxCraftable(this.inventory, this.skillManager, this.selectedStation);
+
+    let y = b.y + 10;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = '#f2f2f2';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillText(recipe.name, b.x + 10, y);
+    y += 24;
+
+    ctx.font = '11px sans-serif';
+    ctx.fillStyle = '#c7c7c7';
+    ctx.fillText(`Station: ${this._humanStation(recipe.station)}`, b.x + 10, y);
+    y += 18;
+
+    const xpText = recipe.grantXP.map(x => `+${x.amount} ${x.skillId}`).join(', ') || 'No XP';
+    ctx.fillStyle = '#9ccc65';
+    ctx.fillText(`XP: ${xpText}`, b.x + 10, y);
+    y += 20;
+
+    ctx.fillStyle = '#90caf9';
+    ctx.fillText(`Max craftable now: ${maxCraftable}`, b.x + 10, y);
+    y += 22;
+
+    ctx.fillStyle = '#f5f5f5';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('Inputs', b.x + 10, y);
+    y += 16;
+    ctx.font = '11px sans-serif';
+    for (const inp of recipe.inputs) {
+      const item = ItemRegistry.get(inp.itemId);
+      const have = this.inventory.countItem(inp.itemId);
+      const ok = have >= inp.qty;
+      ctx.fillStyle = ok ? '#c7c7c7' : '#ef9a9a';
+      ctx.fillText(`- ${inp.qty} ${item?.name ?? inp.itemId} (${have})`, b.x + 12, y);
+      y += 15;
+    }
+
+    y += 6;
+    ctx.fillStyle = '#f5f5f5';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('Tools', b.x + 10, y);
+    y += 16;
+    ctx.font = '11px sans-serif';
+    if (!recipe.tools.length) {
+      ctx.fillStyle = '#c7c7c7';
+      ctx.fillText('- None', b.x + 12, y);
+      y += 15;
+    } else {
+      for (const tool of recipe.tools) {
+        const item = ItemRegistry.get(tool.itemId);
+        const has = this.inventory.hasItem(tool.itemId, 1);
+        ctx.fillStyle = has ? '#c7c7c7' : '#ef9a9a';
+        ctx.fillText(`- ${item?.name ?? tool.itemId}`, b.x + 12, y);
+        y += 15;
+      }
+    }
+
+    y += 6;
+    ctx.fillStyle = '#f5f5f5';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('Outputs', b.x + 10, y);
+    y += 16;
+    ctx.font = '11px sans-serif';
+    for (const out of recipe.outputs) {
+      const item = ItemRegistry.get(out.itemId);
+      ctx.fillStyle = '#81c784';
+      ctx.fillText(`- ${out.qty} ${item?.name ?? out.itemId}`, b.x + 12, y);
+      y += 15;
+    }
+
+    if (recipe.onFailOutputs.length) {
+      y += 6;
+      ctx.fillStyle = '#ffcc80';
+      ctx.fillText('On fail:', b.x + 10, y);
+      y += 15;
+      for (const out of recipe.onFailOutputs) {
+        const item = ItemRegistry.get(out.itemId);
+        ctx.fillText(`- ${out.qty} ${item?.name ?? out.itemId}`, b.x + 12, y);
+        y += 15;
+      }
+    }
+
+    const qtyY = b.y + b.h - 62;
+    const qtyW = 64;
+    const qtyGap = 8;
+    let qx = b.x + 10;
+    for (let i = 0; i < this.quantityOptions.length; i++) {
+      const selected = i === this.quantityIndex;
+      ctx.fillStyle = selected ? 'rgba(100, 149, 237, 0.35)' : 'rgba(255,255,255,0.06)';
+      this._rrect(ctx, qx, qtyY, qtyW, 24, 4);
+      ctx.fill();
+      ctx.strokeStyle = selected ? '#64b5f6' : '#ffffff22';
+      ctx.stroke();
+      ctx.fillStyle = '#f0f0f0';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(String(this.quantityOptions[i]), qx + qtyW / 2, qtyY + 12);
+      qx += qtyW + qtyGap;
+    }
+
+    const craftBtnW = 120;
+    const craftBtnX = b.x + b.w - craftBtnW - 10;
+    const canPress = state.canCraft && maxCraftable > 0;
+    ctx.fillStyle = canPress ? 'rgba(102, 187, 106, 0.35)' : 'rgba(180, 180, 180, 0.2)';
+    this._rrect(ctx, craftBtnX, qtyY, craftBtnW, 24, 4);
+    ctx.fill();
+    ctx.strokeStyle = canPress ? '#66bb6a' : '#888';
+    ctx.stroke();
+
+    ctx.fillStyle = canPress ? '#e8f5e9' : '#bdbdbd';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('CRAFT', craftBtnX + craftBtnW / 2, qtyY + 12);
+  }
+
+  _drawFooter(ctx, y) {
+    if (this._feedback) {
+      ctx.fillStyle = this._feedback.color;
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(this._feedback.text, this._px + 12, y + this.footerH / 2);
+    }
+
+    ctx.fillStyle = '#8f8f8f';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('[C] close  [Mouse wheel] scroll', this._px + this.panelW - 12, y + this.footerH / 2);
+  }
+
+  _humanStation(station) {
+    if (station === 'any') return 'Any';
+    return station.split('_').map(part => part[0].toUpperCase() + part.slice(1)).join(' ');
+  }
+
+  _divider(ctx, y) {
+    ctx.strokeStyle = '#c8a45a55';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(this._px + 8, y);
+    ctx.lineTo(this._px + this.panelW - 8, y);
+    ctx.stroke();
+  }
+
+  _inside(px, py, x, y, w, h) {
+    return px >= x && px <= x + w && py >= y && py <= y + h;
   }
 
   _rrect(ctx, x, y, w, h, r) {

@@ -142,6 +142,7 @@ class InputHandler {
     canvas.addEventListener('click',       (e) => this._onClick(e));
     canvas.addEventListener('contextmenu', (e) => this._onRightClick(e));
     canvas.addEventListener('mousemove',   (e) => this._onMouseMove(e));
+    canvas.addEventListener('wheel',       (e) => this._onWheel(e), { passive: false });
     window.addEventListener('keydown',     (e) => this._onKeyDown(e));
   }
 
@@ -363,6 +364,12 @@ class InputHandler {
     this.lootFilterUI.onMouseMove(sx, sy);
     this.playerUI.onMouseMove(sx, sy);
     this.hotbarUI.onMouseMove(sx, sy);
+  }
+
+  _onWheel(e) {
+    if (!this.craftingUI.isOpen) return;
+    const consumed = this.craftingUI.onWheel(e.deltaY);
+    if (consumed) e.preventDefault();
   }
 
   update(dt) {

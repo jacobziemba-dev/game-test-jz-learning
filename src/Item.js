@@ -42,6 +42,33 @@ class Item {
 
   /** Render this item's icon into a (size × size) box whose top-left is (x, y). */
   draw(ctx, x, y, size) {
-    if (this._draw) this._draw(ctx, x, y, size);
+    if (this._draw) {
+      this._draw(ctx, x, y, size);
+      return;
+    }
+
+    const colorByType = {
+      resource: '#90a4ae',
+      weapon: '#b0bec5',
+      armor: '#8d6e63',
+      food: '#ffcc80',
+      misc: '#9575cd',
+      tool: '#ffd54f',
+      jewellery: '#ffb74d',
+      pottery: '#a1887f',
+    };
+    const fill = colorByType[this.type] ?? '#9e9e9e';
+
+    ctx.fillStyle = fill;
+    ctx.beginPath();
+    ctx.roundRect(x + size * 0.16, y + size * 0.16, size * 0.68, size * 0.68, 4);
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.fillRect(x + size * 0.2, y + size * 0.2, size * 0.4, size * 0.08);
   }
 }

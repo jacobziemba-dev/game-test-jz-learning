@@ -66,6 +66,13 @@ class Player {
     // Inventory
     this.inventory = new Inventory();
 
+    // Starter toolkit keeps core crafting loops usable before shop systems exist.
+    this.inventory.addItem('needle', 1);
+    this.inventory.addItem('chisel', 1);
+    this.inventory.addItem('ring_mould', 1);
+    this.inventory.addItem('necklace_mould', 1);
+    this.inventory.addItem('amulet_mould', 1);
+
     // Equipment — items worn by the player
     this.equipment = new Equipment();
 
@@ -83,6 +90,7 @@ class Player {
     this.skills.register('woodcutting', 'Woodcutting', '#a5d6a7');
     this.skills.register('mining', 'Mining', '#90a4ae');
     this.skills.register('smithing', 'Smithing', '#b0bec5');
+    this.skills.register('crafting', 'Crafting', '#d7ccc8');
   }
 
   /** Called by InputHandler when player clicks ground */

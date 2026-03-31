@@ -51,6 +51,14 @@ const SkillUnlockRegistry = (() => {
       { level: 10, title: 'Bronze Shield Forge', desc: 'Bronze shield progression unlocked.' },
       { level: 20, title: 'Iron Smithing Prep', desc: 'Preparing for iron-tier smithing expansion.' },
     ],
+    crafting: [
+      { level: 1, title: 'Leather Basics', desc: 'Needle-and-thread crafting unlocked.' },
+      { level: 10, title: 'Spinning Mastery I', desc: 'Bowstring spinning becomes available.' },
+      { level: 20, title: 'Gem Cutting I', desc: 'You can start cutting sapphires.' },
+      { level: 34, title: 'Gem Cutting II', desc: 'Ruby cutting tier unlocked.' },
+      { level: 50, title: 'Jewellery Tier III', desc: 'Ruby amulet crafting unlocked.' },
+      { level: 70, title: 'Jewellery Tier IV', desc: 'Diamond amulet crafting unlocked.' },
+    ],
   };
 
   function milestonesFor(skillId) {
