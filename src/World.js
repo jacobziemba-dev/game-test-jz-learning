@@ -135,6 +135,8 @@ class World {
 
     // Ground loot objects
     this.groundLoot = [];
+    this._visibleLootCache = null;
+    this._lastLootViewport = null;
 
     // Town vendors (starter economy)
     this.vendors = [];
@@ -313,6 +315,7 @@ class World {
 
     const ttl = this._getLootTtl(item);
     this.groundLoot.push(new GroundLoot(col, row, itemId, quantity, ttl));
+    this._visibleLootCache = null;
   }
 
   spawnDropsForMonster(monster) {
@@ -380,10 +383,15 @@ class World {
       vendor.update(dt);
     }
 
+    let expiredAny = false;
     for (const loot of this.groundLoot) {
       loot.update(dt);
+      if (loot.isExpired) expiredAny = true;
     }
-    this.groundLoot = this.groundLoot.filter(l => !l.isExpired);
+    if (expiredAny) {
+      this.groundLoot = this.groundLoot.filter(l => !l.isExpired);
+      this._visibleLootCache = null;
+    }
   }
 
   render(ctx, camera) {
@@ -443,12 +451,17 @@ class World {
       vendor.render(ctx, camera, ts);
     }
 
-    const visibleLoot = this.groundLoot.filter(l =>
-      l.col >= startCol - 1 && l.col <= endCol + 1 &&
-      l.row >= startRow - 1 && l.row <= endRow + 1
-    );
-    visibleLoot.sort((a, b) => a.row - b.row);
-    for (const loot of visibleLoot) {
+    const viewportKey = `${startCol},${startRow},${endCol},${endRow}`;
+    if (!this._visibleLootCache || this._lastLootViewport !== viewportKey) {
+      this._visibleLootCache = this.groundLoot.filter(l =>
+        l.col >= startCol - 1 && l.col <= endCol + 1 &&
+        l.row >= startRow - 1 && l.row <= endRow + 1
+      );
+      this._visibleLootCache.sort((a, b) => a.row - b.row);
+      this._lastLootViewport = viewportKey;
+    }
+
+    for (const loot of this._visibleLootCache) {
       loot.render(ctx, camera, ts);
     }
   }
@@ -473,7 +486,10 @@ class World {
 
   _removeLoot(loot) {
     const idx = this.groundLoot.indexOf(loot);
-    if (idx >= 0) this.groundLoot.splice(idx, 1);
+    if (idx >= 0) {
+      this.groundLoot.splice(idx, 1);
+      this._visibleLootCache = null;
+    }
   }
 
   _getLootTtl(item) {
@@ -582,6 +598,7 @@ class World {
     }
 
     this.groundLoot = [];
+    this._visibleLootCache = null;
     if (Array.isArray(data.groundLoot)) {
       for (const l of data.groundLoot) {
         if (!l || !l.itemId) continue;
