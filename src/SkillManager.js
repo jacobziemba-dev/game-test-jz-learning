@@ -54,4 +54,27 @@ class SkillManager {
   popLevelUps() {
     return this._levelUpQueue.splice(0);
   }
+
+  serialize() {
+    const skills = {};
+    for (const [id, skill] of Object.entries(this._skills)) {
+      skills[id] = { xp: skill.xp };
+    }
+    return { skills };
+  }
+
+  deserialize(data) {
+    if (!data || typeof data !== 'object' || !data.skills) return;
+
+    for (const [id, saved] of Object.entries(data.skills)) {
+      const skill = this._skills[id];
+      if (!skill) continue;
+      const xp = Math.max(0, Math.floor(saved?.xp ?? 0));
+      skill.xp = xp;
+      skill.level = XPTable.levelForXP(xp);
+    }
+
+    // Loaded state should not trigger retroactive level-up toasts.
+    this._levelUpQueue = [];
+  }
 }

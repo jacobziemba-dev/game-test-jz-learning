@@ -122,4 +122,37 @@ class Inventory {
       return s.quantity >= s.item.maxStack;
     });
   }
+
+  serialize() {
+    return {
+      cols: this.cols,
+      rows: this.rows,
+      slots: this.slots.map(slot => {
+        if (slot.isEmpty) return null;
+        return {
+          itemId: slot.item.id,
+          quantity: slot.quantity,
+        };
+      }),
+    };
+  }
+
+  deserialize(data) {
+    if (!data || !Array.isArray(data.slots)) return;
+
+    for (const slot of this.slots) slot.clear();
+
+    const max = Math.min(this.slots.length, data.slots.length);
+    for (let i = 0; i < max; i++) {
+      const raw = data.slots[i];
+      if (!raw || !raw.itemId) continue;
+
+      const item = ItemRegistry.get(raw.itemId);
+      if (!item) continue;
+
+      const qty = Math.max(1, Math.floor(raw.quantity ?? 1));
+      this.slots[i].item = item;
+      this.slots[i].quantity = item.stackable ? Math.min(item.maxStack, qty) : 1;
+    }
+  }
 }

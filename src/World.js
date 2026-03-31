@@ -258,4 +258,73 @@ class World {
     const idx = this.groundLoot.indexOf(loot);
     if (idx >= 0) this.groundLoot.splice(idx, 1);
   }
+
+  serialize() {
+    return {
+      trees: this.trees.map(t => ({
+        col: t.col,
+        row: t.row,
+        state: t.state,
+        health: t.health,
+        respawnTimer: t.respawnTimer,
+      })),
+      monsters: this.monsters.map(m => m.serialize()),
+      groundLoot: this.groundLoot.map(l => ({
+        col: l.col,
+        row: l.row,
+        itemId: l.itemId,
+        quantity: l.quantity,
+        ttl: l.ttl,
+      })),
+    };
+  }
+
+  deserialize(data) {
+    if (!data || typeof data !== 'object') return;
+
+    if (Array.isArray(data.trees)) {
+      for (const treeData of data.trees) {
+        const tree = this.trees.find(t => t.col === treeData.col && t.row === treeData.row);
+        if (!tree) continue;
+        tree.state = treeData.state ?? tree.state;
+        tree.health = Math.max(1, Math.floor(treeData.health ?? tree.health));
+        tree.respawnTimer = Math.max(0, Number(treeData.respawnTimer ?? 0));
+        this.grid[tree.row][tree.col] = tree.state === 'STUMP' ? TILE.GRASS : TILE.TREE;
+      }
+    }
+
+    if (Array.isArray(data.monsters)) {
+      this.monsters = data.monsters
+        .filter(m => Number.isFinite(m?.col) && Number.isFinite(m?.row))
+        .map(m => {
+          const monster = new Monster(m.col, m.row, this, {
+            name: m.name,
+            level: m.level,
+            attack: m.attack,
+            strength: m.strength,
+            defence: m.defence,
+            maxHitpoints: m.maxHitpoints,
+            respawnMin: m.respawnMin,
+            respawnMax: m.respawnMax,
+            guaranteedDrops: m.guaranteedDrops,
+            randomDrops: m.randomDrops,
+            randomDropRolls: m.randomDropRolls,
+          });
+          monster.state = m.state === 'DEAD' ? 'DEAD' : 'ALIVE';
+          monster.currentHitpoints = Math.max(0, Math.min(monster.maxHitpoints, Math.floor(m.currentHitpoints ?? monster.maxHitpoints)));
+          monster.respawnTimer = Math.max(0, Number(m.respawnTimer ?? 0));
+          return monster;
+        });
+    }
+
+    this.groundLoot = [];
+    if (Array.isArray(data.groundLoot)) {
+      for (const l of data.groundLoot) {
+        if (!l || !l.itemId) continue;
+        const qty = Math.max(1, Math.floor(l.quantity ?? 1));
+        const ttl = Math.max(0.1, Number(l.ttl ?? 30));
+        this.groundLoot.push(new GroundLoot(Math.floor(l.col), Math.floor(l.row), l.itemId, qty, ttl));
+      }
+    }
+  }
 }

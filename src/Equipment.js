@@ -74,4 +74,28 @@ class Equipment {
     }
     return bonuses;
   }
+
+  serialize() {
+    const out = {};
+    for (const slotId of EQUIP_SLOT_IDS) {
+      out[slotId] = this._slots[slotId]?.id ?? null;
+    }
+    return out;
+  }
+
+  deserialize(data) {
+    for (const slotId of EQUIP_SLOT_IDS) {
+      this._slots[slotId] = null;
+    }
+    if (!data || typeof data !== 'object') return;
+
+    for (const slotId of EQUIP_SLOT_IDS) {
+      const itemId = data[slotId];
+      if (!itemId) continue;
+      const item = ItemRegistry.get(itemId);
+      if (!item) continue;
+      if (item.equipSlot !== slotId) continue;
+      this._slots[slotId] = item;
+    }
+  }
 }

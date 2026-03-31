@@ -22,6 +22,13 @@ class Game {
 
     this.camera.follow(this.player);
 
+    this._saveDirty = false;
+    this._autosaveTimer = 0;
+    this._autosaveEvery = 20;
+    this._lastDeathVersion = this.player.deathVersion;
+
+    this._loadFromSave();
+
     this.lastTime = 0;
     this.loop = this.loop.bind(this);
   }
@@ -58,11 +65,23 @@ class Game {
     // Poll for level-up events and push them to the toast system
     for (const evt of this.player.skills.popLevelUps()) {
       this.ui.pushLevelUp(evt.skillName, evt.level);
+      this._markDirty();
     }
 
     // Poll for loot pickup events and push them to the toast system
     for (const evt of this.player.popLootPickups()) {
       this.ui.pushLoot(evt.itemName, evt.quantity);
+      this._markDirty();
+    }
+
+    if (this.player.deathVersion !== this._lastDeathVersion) {
+      this._lastDeathVersion = this.player.deathVersion;
+      this._markDirty();
+    }
+
+    this._autosaveTimer += dt;
+    if (this._autosaveTimer >= this._autosaveEvery) {
+      this._saveNow();
     }
   }
 
@@ -83,5 +102,29 @@ class Game {
     this.skillsUI.render(ctx, this.canvas.width, this.canvas.height);
     this.playerUI.render(ctx, this.canvas.width, this.canvas.height);
     this.helpUI.render(ctx, this.canvas.width, this.canvas.height);
+  }
+
+  _markDirty() {
+    this._saveDirty = true;
+  }
+
+  _saveNow() {
+    const result = SaveSystem.saveGame(this.player, this.world);
+    this._saveDirty = !result.ok;
+    this._autosaveTimer = 0;
+  }
+
+  _loadFromSave() {
+    const loaded = SaveSystem.loadGame();
+    if (!loaded.ok || !loaded.data) return;
+
+    try {
+      this.player.deserialize(loaded.data.player);
+      this.world.deserialize(loaded.data.world);
+      this._lastDeathVersion = this.player.deathVersion;
+      this.camera.update();
+    } catch (err) {
+      console.warn('Game: failed to apply save, using fresh state.', err);
+    }
   }
 }

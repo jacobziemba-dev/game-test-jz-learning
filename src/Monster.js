@@ -194,4 +194,25 @@ class Monster {
     const raw = attackScore / (attackScore + defenceScore);
     return Math.max(0.15, Math.min(0.9, raw));
   }
+
+  serialize() {
+    return {
+      col: this.col,
+      row: this.row,
+      name: this.name,
+      level: this.level,
+      attack: this.attack,
+      strength: this.strength,
+      defence: this.defence,
+      maxHitpoints: this.maxHitpoints,
+      currentHitpoints: this.currentHitpoints,
+      respawnMin: this.respawnMin,
+      respawnMax: this.respawnMax,
+      state: this.state,
+      respawnTimer: this.respawnTimer,
+      guaranteedDrops: this.guaranteedDrops,
+      randomDrops: this.randomDrops,
+      randomDropRolls: this.randomDropRolls,
+    };
+  }
 }

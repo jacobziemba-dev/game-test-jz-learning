@@ -33,6 +33,7 @@ class Player {
     this.maxHitpoints = 10;
     this.currentHitpoints = this.maxHitpoints;
     this._lootPickupQueue = [];
+    this.deathVersion = 0;
 
     // Chopping
     this.chopTarget = null;
@@ -308,6 +309,53 @@ class Player {
     this.row = Math.floor(this.world.rows / 2);
     this.x = (this.col + 0.5) * this.tileSize;
     this.y = (this.row + 0.5) * this.tileSize;
+    this.deathVersion++;
+  }
+
+  serialize() {
+    return {
+      col: this.col,
+      row: this.row,
+      direction: this.direction,
+      currentHitpoints: this.currentHitpoints,
+      maxHitpoints: this.maxHitpoints,
+      deathVersion: this.deathVersion,
+      inventory: this.inventory.serialize(),
+      equipment: this.equipment.serialize(),
+      skills: this.skills.serialize(),
+    };
+  }
+
+  deserialize(data) {
+    if (!data || typeof data !== 'object') return;
+
+    const col = Math.max(0, Math.min(this.world.cols - 1, Math.floor(data.col ?? this.col)));
+    const row = Math.max(0, Math.min(this.world.rows - 1, Math.floor(data.row ?? this.row)));
+
+    this.col = col;
+    this.row = row;
+    this.x = (this.col + 0.5) * this.tileSize;
+    this.y = (this.row + 0.5) * this.tileSize;
+
+    this.direction = data.direction ?? this.direction;
+    this.maxHitpoints = Math.max(1, Math.floor(data.maxHitpoints ?? this.maxHitpoints));
+    this.currentHitpoints = Math.max(1, Math.min(this.maxHitpoints, Math.floor(data.currentHitpoints ?? this.maxHitpoints)));
+    this.deathVersion = Math.max(0, Math.floor(data.deathVersion ?? this.deathVersion));
+
+    this.inventory.deserialize(data.inventory);
+    this.equipment.deserialize(data.equipment);
+    this.skills.deserialize(data.skills);
+
+    // Reset transient runtime-only state on load.
+    this.state = PlayerState.IDLE;
+    this.path = [];
+    this.pathProgress = 0;
+    this._pendingAction = null;
+    this.chopTarget = null;
+    this.targetMonster = null;
+    this.attackTimer = 0;
+    this._combatRepathTimer = 0;
+    this._lootPickupQueue = [];
   }
 
   render(ctx, camera) {
