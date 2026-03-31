@@ -20,6 +20,8 @@ class HelpUI {
       { key: 'K',      desc: 'Skills' },
       { key: 'P',      desc: 'Character (equipment + stats)' },
       { key: 'H',      desc: 'Help (this panel)' },
+      { key: 'O',      desc: 'Manual save' },
+      { key: 'L',      desc: 'Load latest save' },
       { key: 'Escape', desc: 'Close all panels' },
     ];
 

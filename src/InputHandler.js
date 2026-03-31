@@ -121,7 +121,7 @@ class ContextMenu {
 // ─────────────────────────────────────────────
 
 class InputHandler {
-  constructor(canvas, camera, world, player, inventoryUI, craftingUI, skillsUI, playerUI, helpUI) {
+  constructor(canvas, camera, world, player, inventoryUI, craftingUI, skillsUI, playerUI, helpUI, actions = {}) {
     this.canvas      = canvas;
     this.camera      = camera;
     this.world       = world;
@@ -131,6 +131,7 @@ class InputHandler {
     this.skillsUI    = skillsUI;
     this.playerUI    = playerUI;
     this.helpUI      = helpUI;
+    this.actions     = actions;
 
     this.clickMarker = null; // { x, y, alpha }
     this.menu = new ContextMenu();
@@ -148,6 +149,14 @@ class InputHandler {
     if (key === 'k') { this.skillsUI.toggle();    this.menu.close(); }
     if (key === 'p') { this.playerUI.toggle();    this.menu.close(); }
     if (key === 'h') { this.helpUI.toggle();      this.menu.close(); }
+    if (key === 'o') {
+      this.actions.onManualSave?.();
+      this.menu.close();
+    }
+    if (key === 'l') {
+      this.actions.onManualLoad?.();
+      this.menu.close();
+    }
     if (e.key === 'Escape') {
       this.inventoryUI.close();
       this.craftingUI.close();

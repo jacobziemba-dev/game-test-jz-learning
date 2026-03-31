@@ -1,48 +1,66 @@
 # Game Plan — RuneScape-like (JS/HTML5 Canvas)
 
 ## Broader Vision
-- **Skills, not classes** — one character can level up woodcutting, mining, fishing, combat, crafting, etc.
-- **Gather → Craft → Fight loop** — chop wood / mine ore / catch fish → craft gear/food → fight enemies for loot → repeat
-- **Point-and-click everything** — movement, combat, and interactions all via mouse click
-- **Progression** — XP in each skill unlocks better resources, gear, and enemies
+- **Skills, not classes** — one character can level multiple combat and non-combat skills.
+- **Gather → Craft → Fight loop** — resources feed equipment, and equipment improves combat progression.
+- **Point-and-click interactions** — movement, gathering, combat, and loot pickup all via mouse.
+- **Persistent progression** — keep character growth and world continuity between sessions.
 
 ---
 
-## Milestone 1 (DONE) — MVP: Movement + Woodcutting
+## Milestone Status Snapshot (2026-03-31)
 
-### What was built
-- 2D top-down tile world (40×40 grass tiles, 48px each)
-- Camera that follows the player and clamps to world bounds
-- Click-to-move with A* pathfinding around trees
-- Animated player character (circle, direction dot, walk bob, chop swing)
-- Trees that can be clicked → walked to → chopped → depleted → respawn after 20s
-- HUD showing woodcutting level, XP bar, and log count
+### Milestone 1 (DONE) — Movement + Woodcutting Core
+- World, camera, A* movement, tree chopping, woodcutting XP, baseline HUD.
 
-### File structure
-```
-index.html
-style.css
-src/
-  main.js          ← entry point
-  Game.js          ← game loop, coordinates all systems
-  World.js         ← tile grid, tree spawning, rendering
-  Camera.js        ← viewport, world↔screen coordinate conversion
-  Player.js        ← state machine (IDLE/WALKING/CHOPPING), animation
-  Tree.js          ← tree state machine (ALIVE/BEING_CHOPPED/STUMP), chop logic
-  Pathfinder.js    ← A* on tile grid
-  InputHandler.js  ← mouse click handling, click marker visual
-  UI.js            ← HUD panel (XP bar, log count)
-```
+### Milestone 2 (DONE) — Inventory + Panels + Equipment
+- Inventory grid, tooltip UI, crafting/skills/character/help panels, equip/unequip flow.
+
+### Milestone 3 (DONE baseline) — Combat + Monsters + Loot
+- Monster spawns, click-to-target melee combat, hit/miss rolls, combat XP.
+- Weighted loot drops, coins, ground loot entities, pickup flow and pickup toasts.
+
+### Milestone 4 (DONE) — Save/Load V1 Stabilization
+- Implemented: schema-based localStorage save/load, load-on-start, periodic autosave.
+- Completed polish: manual save/load controls, save-state HUD feedback, combat-level readout.
 
 ---
 
-## Milestone 2 — Ideas for next steps
+## Next Milestone Recommendation
 
-- **Inventory panel** — proper inventory grid (logs, ore, fish, etc.)
-- **Mining** — rocks that can be mined for ore, same pattern as trees
-- **Fishing** — fishing spots near water tiles
-- **Crafting** — combine resources into gear/food
-- **NPCs & Combat** — goblins/enemies, melee combat system
-- **Map expansion** — different zones (forest, mines, fishing village)
-- **Sprite upgrades** — replace canvas shapes with real pixel art sprites
-- **Save/load** — persist player skills and inventory to localStorage
+### Milestone 5 — Mining + Smithing Starter Loop
+
+**Why this next:**
+- It is the highest-value expansion of the current gameplay loop.
+- It reuses systems already built (inventory, equipment, XP, persistence).
+- It creates meaningful gear progression beyond loot RNG.
+
+**Definition of done:**
+1. Mining nodes spawn in-world and can be harvested with XP gain.
+2. At least 2 ore types and 2 bar recipes exist.
+3. Smithing can produce at least 1 weapon and 1 armor item.
+4. New items integrate with existing equipment bonuses.
+5. New resources/items persist through save/load.
+
+**Execution order:**
+1. Add `Mining` skill registration and panel display.
+2. Implement ore node entity + spawn/update/render in world.
+3. Add ore items + bar items in item registry.
+4. Add smelting/smithing recipes in recipe registry.
+5. Add first smithable weapon/armor and equip bonuses.
+6. Extend save/load serialization for mining nodes.
+7. Playtest balance pass: XP rate, resource respawn, recipe costs.
+
+---
+
+## Milestone 5 Readiness Gate
+
+1. Manual smoke test complete: save while idle, in combat, and with ground loot nearby.
+2. Load validation complete: position, inventory, equipment, skills, trees, monsters, and loot restore correctly.
+3. Failure path validated: corrupted save does not crash game and falls back safely.
+
+## Immediate Next Actions
+
+1. Start Milestone 5 step 1: add `Mining` skill registration and Skills panel visibility.
+2. Add first ore node entity and world spawn/update/render integration.
+3. Add copper/tin ore items and first smelting recipe pair.

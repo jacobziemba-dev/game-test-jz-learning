@@ -14,6 +14,8 @@ A living document. Update "Currently Working On" at the start of each session an
 | `K` | Open / close Skills |
 | `P` | Open / close Character (equipment + stats) |
 | `H` | Open / close Help (this controls list in-game) |
+| `O` | Manual save |
+| `L` | Load latest save |
 | `Escape` | Close all open panels |
 
 ### Mouse
@@ -42,6 +44,10 @@ A living document. Update "Currently Working On" at the start of each session an
 - [x] Character panel (`P`) — paperdoll layout left, equipment bonuses + skill levels right; click slot to unequip
 - [x] Equippable items — bronze sword, iron sword, bronze shield, full leather armor set (8 pieces)
 - [x] Combat skills registered — Attack, Strength, Defence, Hitpoints, Ranged, Prayer, Magic
+- [x] NPC Monsters (baseline slice) — goblin spawns, HP bars, respawn timers
+- [x] Combat System (baseline slice) — click-to-target melee combat, hit/miss rolls, combat XP, death reset
+- [x] Loot & Item Drops (baseline slice) — weighted drops, coins, ground loot entities, manual pickup
+- [x] Save/Load System (V1 baseline) — localStorage schema save, load-on-start, periodic autosave
 - [x] In-game Help panel (`H`) — keyboard and mouse controls reference overlay
 - [x] DEVLOG — this document
 
@@ -51,7 +57,17 @@ A living document. Update "Currently Working On" at the start of each session an
 
 > Update this section at the start of each session.
 
-- (nothing started yet — pick a roadmap item below)
+- Milestone 4 closeout verification pass (manual controls + save feedback + combat pacing feel)
+- Milestone 5 kickoff prep (Mining + Smithing starter scope)
+
+### Session Update — 2026-03-31
+
+- Implemented combat foundation: monsters, target-and-attack loop, XP gain, health handling
+- Implemented loot loop: guaranteed + weighted drops, coins, world loot, pickup flow, pickup toasts
+- Implemented persistence foundation: schema-based save/load, autosave cadence, player/world state restore
+- Fixed inventory tooltip wrapping and restored startup after UI parse regression
+- Added manual save/load controls (`O` / `L`) with in-game save status HUD
+- Added combat level display to Character panel and tuned melee cadence for a more classic feel
 
 ---
 
@@ -109,19 +125,19 @@ Planning a single-player offline adventure inspired by RuneScape: craft weapons 
 
 ### Core Feature Roadmap (in development order)
 
-1. **NPC Monsters**
+1. **NPC Monsters** ✅ DONE (baseline)
    - Hostile NPCs roam the world.
    - Different monster types with unique stats, drop tables, and respawn timers.
    - Some passive, some aggressive.
 
-2. **Combat System**
+2. **Combat System** ✅ DONE (baseline)
    - Click monsters to engage in turn-based or real-time combat.
    - Stats: Attack, Strength, Defence, Hitpoints (base skills).
    - Leveling combat skills through fighting.
    - Attack rolls, hit/miss chance, and weapon bonuses.
    - Visual feedback for damage, critical hits, and XP gains.
 
-3. **Loot & Item Drops**
+3. **Loot & Item Drops** ✅ DONE (baseline)
    - Monsters drop items and coins based on rarity.
    - Rare drops, common drops, stackable loot.
    - Drops can include equipment, resources, or coins.
@@ -169,10 +185,18 @@ Planning a single-player offline adventure inspired by RuneScape: craft weapons 
     - Drag-and-drop or grid-based item management.
     - Stackable items and max stack sizes.
 
-12. **Save/Load System**
+12. **Save/Load System** 🟡 IN PROGRESS (foundation complete)
     - Persistent single-player progression (localStorage).
     - Restore character, inventory, skills, and settings between sessions.
     - Option for manual or auto-save.
+
+### Near-Term Next Goal (after persistence stabilization)
+
+- **Milestone: Mining + Smithing starter loop**
+   - Add mining nodes and ore drops
+   - Add smelting (ore -> bars)
+   - Add first smithing outputs (at least one weapon + one armor piece)
+   - Reuse current inventory/equipment/persistence pipeline so progression compounds
 
 ### Additional RuneScape-Inspired Details
 

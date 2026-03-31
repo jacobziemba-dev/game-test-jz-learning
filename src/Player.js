@@ -28,7 +28,8 @@ class Player {
     // Combat
     this.targetMonster = null;
     this.attackTimer = 0;
-    this.attackSpeed = 1.35;
+    // Slightly slower cadence feels closer to classic melee pacing.
+    this.attackSpeed = 1.8;
     this._combatRepathTimer = 0;
     this.maxHitpoints = 10;
     this.currentHitpoints = this.maxHitpoints;
@@ -281,6 +282,23 @@ class Player {
 
   getEffectiveDefence() {
     return this.skills.getLevel('defence') + this.equipment.getBonuses().defence;
+  }
+
+  getCombatLevel() {
+    const attack = this.skills.getLevel('attack');
+    const strength = this.skills.getLevel('strength');
+    const defence = this.skills.getLevel('defence');
+    const hitpoints = this.skills.getLevel('hitpoints');
+    const ranged = this.skills.getLevel('ranged');
+    const magic = this.skills.getLevel('magic');
+    const prayer = this.skills.getLevel('prayer');
+
+    const base = 0.25 * (defence + hitpoints + Math.floor(prayer / 2));
+    const melee = 0.325 * (attack + strength);
+    const rangedStyle = 0.325 * Math.floor(1.5 * ranged);
+    const magicStyle = 0.325 * Math.floor(1.5 * magic);
+
+    return Math.floor(base + Math.max(melee, rangedStyle, magicStyle));
   }
 
   queueLootPickup(itemName, quantity) {

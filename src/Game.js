@@ -17,7 +17,11 @@ class Game {
     this.helpUI      = new HelpUI();
     this.input       = new InputHandler(
       this.canvas, this.camera, this.world, this.player,
-      this.inventoryUI, this.craftingUI, this.skillsUI, this.playerUI, this.helpUI
+      this.inventoryUI, this.craftingUI, this.skillsUI, this.playerUI, this.helpUI,
+      {
+        onManualSave: () => this.manualSave(),
+        onManualLoad: () => this.manualLoad(),
+      }
     );
 
     this.camera.follow(this.player);
@@ -112,19 +116,51 @@ class Game {
     const result = SaveSystem.saveGame(this.player, this.world);
     this._saveDirty = !result.ok;
     this._autosaveTimer = 0;
+    if (result.ok) {
+      this.ui.setSaveStatus(`Saved ${new Date().toLocaleTimeString()}`, '#9ccc65', 2.8);
+    } else {
+      this.ui.setSaveStatus('Save failed', '#ef9a9a', 4.0);
+      this.ui.pushSystem('Save failed', '#ef9a9a');
+    }
   }
 
   _loadFromSave() {
     const loaded = SaveSystem.loadGame();
-    if (!loaded.ok || !loaded.data) return;
+    if (!loaded.ok) {
+      this.ui.setSaveStatus('Save data invalid', '#ef9a9a', 4.0);
+      return false;
+    }
+    if (!loaded.data) {
+      this.ui.setSaveStatus('No save found', '#ffcc80', 2.5);
+      return false;
+    }
 
     try {
       this.player.deserialize(loaded.data.player);
       this.world.deserialize(loaded.data.world);
       this._lastDeathVersion = this.player.deathVersion;
       this.camera.update();
+      this._autosaveTimer = 0;
+      this.ui.setSaveStatus('Save loaded', '#90caf9', 3.2);
+      return true;
     } catch (err) {
       console.warn('Game: failed to apply save, using fresh state.', err);
+      this.ui.setSaveStatus('Load failed', '#ef9a9a', 4.0);
+      return false;
+    }
+  }
+
+  manualSave() {
+    this._saveNow();
+    this.ui.pushSystem('Game saved', '#9ccc65');
+  }
+
+  manualLoad() {
+    const loaded = this._loadFromSave();
+    if (loaded) {
+      this.ui.pushSystem('Save loaded', '#90caf9');
+    } else {
+      this.ui.pushSystem('No valid save to load', '#ffcc80');
     }
   }
 }

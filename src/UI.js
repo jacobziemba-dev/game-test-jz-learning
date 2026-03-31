@@ -6,6 +6,12 @@
 class UI {
   constructor() {
     this._toasts = []; // [{ text, ttl, maxTtl }]
+    this._saveStatus = {
+      text: 'Autosave active',
+      color: '#9e9e9e',
+      ttl: 0,
+      maxTtl: 0,
+    };
   }
 
   /** Call this when a level-up event fires (from Game.js polling player.skills.popLevelUps()). */
@@ -30,14 +36,41 @@ class UI {
     if (this._toasts.length > 4) this._toasts.shift();
   }
 
+  pushSystem(text, color = '#90caf9') {
+    this._toasts.push({
+      text,
+      color,
+      ttl: 2.2,
+      maxTtl: 2.2,
+    });
+    if (this._toasts.length > 4) this._toasts.shift();
+  }
+
+  setSaveStatus(text, color = '#9e9e9e', ttl = 0) {
+    this._saveStatus = {
+      text,
+      color,
+      ttl,
+      maxTtl: ttl,
+    };
+  }
+
   update(dt) {
     for (const t of this._toasts) t.ttl -= dt;
     this._toasts = this._toasts.filter(t => t.ttl > 0);
+
+    if (this._saveStatus.ttl > 0) {
+      this._saveStatus.ttl -= dt;
+      if (this._saveStatus.ttl <= 0) {
+        this.setSaveStatus('Autosave active', '#9e9e9e', 0);
+      }
+    }
   }
 
   render(ctx, player) {
     this._renderSkillBar(ctx, player);
     this._renderKeybindHints(ctx, player);
+    this._renderSaveStatus(ctx);
     this._renderToasts(ctx);
   }
 
@@ -109,13 +142,45 @@ class UI {
   }
 
   _renderKeybindHints(ctx, player) {
-    const hints = ['[I] Inventory', '[C] Crafting', '[K] Skills', '[P] Character', '[H] Help'];
+    const hints = ['[I] Inventory', '[C] Crafting', '[K] Skills', '[P] Character', '[H] Help', '[O] Save', '[L] Load'];
     ctx.save();
     ctx.fillStyle    = 'rgba(255,255,255,0.3)';
     ctx.font         = '10px monospace';
     ctx.textAlign    = 'right';
     ctx.textBaseline = 'bottom';
     ctx.fillText(hints.join('   '), ctx.canvas.width - 12, ctx.canvas.height - 12);
+    ctx.restore();
+  }
+
+  _renderSaveStatus(ctx) {
+    const text = this._saveStatus.text;
+    if (!text) return;
+
+    ctx.save();
+    const w = 176;
+    const h = 24;
+    const x = ctx.canvas.width - w - 12;
+    const y = 12;
+
+    const fade = this._saveStatus.maxTtl > 0
+      ? Math.max(0.45, this._saveStatus.ttl / this._saveStatus.maxTtl)
+      : 0.55;
+
+    ctx.globalAlpha = fade;
+    ctx.fillStyle = 'rgba(0,0,0,0.62)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 1;
+    this._rrect(ctx, x, y, w, h, 5);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = this._saveStatus.color;
+    ctx.font = 'bold 11px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, x + w / 2, y + h / 2);
+
     ctx.restore();
   }
 

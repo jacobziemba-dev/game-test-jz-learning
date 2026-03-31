@@ -245,7 +245,11 @@ class PlayerUI {
     ctx.textBaseline = 'top';
     ctx.fillText('Stats', cx, sectionY + 6);
 
-    let y = sectionY + this._sectionLabelH + this._sectionPad;
+    ctx.fillStyle    = '#ddd';
+    ctx.font         = 'bold 10px sans-serif';
+    ctx.fillText(`Combat Lv ${this.player.getCombatLevel()}`, cx, sectionY + 20);
+
+    let y = sectionY + this._sectionLabelH + this._sectionPad + 14;
 
     // ── Equipment bonuses ─────────────────────────────────────────────────────
     ctx.fillStyle    = '#555';
