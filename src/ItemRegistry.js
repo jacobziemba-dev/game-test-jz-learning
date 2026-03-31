@@ -1095,7 +1095,1064 @@ ItemRegistry.register({ id: 'diamond_necklace', name: 'Diamond Necklace', descri
 ItemRegistry.register({ id: 'diamond_amulet_unstrung', name: 'Diamond Amulet (u)', description: 'Needs stringing with wool.', type: 'jewellery', stackable: false, maxStack: 1 });
 ItemRegistry.register({ id: 'diamond_amulet', name: 'Diamond Amulet', description: 'A strung diamond amulet.', type: 'jewellery', stackable: false, maxStack: 1 });
 
-// ─── Future items (add as new skills are implemented) ────────────────────────
-// ItemRegistry.register({ id: 'iron_ore',  name: 'Iron Ore',   type: 'resource', ... });
-// ItemRegistry.register({ id: 'raw_fish',  name: 'Raw Fish',   type: 'resource', ... });
-// ItemRegistry.register({ id: 'iron_bar',  name: 'Iron Bar',   type: 'resource', ... });
+// ─── Tiered Logs (Woodcutting) ────────────────────────────────────────────────
+
+ItemRegistry.register({
+  id: 'oak_log',
+  name: 'Oak Logs',
+  description: 'Sturdy oak logs. Requires 15 Woodcutting to chop.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    const r = size * 0.38;
+    const grad = ctx.createLinearGradient(cx, cy - r * 0.5, cx, cy + r * 0.5);
+    grad.addColorStop(0, '#8B7355');
+    grad.addColorStop(0.5, '#5D4E37');
+    grad.addColorStop(1, '#3E2723');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, r * 1.5, r * 0.55, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#6D5D4D';
+    ctx.beginPath();
+    ctx.ellipse(cx - r * 1.4, cy, r * 0.28, r * 0.55, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#5D4E37';
+    ctx.beginPath();
+    ctx.ellipse(cx + r * 1.4, cy, r * 0.28, r * 0.55, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#3E2723';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.ellipse(cx + r * 1.4, cy, r * 0.14, r * 0.27, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  },
+});
+
+ItemRegistry.register({
+  id: 'willow_log',
+  name: 'Willow Logs',
+  description: 'Flexible willow logs. Requires 30 Woodcutting to chop.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    const r = size * 0.38;
+    const grad = ctx.createLinearGradient(cx, cy - r * 0.5, cx, cy + r * 0.5);
+    grad.addColorStop(0, '#9E9D7D');
+    grad.addColorStop(0.5, '#7D7C5C');
+    grad.addColorStop(1, '#5C5B3B');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, r * 1.5, r * 0.55, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#8E8D6D';
+    ctx.beginPath();
+    ctx.ellipse(cx - r * 1.4, cy, r * 0.28, r * 0.55, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#7D7C5C';
+    ctx.beginPath();
+    ctx.ellipse(cx + r * 1.4, cy, r * 0.28, r * 0.55, 0, 0, Math.PI * 2);
+    ctx.fill();
+  },
+});
+
+ItemRegistry.register({
+  id: 'maple_log',
+  name: 'Maple Logs',
+  description: 'Quality maple logs. Requires 45 Woodcutting to chop.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    const r = size * 0.38;
+    const grad = ctx.createLinearGradient(cx, cy - r * 0.5, cx, cy + r * 0.5);
+    grad.addColorStop(0, '#C4A35A');
+    grad.addColorStop(0.5, '#A38139');
+    grad.addColorStop(1, '#826018');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, r * 1.5, r * 0.55, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#B4934A';
+    ctx.beginPath();
+    ctx.ellipse(cx - r * 1.4, cy, r * 0.28, r * 0.55, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#A38139';
+    ctx.beginPath();
+    ctx.ellipse(cx + r * 1.4, cy, r * 0.28, r * 0.55, 0, 0, Math.PI * 2);
+    ctx.fill();
+  },
+});
+
+ItemRegistry.register({
+  id: 'yew_log',
+  name: 'Yew Logs',
+  description: 'Dense yew logs. Requires 60 Woodcutting to chop.',
+  type: 'resource',
+  rarity: 'uncommon',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    const r = size * 0.38;
+    const grad = ctx.createLinearGradient(cx, cy - r * 0.5, cx, cy + r * 0.5);
+    grad.addColorStop(0, '#8B4513');
+    grad.addColorStop(0.5, '#6B3300');
+    grad.addColorStop(1, '#4B2200');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, r * 1.5, r * 0.55, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#7B3503';
+    ctx.beginPath();
+    ctx.ellipse(cx - r * 1.4, cy, r * 0.28, r * 0.55, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#6B3300';
+    ctx.beginPath();
+    ctx.ellipse(cx + r * 1.4, cy, r * 0.28, r * 0.55, 0, 0, Math.PI * 2);
+    ctx.fill();
+  },
+});
+
+// ─── Tiered Ores (Mining) ─────────────────────────────────────────────────────
+
+ItemRegistry.register({
+  id: 'iron_ore',
+  name: 'Iron Ore',
+  description: 'Ore mined from an iron rock. Requires 15 Mining.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    const r = size * 0.34;
+    ctx.fillStyle = '#5D4E37';
+    ctx.beginPath();
+    ctx.moveTo(cx - r * 0.9, cy + r * 0.2);
+    ctx.lineTo(cx - r * 0.55, cy - r * 0.6);
+    ctx.lineTo(cx + r * 0.1, cy - r * 0.8);
+    ctx.lineTo(cx + r * 0.8, cy - r * 0.25);
+    ctx.lineTo(cx + r * 0.7, cy + r * 0.5);
+    ctx.lineTo(cx, cy + r * 0.85);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#8B4513';
+    ctx.beginPath();
+    ctx.arc(cx - r * 0.2, cy - r * 0.04, r * 0.18, 0, Math.PI * 2);
+    ctx.arc(cx + r * 0.25, cy + r * 0.18, r * 0.15, 0, Math.PI * 2);
+    ctx.fill();
+  },
+});
+
+ItemRegistry.register({
+  id: 'coal',
+  name: 'Coal',
+  description: 'Black coal used for smelting higher tier bars. Requires 30 Mining.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    const r = size * 0.34;
+    ctx.fillStyle = '#2C2C2C';
+    ctx.beginPath();
+    ctx.moveTo(cx - r * 0.9, cy + r * 0.2);
+    ctx.lineTo(cx - r * 0.55, cy - r * 0.6);
+    ctx.lineTo(cx + r * 0.1, cy - r * 0.8);
+    ctx.lineTo(cx + r * 0.8, cy - r * 0.25);
+    ctx.lineTo(cx + r * 0.7, cy + r * 0.5);
+    ctx.lineTo(cx, cy + r * 0.85);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#1A1A1A';
+    ctx.beginPath();
+    ctx.arc(cx - r * 0.2, cy - r * 0.04, r * 0.18, 0, Math.PI * 2);
+    ctx.arc(cx + r * 0.25, cy + r * 0.18, r * 0.15, 0, Math.PI * 2);
+    ctx.fill();
+    // Shiny spots
+    ctx.fillStyle = '#4A4A4A';
+    ctx.beginPath();
+    ctx.arc(cx - r * 0.3, cy - r * 0.2, r * 0.08, 0, Math.PI * 2);
+    ctx.fill();
+  },
+});
+
+ItemRegistry.register({
+  id: 'mithril_ore',
+  name: 'Mithril Ore',
+  description: 'Dark blue mithril ore. Requires 55 Mining.',
+  type: 'resource',
+  rarity: 'uncommon',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    const r = size * 0.34;
+    ctx.fillStyle = '#3D3D5C';
+    ctx.beginPath();
+    ctx.moveTo(cx - r * 0.9, cy + r * 0.2);
+    ctx.lineTo(cx - r * 0.55, cy - r * 0.6);
+    ctx.lineTo(cx + r * 0.1, cy - r * 0.8);
+    ctx.lineTo(cx + r * 0.8, cy - r * 0.25);
+    ctx.lineTo(cx + r * 0.7, cy + r * 0.5);
+    ctx.lineTo(cx, cy + r * 0.85);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#4169E1';
+    ctx.beginPath();
+    ctx.arc(cx - r * 0.2, cy - r * 0.04, r * 0.18, 0, Math.PI * 2);
+    ctx.arc(cx + r * 0.25, cy + r * 0.18, r * 0.15, 0, Math.PI * 2);
+    ctx.fill();
+  },
+});
+
+ItemRegistry.register({
+  id: 'adamant_ore',
+  name: 'Adamantite Ore',
+  description: 'Green adamantite ore. Requires 70 Mining.',
+  type: 'resource',
+  rarity: 'rare',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    const r = size * 0.34;
+    ctx.fillStyle = '#2F4F4F';
+    ctx.beginPath();
+    ctx.moveTo(cx - r * 0.9, cy + r * 0.2);
+    ctx.lineTo(cx - r * 0.55, cy - r * 0.6);
+    ctx.lineTo(cx + r * 0.1, cy - r * 0.8);
+    ctx.lineTo(cx + r * 0.8, cy - r * 0.25);
+    ctx.lineTo(cx + r * 0.7, cy + r * 0.5);
+    ctx.lineTo(cx, cy + r * 0.85);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#228B22';
+    ctx.beginPath();
+    ctx.arc(cx - r * 0.2, cy - r * 0.04, r * 0.18, 0, Math.PI * 2);
+    ctx.arc(cx + r * 0.25, cy + r * 0.18, r * 0.15, 0, Math.PI * 2);
+    ctx.fill();
+  },
+});
+
+// ─── Tiered Bars (Smithing) ───────────────────────────────────────────────────
+
+ItemRegistry.register({
+  id: 'iron_bar',
+  name: 'Iron Bar',
+  description: 'An iron bar ready to smith into equipment.',
+  type: 'resource',
+  rarity: 'common',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const pad = size * 0.14;
+    const w = size - pad * 2;
+    const h = size * 0.42;
+    const x0 = x + pad;
+    const y0 = y + (size - h) / 2;
+    const grad = ctx.createLinearGradient(x0, y0, x0, y0 + h);
+    grad.addColorStop(0, '#A0A0A0');
+    grad.addColorStop(1, '#606060');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.roundRect(x0, y0, w, h, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#404040';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  },
+});
+
+ItemRegistry.register({
+  id: 'steel_bar',
+  name: 'Steel Bar',
+  description: 'A steel bar (iron + 2 coal). Requires 30 Smithing.',
+  type: 'resource',
+  rarity: 'uncommon',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const pad = size * 0.14;
+    const w = size - pad * 2;
+    const h = size * 0.42;
+    const x0 = x + pad;
+    const y0 = y + (size - h) / 2;
+    const grad = ctx.createLinearGradient(x0, y0, x0, y0 + h);
+    grad.addColorStop(0, '#C0C0C0');
+    grad.addColorStop(1, '#808080');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.roundRect(x0, y0, w, h, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#505050';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+    ctx.beginPath();
+    ctx.moveTo(x0 + 4, y0 + 4);
+    ctx.lineTo(x0 + w - 4, y0 + 4);
+    ctx.stroke();
+  },
+});
+
+ItemRegistry.register({
+  id: 'mithril_bar',
+  name: 'Mithril Bar',
+  description: 'A mithril bar (mithril + 4 coal). Requires 50 Smithing.',
+  type: 'resource',
+  rarity: 'rare',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const pad = size * 0.14;
+    const w = size - pad * 2;
+    const h = size * 0.42;
+    const x0 = x + pad;
+    const y0 = y + (size - h) / 2;
+    const grad = ctx.createLinearGradient(x0, y0, x0, y0 + h);
+    grad.addColorStop(0, '#6495ED');
+    grad.addColorStop(1, '#4169E1');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.roundRect(x0, y0, w, h, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#2F4F8F';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  },
+});
+
+ItemRegistry.register({
+  id: 'adamant_bar',
+  name: 'Adamant Bar',
+  description: 'An adamant bar (adamant + 6 coal). Requires 70 Smithing.',
+  type: 'resource',
+  rarity: 'epic',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const pad = size * 0.14;
+    const w = size - pad * 2;
+    const h = size * 0.42;
+    const x0 = x + pad;
+    const y0 = y + (size - h) / 2;
+    const grad = ctx.createLinearGradient(x0, y0, x0, y0 + h);
+    grad.addColorStop(0, '#3CB371');
+    grad.addColorStop(1, '#228B22');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.roundRect(x0, y0, w, h, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#006400';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  },
+});
+
+// ─── Raw Fish (Fishing) ───────────────────────────────────────────────────────
+
+ItemRegistry.register({
+  id: 'raw_shrimp',
+  name: 'Raw Shrimps',
+  description: 'Small shrimp caught with a net. Requires 1 Fishing.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    ctx.fillStyle = '#FFB6C1';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, size * 0.3, size * 0.15, Math.PI / 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#FF69B4';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  },
+});
+
+ItemRegistry.register({
+  id: 'raw_trout',
+  name: 'Raw Trout',
+  description: 'A medium fish caught with a fly fishing rod. Requires 20 Fishing.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    // Body
+    ctx.fillStyle = '#A0522D';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, size * 0.35, size * 0.18, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Tail
+    ctx.beginPath();
+    ctx.moveTo(cx + size * 0.32, cy);
+    ctx.lineTo(cx + size * 0.42, cy - size * 0.12);
+    ctx.lineTo(cx + size * 0.42, cy + size * 0.12);
+    ctx.closePath();
+    ctx.fill();
+    // Eye
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.arc(cx - size * 0.2, cy - size * 0.04, size * 0.03, 0, Math.PI * 2);
+    ctx.fill();
+  },
+});
+
+ItemRegistry.register({
+  id: 'raw_salmon',
+  name: 'Raw Salmon',
+  description: 'A pink fish caught with a fly fishing rod. Requires 30 Fishing.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    ctx.fillStyle = '#FA8072';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, size * 0.35, size * 0.18, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx + size * 0.32, cy);
+    ctx.lineTo(cx + size * 0.42, cy - size * 0.12);
+    ctx.lineTo(cx + size * 0.42, cy + size * 0.12);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.arc(cx - size * 0.2, cy - size * 0.04, size * 0.03, 0, Math.PI * 2);
+    ctx.fill();
+  },
+});
+
+ItemRegistry.register({
+  id: 'raw_lobster',
+  name: 'Raw Lobster',
+  description: 'A large lobster caught with a cage. Requires 40 Fishing.',
+  type: 'resource',
+  rarity: 'uncommon',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    ctx.fillStyle = '#8B0000';
+    // Body
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, size * 0.25, size * 0.3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Claws
+    ctx.beginPath();
+    ctx.ellipse(cx - size * 0.28, cy - size * 0.15, size * 0.12, size * 0.08, -Math.PI / 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(cx + size * 0.28, cy - size * 0.15, size * 0.12, size * 0.08, Math.PI / 4, 0, Math.PI * 2);
+    ctx.fill();
+  },
+});
+
+ItemRegistry.register({
+  id: 'raw_swordfish',
+  name: 'Raw Swordfish',
+  description: 'A large swordfish caught with a harpoon. Requires 50 Fishing.',
+  type: 'resource',
+  rarity: 'rare',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    ctx.fillStyle = '#4682B4';
+    // Body
+    ctx.beginPath();
+    ctx.ellipse(cx + size * 0.05, cy, size * 0.3, size * 0.15, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Sword
+    ctx.beginPath();
+    ctx.moveTo(cx - size * 0.25, cy);
+    ctx.lineTo(cx - size * 0.45, cy);
+    ctx.lineTo(cx - size * 0.25, cy + size * 0.03);
+    ctx.closePath();
+    ctx.fill();
+    // Tail
+    ctx.beginPath();
+    ctx.moveTo(cx + size * 0.32, cy);
+    ctx.lineTo(cx + size * 0.42, cy - size * 0.15);
+    ctx.lineTo(cx + size * 0.42, cy + size * 0.15);
+    ctx.closePath();
+    ctx.fill();
+  },
+});
+
+// ─── Cooked Fish (Cooking) ────────────────────────────────────────────────────
+
+ItemRegistry.register({
+  id: 'cooked_shrimp',
+  name: 'Shrimps',
+  description: 'Cooked shrimps. Heals 3 HP.',
+  type: 'food',
+  stackable: true,
+  maxStack: 1000,
+  healAmount: 3,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    ctx.fillStyle = '#FF8C00';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, size * 0.3, size * 0.15, Math.PI / 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#CD5C00';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  },
+});
+
+ItemRegistry.register({
+  id: 'cooked_trout',
+  name: 'Trout',
+  description: 'Cooked trout. Heals 7 HP.',
+  type: 'food',
+  stackable: true,
+  maxStack: 1000,
+  healAmount: 7,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    ctx.fillStyle = '#CD853F';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, size * 0.35, size * 0.18, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx + size * 0.32, cy);
+    ctx.lineTo(cx + size * 0.42, cy - size * 0.12);
+    ctx.lineTo(cx + size * 0.42, cy + size * 0.12);
+    ctx.closePath();
+    ctx.fill();
+  },
+});
+
+ItemRegistry.register({
+  id: 'cooked_salmon',
+  name: 'Salmon',
+  description: 'Cooked salmon. Heals 9 HP.',
+  type: 'food',
+  stackable: true,
+  maxStack: 1000,
+  healAmount: 9,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    ctx.fillStyle = '#E9967A';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, size * 0.35, size * 0.18, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx + size * 0.32, cy);
+    ctx.lineTo(cx + size * 0.42, cy - size * 0.12);
+    ctx.lineTo(cx + size * 0.42, cy + size * 0.12);
+    ctx.closePath();
+    ctx.fill();
+  },
+});
+
+ItemRegistry.register({
+  id: 'cooked_lobster',
+  name: 'Lobster',
+  description: 'Cooked lobster. Heals 12 HP.',
+  type: 'food',
+  rarity: 'uncommon',
+  stackable: true,
+  maxStack: 1000,
+  healAmount: 12,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    ctx.fillStyle = '#FF4500';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, size * 0.25, size * 0.3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(cx - size * 0.28, cy - size * 0.15, size * 0.12, size * 0.08, -Math.PI / 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(cx + size * 0.28, cy - size * 0.15, size * 0.12, size * 0.08, Math.PI / 4, 0, Math.PI * 2);
+    ctx.fill();
+  },
+});
+
+ItemRegistry.register({
+  id: 'cooked_swordfish',
+  name: 'Swordfish',
+  description: 'Cooked swordfish. Heals 14 HP.',
+  type: 'food',
+  rarity: 'rare',
+  stackable: true,
+  maxStack: 1000,
+  healAmount: 14,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    ctx.fillStyle = '#DAA520';
+    ctx.beginPath();
+    ctx.ellipse(cx + size * 0.05, cy, size * 0.3, size * 0.15, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx - size * 0.25, cy);
+    ctx.lineTo(cx - size * 0.45, cy);
+    ctx.lineTo(cx - size * 0.25, cy + size * 0.03);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx + size * 0.32, cy);
+    ctx.lineTo(cx + size * 0.42, cy - size * 0.15);
+    ctx.lineTo(cx + size * 0.42, cy + size * 0.15);
+    ctx.closePath();
+    ctx.fill();
+  },
+});
+
+ItemRegistry.register({
+  id: 'burnt_fish',
+  name: 'Burnt Fish',
+  description: 'Accidentally burnt while cooking. Useless.',
+  type: 'misc',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    ctx.fillStyle = '#2F2F2F';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, size * 0.35, size * 0.18, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx + size * 0.32, cy);
+    ctx.lineTo(cx + size * 0.42, cy - size * 0.12);
+    ctx.lineTo(cx + size * 0.42, cy + size * 0.12);
+    ctx.closePath();
+    ctx.fill();
+  },
+});
+
+// ─── Fishing Tools ────────────────────────────────────────────────────────────
+
+ItemRegistry.register({
+  id: 'small_fishing_net',
+  name: 'Small Fishing Net',
+  description: 'A net for catching small fish like shrimp.',
+  type: 'tool',
+  stackable: false,
+  maxStack: 1,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    ctx.strokeStyle = '#8B4513';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx - size * 0.3, cy - size * 0.3);
+    ctx.lineTo(cx - size * 0.3, cy + size * 0.3);
+    ctx.stroke();
+    ctx.strokeStyle = '#D2B48C';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 4; i++) {
+      ctx.beginPath();
+      ctx.moveTo(cx - size * 0.3, cy - size * 0.2 + i * size * 0.12);
+      ctx.quadraticCurveTo(cx + size * 0.1, cy - size * 0.1 + i * size * 0.1, cx + size * 0.3, cy + size * 0.2);
+      ctx.stroke();
+    }
+  },
+});
+
+ItemRegistry.register({
+  id: 'fly_fishing_rod',
+  name: 'Fly Fishing Rod',
+  description: 'A rod for catching trout and salmon.',
+  type: 'tool',
+  stackable: false,
+  maxStack: 1,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(-Math.PI / 4);
+    ctx.strokeStyle = '#8B4513';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(0, -size * 0.4);
+    ctx.lineTo(0, size * 0.4);
+    ctx.stroke();
+    ctx.strokeStyle = '#87CEEB';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, -size * 0.4);
+    ctx.quadraticCurveTo(size * 0.2, -size * 0.2, size * 0.15, 0);
+    ctx.stroke();
+    ctx.restore();
+  },
+});
+
+ItemRegistry.register({
+  id: 'feather',
+  name: 'Feather',
+  description: 'Used as bait for fly fishing.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    ctx.fillStyle = '#F5F5F5';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, size * 0.08, size * 0.35, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#D3D3D3';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  },
+});
+
+ItemRegistry.register({
+  id: 'lobster_pot',
+  name: 'Lobster Pot',
+  description: 'A cage for catching lobsters.',
+  type: 'tool',
+  stackable: false,
+  maxStack: 1,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    ctx.strokeStyle = '#8B4513';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(cx - size * 0.3, cy - size * 0.25, size * 0.6, size * 0.5, 4);
+    ctx.stroke();
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(cx - size * 0.3, cy - size * 0.15 + i * size * 0.15);
+      ctx.lineTo(cx + size * 0.3, cy - size * 0.15 + i * size * 0.15);
+      ctx.stroke();
+    }
+  },
+});
+
+ItemRegistry.register({
+  id: 'harpoon',
+  name: 'Harpoon',
+  description: 'Used to catch swordfish and tuna.',
+  type: 'tool',
+  stackable: false,
+  maxStack: 1,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(-Math.PI / 4);
+    ctx.strokeStyle = '#696969';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(0, -size * 0.35);
+    ctx.lineTo(0, size * 0.35);
+    ctx.stroke();
+    ctx.fillStyle = '#A9A9A9';
+    ctx.beginPath();
+    ctx.moveTo(0, -size * 0.4);
+    ctx.lineTo(-size * 0.08, -size * 0.28);
+    ctx.lineTo(size * 0.08, -size * 0.28);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  },
+});
+
+// ─── Tinderbox for Firemaking ─────────────────────────────────────────────────
+
+ItemRegistry.register({
+  id: 'tinderbox',
+  name: 'Tinderbox',
+  description: 'Used to light fires from logs.',
+  type: 'tool',
+  stackable: false,
+  maxStack: 1,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    ctx.fillStyle = '#8B4513';
+    ctx.beginPath();
+    ctx.roundRect(cx - size * 0.3, cy - size * 0.2, size * 0.6, size * 0.4, 3);
+    ctx.fill();
+    ctx.strokeStyle = '#5D3A1A';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = '#FF4500';
+    ctx.beginPath();
+    ctx.arc(cx, cy, size * 0.08, 0, Math.PI * 2);
+    ctx.fill();
+  },
+});
+
+// ─── Tiered Weapons (Smithing) ────────────────────────────────────────────────
+
+ItemRegistry.register({
+  id: 'steel_sword',
+  name: 'Steel Sword',
+  description: 'A strong steel sword.',
+  type: 'weapon',
+  rarity: 'uncommon',
+  stackable: false,
+  maxStack: 1,
+  equipSlot: 'weapon',
+  requiredSkills: [{ skillId: 'attack', level: 5 }],
+  bonuses: { attack: 14, strength: 8 },
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2, cy = y + size / 2;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(Math.PI / 4);
+    ctx.fillStyle = '#C0C0C0';
+    ctx.beginPath();
+    ctx.moveTo(0, -size * 0.44);
+    ctx.lineTo(size * 0.1, size * 0.1);
+    ctx.lineTo(-size * 0.1, size * 0.1);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#808080';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+    ctx.fillStyle = '#A0A0A0';
+    ctx.fillRect(-size * 0.24, size * 0.07, size * 0.48, size * 0.07);
+    ctx.fillStyle = '#4a3728';
+    ctx.fillRect(-size * 0.055, size * 0.12, size * 0.11, size * 0.22);
+    ctx.fillStyle = '#A0A0A0';
+    ctx.beginPath();
+    ctx.arc(0, size * 0.35, size * 0.075, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  },
+});
+
+ItemRegistry.register({
+  id: 'mithril_sword',
+  name: 'Mithril Sword',
+  description: 'A sharp mithril sword.',
+  type: 'weapon',
+  rarity: 'rare',
+  stackable: false,
+  maxStack: 1,
+  equipSlot: 'weapon',
+  requiredSkills: [{ skillId: 'attack', level: 20 }],
+  bonuses: { attack: 21, strength: 12 },
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2, cy = y + size / 2;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(Math.PI / 4);
+    ctx.fillStyle = '#6495ED';
+    ctx.beginPath();
+    ctx.moveTo(0, -size * 0.44);
+    ctx.lineTo(size * 0.1, size * 0.1);
+    ctx.lineTo(-size * 0.1, size * 0.1);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#4169E1';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+    ctx.fillStyle = '#4682B4';
+    ctx.fillRect(-size * 0.24, size * 0.07, size * 0.48, size * 0.07);
+    ctx.fillStyle = '#4a3728';
+    ctx.fillRect(-size * 0.055, size * 0.12, size * 0.11, size * 0.22);
+    ctx.fillStyle = '#4682B4';
+    ctx.beginPath();
+    ctx.arc(0, size * 0.35, size * 0.075, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  },
+});
+
+ItemRegistry.register({
+  id: 'adamant_sword',
+  name: 'Adamant Sword',
+  description: 'A powerful adamant sword.',
+  type: 'weapon',
+  rarity: 'epic',
+  stackable: false,
+  maxStack: 1,
+  equipSlot: 'weapon',
+  requiredSkills: [{ skillId: 'attack', level: 30 }],
+  bonuses: { attack: 29, strength: 17 },
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2, cy = y + size / 2;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(Math.PI / 4);
+    ctx.fillStyle = '#3CB371';
+    ctx.beginPath();
+    ctx.moveTo(0, -size * 0.44);
+    ctx.lineTo(size * 0.1, size * 0.1);
+    ctx.lineTo(-size * 0.1, size * 0.1);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#228B22';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+    ctx.fillStyle = '#2E8B57';
+    ctx.fillRect(-size * 0.24, size * 0.07, size * 0.48, size * 0.07);
+    ctx.fillStyle = '#4a3728';
+    ctx.fillRect(-size * 0.055, size * 0.12, size * 0.11, size * 0.22);
+    ctx.fillStyle = '#2E8B57';
+    ctx.beginPath();
+    ctx.arc(0, size * 0.35, size * 0.075, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  },
+});
+
+// ─── Tiered Armor ─────────────────────────────────────────────────────────────
+
+ItemRegistry.register({
+  id: 'iron_platebody',
+  name: 'Iron Platebody',
+  description: 'Iron chest armor. Requires 1 Defence.',
+  type: 'armor',
+  rarity: 'common',
+  stackable: false,
+  maxStack: 1,
+  equipSlot: 'body',
+  requiredSkills: [{ skillId: 'defence', level: 1 }],
+  bonuses: { defence: 14 },
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2, cy = y + size / 2;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.fillStyle = '#A0A0A0';
+    ctx.beginPath();
+    ctx.moveTo(-size * 0.32, -size * 0.38);
+    ctx.lineTo(-size * 0.38, size * 0.38);
+    ctx.lineTo(size * 0.38, size * 0.38);
+    ctx.lineTo(size * 0.32, -size * 0.38);
+    ctx.lineTo(size * 0.12, -size * 0.44);
+    ctx.lineTo(-size * 0.12, -size * 0.44);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#606060';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    ctx.restore();
+  },
+});
+
+ItemRegistry.register({
+  id: 'steel_platebody',
+  name: 'Steel Platebody',
+  description: 'Steel chest armor. Requires 5 Defence.',
+  type: 'armor',
+  rarity: 'uncommon',
+  stackable: false,
+  maxStack: 1,
+  equipSlot: 'body',
+  requiredSkills: [{ skillId: 'defence', level: 5 }],
+  bonuses: { defence: 21 },
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2, cy = y + size / 2;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.fillStyle = '#C0C0C0';
+    ctx.beginPath();
+    ctx.moveTo(-size * 0.32, -size * 0.38);
+    ctx.lineTo(-size * 0.38, size * 0.38);
+    ctx.lineTo(size * 0.38, size * 0.38);
+    ctx.lineTo(size * 0.32, -size * 0.38);
+    ctx.lineTo(size * 0.12, -size * 0.44);
+    ctx.lineTo(-size * 0.12, -size * 0.44);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#808080';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    ctx.restore();
+  },
+});
+
+ItemRegistry.register({
+  id: 'mithril_platebody',
+  name: 'Mithril Platebody',
+  description: 'Mithril chest armor. Requires 20 Defence.',
+  type: 'armor',
+  rarity: 'rare',
+  stackable: false,
+  maxStack: 1,
+  equipSlot: 'body',
+  requiredSkills: [{ skillId: 'defence', level: 20 }],
+  bonuses: { defence: 33 },
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2, cy = y + size / 2;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.fillStyle = '#6495ED';
+    ctx.beginPath();
+    ctx.moveTo(-size * 0.32, -size * 0.38);
+    ctx.lineTo(-size * 0.38, size * 0.38);
+    ctx.lineTo(size * 0.38, size * 0.38);
+    ctx.lineTo(size * 0.32, -size * 0.38);
+    ctx.lineTo(size * 0.12, -size * 0.44);
+    ctx.lineTo(-size * 0.12, -size * 0.44);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#4169E1';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    ctx.restore();
+  },
+});
+
+ItemRegistry.register({
+  id: 'adamant_platebody',
+  name: 'Adamant Platebody',
+  description: 'Adamant chest armor. Requires 30 Defence.',
+  type: 'armor',
+  rarity: 'epic',
+  stackable: false,
+  maxStack: 1,
+  equipSlot: 'body',
+  requiredSkills: [{ skillId: 'defence', level: 30 }],
+  bonuses: { defence: 46 },
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2, cy = y + size / 2;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.fillStyle = '#3CB371';
+    ctx.beginPath();
+    ctx.moveTo(-size * 0.32, -size * 0.38);
+    ctx.lineTo(-size * 0.38, size * 0.38);
+    ctx.lineTo(size * 0.38, size * 0.38);
+    ctx.lineTo(size * 0.32, -size * 0.38);
+    ctx.lineTo(size * 0.12, -size * 0.44);
+    ctx.lineTo(-size * 0.12, -size * 0.44);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#228B22';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    ctx.restore();
+  },
+});

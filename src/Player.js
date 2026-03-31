@@ -3,6 +3,7 @@ const PlayerState = {
   WALKING: 'WALKING',
   CHOPPING: 'CHOPPING',
   MINING: 'MINING',
+  FISHING: 'FISHING',
 };
 
 const WALK_SPEED = 5.5; // tiles per second
@@ -25,7 +26,7 @@ class Player {
     this.direction = 'DOWN'; // UP DOWN LEFT RIGHT
 
     // Pending action after arriving
-    this._pendingAction = null; // { type: 'CHOP', tree } | { type: 'MINE', oreNode }
+    this._pendingAction = null; // { type: 'CHOP', tree } | { type: 'MINE', oreNode } | { type: 'FISH', fishingSpot }
 
     // Combat
     this.targetMonster = null;
@@ -96,8 +97,16 @@ class Player {
     // Gathering / crafting skills
     this.skills.register('woodcutting', 'Woodcutting', '#a5d6a7');
     this.skills.register('mining', 'Mining', '#90a4ae');
+    this.skills.register('fishing', 'Fishing', '#64b5f6');
+    this.skills.register('cooking', 'Cooking', '#a1887f');
+    this.skills.register('firemaking', 'Firemaking', '#ff7043');
     this.skills.register('smithing', 'Smithing', '#b0bec5');
     this.skills.register('crafting', 'Crafting', '#d7ccc8');
+
+    // Fishing state
+    this.fishTarget = null;
+    this.fishTimer = 0;
+    this.fishInterval = 3.0; // Base time between catches
   }
 
   /** Called by InputHandler when player clicks ground */
@@ -135,6 +144,20 @@ class Player {
     this._startWalking(path);
   }
 
+  /** Called by InputHandler when player clicks a fishing spot. */
+  fishAt(fishingSpot) {
+    if (!fishingSpot || fishingSpot.state === 'MOVED') return;
+
+    this.targetMonster = null;
+    this._cancelGatheringActions();
+
+    const adj = Pathfinder.findAdjacentTile(this.col, this.row, fishingSpot.col, fishingSpot.row, this.world);
+    if (!adj) return;
+    const path = Pathfinder.findPath(this.col, this.row, adj.col, adj.row, this.world);
+    this._pendingAction = { type: 'FISH', fishingSpot };
+    this._startWalking(path);
+  }
+
   /** Called by InputHandler when player clicks a monster. */
   attackMonster(monster) {
     if (!monster || !monster.isAlive) return;
@@ -160,6 +183,9 @@ class Player {
       if (this._pendingAction.type === 'MINE') {
         this._beginMining(this._pendingAction.oreNode);
       }
+      if (this._pendingAction.type === 'FISH') {
+        this._beginFishing(this._pendingAction.fishingSpot);
+      }
       this._pendingAction = null;
     }
   }
@@ -174,6 +200,33 @@ class Player {
     // Face the tree
     const dc = tree.col - this.col;
     const dr = tree.row - this.row;
+    if (Math.abs(dc) >= Math.abs(dr)) {
+      this.direction = dc > 0 ? 'RIGHT' : 'LEFT';
+    } else {
+      this.direction = dr > 0 ? 'DOWN' : 'UP';
+    }
+  }
+
+  _beginFishing(fishingSpot) {
+    if (fishingSpot.state !== 'ACTIVE') return;
+    
+    // Check if player can fish here
+    const check = fishingSpot.canFish(this);
+    if (!check.canFish) {
+      // Could show a message here
+      return;
+    }
+
+    this.state = PlayerState.FISHING;
+    this.fishTarget = fishingSpot;
+    this.chopTarget = null;
+    this.mineTarget = null;
+    this.fishTimer = 0;
+    fishingSpot.state = 'BEING_FISHED';
+
+    // Face the fishing spot
+    const dc = fishingSpot.col - this.col;
+    const dr = fishingSpot.row - this.row;
     if (Math.abs(dc) >= Math.abs(dr)) {
       this.direction = dc > 0 ? 'RIGHT' : 'LEFT';
     } else {
@@ -207,6 +260,8 @@ class Player {
       this._updateChopping(dt);
     } else if (this.state === PlayerState.MINING) {
       this._updateMining(dt);
+    } else if (this.state === PlayerState.FISHING) {
+      this._updateFishing(dt);
     }
 
     this._updateCombat(dt);
@@ -226,6 +281,7 @@ class Player {
     if (attackingInMelee) nextClip = 'attack';
     if (this.state === PlayerState.WALKING) nextClip = `walk_${dir}`;
     if (this.state === PlayerState.MINING || this.state === PlayerState.CHOPPING) nextClip = `mining_${dir}`;
+    if (this.state === PlayerState.FISHING) nextClip = `idle_${dir}`; // Use idle animation while fishing
 
     if (!this._visual.anim.setClip(nextClip)) {
       this._visual.anim.setClip(`idle_${dir}`);
@@ -249,11 +305,15 @@ class Player {
     if (this.mineTarget && this.mineTarget.state === 'BEING_MINED') {
       this.mineTarget.state = 'ALIVE';
     }
+    if (this.fishTarget && this.fishTarget.state === 'BEING_FISHED') {
+      this.fishTarget.state = 'ACTIVE';
+    }
 
     this.chopTarget = null;
     this.mineTarget = null;
+    this.fishTarget = null;
 
-    if (this.state === PlayerState.CHOPPING || this.state === PlayerState.MINING) {
+    if (this.state === PlayerState.CHOPPING || this.state === PlayerState.MINING || this.state === PlayerState.FISHING) {
       this.state = PlayerState.IDLE;
     }
   }
@@ -267,6 +327,9 @@ class Player {
         }
         if (this._pendingAction.type === 'MINE') {
           this._beginMining(this._pendingAction.oreNode);
+        }
+        if (this._pendingAction.type === 'FISH') {
+          this._beginFishing(this._pendingAction.fishingSpot);
         }
         this._pendingAction = null;
       }
@@ -334,6 +397,36 @@ class Player {
     }
   }
 
+  _updateFishing(dt) {
+    if (!this.fishTarget || this.fishTarget.state === 'MOVED') {
+      this.state = PlayerState.IDLE;
+      this.fishTarget = null;
+      return;
+    }
+
+    // Re-check that player can still fish (has tool/bait)
+    const check = this.fishTarget.canFish(this);
+    if (!check.canFish) {
+      this.fishTarget.state = 'ACTIVE';
+      this.state = PlayerState.IDLE;
+      this.fishTarget = null;
+      return;
+    }
+
+    this.fishTimer += dt;
+
+    // Get catch time from fishing spot config
+    const { min, max } = this.fishTarget.config.catchTime;
+    const catchTime = min + Math.random() * (max - min);
+
+    if (this.fishTimer >= this.fishInterval) {
+      this.fishTimer = 0;
+      // Randomize next catch interval
+      this.fishInterval = catchTime;
+      this.fishTarget.catchFish(this);
+    }
+  }
+
   _updateCombat(dt) {
     if (!this.targetMonster) return;
 
@@ -343,7 +436,7 @@ class Player {
     }
 
     // Gathering actions should always cancel combat intent.
-    if (this.state === PlayerState.CHOPPING || this.state === PlayerState.MINING) return;
+    if (this.state === PlayerState.CHOPPING || this.state === PlayerState.MINING || this.state === PlayerState.FISHING) return;
 
     this._combatRepathTimer -= dt;
     if (!this._isMonsterInMeleeRange(this.targetMonster)) {

@@ -1,5 +1,66 @@
-const ORE_HITS_TO_DEPLETION = { min: 2, max: 4 };
-const ORE_RESPAWN_TIME = 16; // seconds
+// ─── Ore Type Definitions ─────────────────────────────────────────────────────
+const ORE_TYPES = {
+  copper: {
+    name: 'Copper Rock',
+    oreItemId: 'copper_ore',
+    levelRequired: 1,
+    xp: 18,
+    hits: { min: 2, max: 4 },
+    respawnTime: 16,
+    rockColor: '#7f8c8d',
+    oreColor: '#b87333',
+  },
+  tin: {
+    name: 'Tin Rock',
+    oreItemId: 'tin_ore',
+    levelRequired: 1,
+    xp: 18,
+    hits: { min: 2, max: 4 },
+    respawnTime: 16,
+    rockColor: '#7f8c8d',
+    oreColor: '#b0bec5',
+  },
+  iron: {
+    name: 'Iron Rock',
+    oreItemId: 'iron_ore',
+    levelRequired: 15,
+    xp: 35,
+    hits: { min: 3, max: 5 },
+    respawnTime: 10,
+    rockColor: '#5D4E37',
+    oreColor: '#8B4513',
+  },
+  coal: {
+    name: 'Coal Rock',
+    oreItemId: 'coal',
+    levelRequired: 30,
+    xp: 50,
+    hits: { min: 4, max: 6 },
+    respawnTime: 50,
+    rockColor: '#2C2C2C',
+    oreColor: '#1A1A1A',
+  },
+  mithril: {
+    name: 'Mithril Rock',
+    oreItemId: 'mithril_ore',
+    levelRequired: 55,
+    xp: 80,
+    hits: { min: 5, max: 8 },
+    respawnTime: 120,
+    rockColor: '#3D3D5C',
+    oreColor: '#4169E1',
+  },
+  adamant: {
+    name: 'Adamantite Rock',
+    oreItemId: 'adamant_ore',
+    levelRequired: 70,
+    xp: 95,
+    hits: { min: 6, max: 10 },
+    respawnTime: 240,
+    rockColor: '#2F4F4F',
+    oreColor: '#228B22',
+  },
+};
 
 const OreNodeState = {
   ALIVE: 'ALIVE',
@@ -8,14 +69,16 @@ const OreNodeState = {
 };
 
 class OreNode {
-  constructor(col, row, world, config = {}) {
+  constructor(col, row, world, oreType = 'copper') {
     this.col = col;
     this.row = row;
     this.world = world;
+    this.oreType = oreType;
+    this.config = ORE_TYPES[oreType] || ORE_TYPES.copper;
 
-    this.oreItemId = config.oreItemId ?? 'copper_ore';
-    this.name = config.name ?? 'Copper Rock';
-    this.xp = Math.max(1, Math.floor(config.xp ?? 18));
+    this.oreItemId = this.config.oreItemId;
+    this.name = this.config.name;
+    this.xp = this.config.xp;
 
     this.state = OreNodeState.ALIVE;
     this.health = this._randomHealth();
@@ -25,12 +88,30 @@ class OreNode {
     this.shake = 0;
   }
 
+  get levelRequired() {
+    return this.config.levelRequired;
+  }
+
   _randomHealth() {
-    return ORE_HITS_TO_DEPLETION.min + Math.floor(Math.random() * (ORE_HITS_TO_DEPLETION.max - ORE_HITS_TO_DEPLETION.min + 1));
+    const { min, max } = this.config.hits;
+    return min + Math.floor(Math.random() * (max - min + 1));
+  }
+
+  /** Check if player can mine this ore */
+  canMine(player) {
+    const miningLevel = player.skills.getLevel('mining');
+    return miningLevel >= this.config.levelRequired;
   }
 
   mine(player) {
     if (this.state !== OreNodeState.BEING_MINED) return;
+
+    // Check level requirement
+    if (!this.canMine(player)) {
+      player.state = PlayerState.IDLE;
+      player.mineTarget = null;
+      return;
+    }
 
     this.shake = 0.12;
     this.health--;
@@ -42,7 +123,7 @@ class OreNode {
 
   _deplete(player) {
     this.state = OreNodeState.DEPLETED;
-    this.respawnTimer = ORE_RESPAWN_TIME;
+    this.respawnTimer = this.config.respawnTime;
 
     player.world.grid[this.row][this.col] = TILE.GRASS;
     player.inventory.addItem(this.oreItemId, 1);
@@ -96,12 +177,14 @@ class OreNode {
   _drawRock(ctx, ts) {
     const r = ts * 0.34;
 
+    // Shadow
     ctx.fillStyle = 'rgba(0,0,0,0.2)';
     ctx.beginPath();
     ctx.ellipse(0, r * 0.95, r * 0.85, r * 0.28, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = '#7f8c8d';
+    // Rock body - use ore type color
+    ctx.fillStyle = this.config.rockColor;
     ctx.beginPath();
     ctx.moveTo(-r * 0.9, r * 0.2);
     ctx.lineTo(-r * 0.55, -r * 0.55);
@@ -113,15 +196,24 @@ class OreNode {
     ctx.closePath();
     ctx.fill();
 
-    ctx.strokeStyle = '#5f6b6c';
+    ctx.strokeStyle = this._darkenColor(this.config.rockColor, 0.7);
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    ctx.fillStyle = this.oreItemId === 'tin_ore' ? '#b0bec5' : '#b87333';
+    // Ore veins - use ore type color
+    ctx.fillStyle = this.config.oreColor;
     ctx.beginPath();
     ctx.arc(-r * 0.18, -r * 0.05, r * 0.16, 0, Math.PI * 2);
     ctx.arc(r * 0.22, r * 0.18, r * 0.14, 0, Math.PI * 2);
     ctx.fill();
+
+    // Add sparkle for higher tier ores
+    if (this.oreType === 'mithril' || this.oreType === 'adamant') {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.beginPath();
+      ctx.arc(-r * 0.22, -r * 0.1, r * 0.05, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
 
   _drawDepleted(ctx, ts) {
@@ -137,5 +229,13 @@ class OreNode {
     ctx.beginPath();
     ctx.roundRect(-w / 2, -h / 2, w, h, 4);
     ctx.fill();
+  }
+
+  _darkenColor(hex, factor) {
+    // Simple color darkening
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgb(${Math.floor(r * factor)}, ${Math.floor(g * factor)}, ${Math.floor(b * factor)})`;
   }
 }
