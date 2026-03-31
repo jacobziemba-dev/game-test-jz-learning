@@ -89,7 +89,7 @@ class UI {
     ctx.fillStyle   = 'rgba(0,0,0,0.65)';
     ctx.strokeStyle = 'rgba(255,255,255,0.12)';
     ctx.lineWidth   = 1;
-    this._rrect(ctx, panelX, panelY, panelW, panelH, 6);
+    DrawingUtils.rrect(ctx, panelX, panelY, panelW, panelH, 6);
     ctx.fill();
     ctx.stroke();
 
@@ -112,11 +112,11 @@ class UI {
     const barH = 7;
 
     ctx.fillStyle = '#2a2a2a';
-    this._rrect(ctx, barX, barY, barW, barH, 2);
+    DrawingUtils.rrect(ctx, barX, barY, barW, barH, 2);
     ctx.fill();
 
     ctx.fillStyle = skill.color;
-    this._rrect(ctx, barX, barY, barW * skill.progressToNextLevel, barH, 2);
+    DrawingUtils.rrect(ctx, barX, barY, barW * skill.progressToNextLevel, barH, 2);
     ctx.fill();
 
     // XP text
@@ -171,7 +171,7 @@ class UI {
     ctx.fillStyle = 'rgba(0,0,0,0.62)';
     ctx.strokeStyle = 'rgba(255,255,255,0.12)';
     ctx.lineWidth = 1;
-    this._rrect(ctx, x, y, w, h, 5);
+    DrawingUtils.rrect(ctx, x, y, w, h, 5);
     ctx.fill();
     ctx.stroke();
 
@@ -203,7 +203,7 @@ class UI {
       ctx.fillStyle   = 'rgba(20,12,4,0.92)';
       ctx.strokeStyle = '#c8a45a';
       ctx.lineWidth   = 1.5;
-      this._rrect(ctx, cx - toastW / 2, y, toastW, toastH, 6);
+      DrawingUtils.rrect(ctx, cx - toastW / 2, y, toastW, toastH, 6);
       ctx.fill();
       ctx.stroke();
 
@@ -218,18 +218,4 @@ class UI {
     ctx.restore();
   }
 
-  _rrect(ctx, x, y, w, h, r) {
-    if (w <= 0) return;
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
-  }
 }

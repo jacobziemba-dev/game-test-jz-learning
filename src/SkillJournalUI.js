@@ -50,7 +50,7 @@ class SkillJournalUI {
     ctx.fillStyle = 'rgba(18,12,6,0.97)';
     ctx.strokeStyle = '#c8a45a';
     ctx.lineWidth = 2;
-    this._rrect(ctx, this._px, this._py, this.panelW, this.panelH, 6);
+    DrawingUtils.rrect(ctx, this._px, this._py, this.panelW, this.panelH, 6);
     ctx.fill();
     ctx.stroke();
 
@@ -83,7 +83,7 @@ class SkillJournalUI {
     const skills = this.skillManager.all();
 
     ctx.fillStyle = 'rgba(255,255,255,0.03)';
-    this._rrect(ctx, listX - 2, listY - 2, listW + 4, skills.length * rowH + 4, 4);
+    DrawingUtils.rrect(ctx, listX - 2, listY - 2, listW + 4, skills.length * rowH + 4, 4);
     ctx.fill();
 
     for (let i = 0; i < skills.length; i++) {
@@ -93,7 +93,7 @@ class SkillJournalUI {
 
       if (selected) {
         ctx.fillStyle = 'rgba(129,199,132,0.22)';
-        this._rrect(ctx, listX, y, listW, rowH - 2, 3);
+        DrawingUtils.rrect(ctx, listX, y, listW, rowH - 2, 3);
         ctx.fill();
       }
 
@@ -121,7 +121,7 @@ class SkillJournalUI {
     const milestones = SkillUnlockRegistry.milestonesFor(skill.id);
 
     ctx.fillStyle = 'rgba(255,255,255,0.03)';
-    this._rrect(ctx, paneX, paneY, paneW, paneH, 4);
+    DrawingUtils.rrect(ctx, paneX, paneY, paneW, paneH, 4);
     ctx.fill();
 
     ctx.fillStyle = skill.color;
@@ -138,12 +138,12 @@ class SkillJournalUI {
 
       const cardH = 52;
       ctx.fillStyle = unlocked ? 'rgba(129,199,132,0.18)' : (isNext ? 'rgba(100,181,246,0.14)' : 'rgba(255,255,255,0.04)');
-      this._rrect(ctx, paneX + 10, y, paneW - 20, cardH, 4);
+      DrawingUtils.rrect(ctx, paneX + 10, y, paneW - 20, cardH, 4);
       ctx.fill();
 
       ctx.strokeStyle = unlocked ? '#81c78466' : (isNext ? '#64b5f666' : '#ffffff22');
       ctx.lineWidth = 1;
-      this._rrect(ctx, paneX + 10, y, paneW - 20, cardH, 4);
+      DrawingUtils.rrect(ctx, paneX + 10, y, paneW - 20, cardH, 4);
       ctx.stroke();
 
       ctx.fillStyle = unlocked ? '#81c784' : (isNext ? '#64b5f6' : '#9e9e9e');
@@ -168,19 +168,5 @@ class SkillJournalUI {
     ctx.moveTo(x + 8, y);
     ctx.lineTo(x + w - 8, y);
     ctx.stroke();
-  }
-
-  _rrect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
   }
 }

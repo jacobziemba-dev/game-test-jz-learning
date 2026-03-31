@@ -94,12 +94,12 @@ class SkillsUI {
     // XP bar track
     const barY = y + this.rowH - barH - 4;
     ctx.fillStyle = '#333';
-    this._rrect(ctx, x, barY, w, barH, 2);
+    DrawingUtils.rrect(ctx, x, barY, w, barH, 2);
     ctx.fill();
 
     // XP bar fill
     ctx.fillStyle = skill.color;
-    this._rrect(ctx, x, barY, w * Math.min(progress, 1), barH, 2);
+    DrawingUtils.rrect(ctx, x, barY, w * Math.min(progress, 1), barH, 2);
     ctx.fill();
   }
 
@@ -107,7 +107,7 @@ class SkillsUI {
     ctx.fillStyle   = 'rgba(18,12,6,0.96)';
     ctx.strokeStyle = '#c8a45a';
     ctx.lineWidth   = 2;
-    this._rrect(ctx, x, y, w, h, 6);
+    DrawingUtils.rrect(ctx, x, y, w, h, 6);
     ctx.fill();
     ctx.stroke();
   }
@@ -119,19 +119,5 @@ class SkillsUI {
     ctx.moveTo(x + 8, y);
     ctx.lineTo(x + w - 8, y);
     ctx.stroke();
-  }
-
-  _rrect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
   }
 }
