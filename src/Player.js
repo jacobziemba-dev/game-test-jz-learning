@@ -2,6 +2,7 @@ const PlayerState = {
   IDLE: 'IDLE',
   WALKING: 'WALKING',
   CHOPPING: 'CHOPPING',
+  MINING: 'MINING',
 };
 
 const WALK_SPEED = 5.5; // tiles per second
@@ -23,7 +24,7 @@ class Player {
     this.direction = 'DOWN'; // UP DOWN LEFT RIGHT
 
     // Pending action after arriving
-    this._pendingAction = null; // { type: 'CHOP', tree }
+    this._pendingAction = null; // { type: 'CHOP', tree } | { type: 'MINE', oreNode }
 
     // Combat
     this.targetMonster = null;
@@ -41,6 +42,11 @@ class Player {
     this.chopTimer = 0;
     this.chopInterval = 0.85; // seconds per chop hit
     this.axeAngle = 0;        // spinning axe orbit angle (radians)
+
+    // Mining
+    this.mineTarget = null;
+    this.mineTimer = 0;
+    this.mineInterval = 0.9;
 
     // Walk animation
     this.bobTime = 0;
@@ -63,6 +69,8 @@ class Player {
     this.skills.register('magic',     'Magic',     '#7b9cd6');
     // Gathering / crafting skills
     this.skills.register('woodcutting', 'Woodcutting', '#a5d6a7');
+    this.skills.register('mining', 'Mining', '#90a4ae');
+    this.skills.register('smithing', 'Smithing', '#b0bec5');
   }
 
   /** Called by InputHandler when player clicks ground */
@@ -70,7 +78,7 @@ class Player {
     const path = Pathfinder.findPath(this.col, this.row, col, row, this.world);
     if (path.length === 0 && !(this.col === col && this.row === row)) return;
     this._pendingAction = null;
-    this.chopTarget = null;
+    this._cancelGatheringActions();
     this.targetMonster = null;
     this._startWalking(path);
   }
@@ -78,6 +86,7 @@ class Player {
   /** Called by InputHandler when player clicks a tree */
   chopTree(tree) {
     this.targetMonster = null;
+    this._cancelGatheringActions();
     const adj = Pathfinder.findAdjacentTile(this.col, this.row, tree.col, tree.row, this.world);
     if (!adj) return; // tree completely surrounded — no-op
     const path = Pathfinder.findPath(this.col, this.row, adj.col, adj.row, this.world);
@@ -85,11 +94,25 @@ class Player {
     this._startWalking(path);
   }
 
+  /** Called by InputHandler when player clicks an ore node. */
+  mineOreNode(oreNode) {
+    if (!oreNode || oreNode.state === 'DEPLETED') return;
+
+    this.targetMonster = null;
+    this._cancelGatheringActions();
+
+    const adj = Pathfinder.findAdjacentTile(this.col, this.row, oreNode.col, oreNode.row, this.world);
+    if (!adj) return;
+    const path = Pathfinder.findPath(this.col, this.row, adj.col, adj.row, this.world);
+    this._pendingAction = { type: 'MINE', oreNode };
+    this._startWalking(path);
+  }
+
   /** Called by InputHandler when player clicks a monster. */
   attackMonster(monster) {
     if (!monster || !monster.isAlive) return;
 
-    this.chopTarget = null;
+    this._cancelGatheringActions();
     this._pendingAction = null;
     this.targetMonster = monster;
 
@@ -107,6 +130,9 @@ class Player {
       if (this._pendingAction.type === 'CHOP') {
         this._beginChop(this._pendingAction.tree);
       }
+      if (this._pendingAction.type === 'MINE') {
+        this._beginMining(this._pendingAction.oreNode);
+      }
       this._pendingAction = null;
     }
   }
@@ -115,11 +141,29 @@ class Player {
     if (tree.state !== 'ALIVE') return;
     this.state = PlayerState.CHOPPING;
     this.chopTarget = tree;
+    this.mineTarget = null;
     this.chopTimer = 0;
     tree.state = 'BEING_CHOPPED';
     // Face the tree
     const dc = tree.col - this.col;
     const dr = tree.row - this.row;
+    if (Math.abs(dc) >= Math.abs(dr)) {
+      this.direction = dc > 0 ? 'RIGHT' : 'LEFT';
+    } else {
+      this.direction = dr > 0 ? 'DOWN' : 'UP';
+    }
+  }
+
+  _beginMining(oreNode) {
+    if (oreNode.state !== 'ALIVE') return;
+    this.state = PlayerState.MINING;
+    this.mineTarget = oreNode;
+    this.chopTarget = null;
+    this.mineTimer = 0;
+    oreNode.state = 'BEING_MINED';
+
+    const dc = oreNode.col - this.col;
+    const dr = oreNode.row - this.row;
     if (Math.abs(dc) >= Math.abs(dr)) {
       this.direction = dc > 0 ? 'RIGHT' : 'LEFT';
     } else {
@@ -134,9 +178,27 @@ class Player {
       this._updateWalking(dt);
     } else if (this.state === PlayerState.CHOPPING) {
       this._updateChopping(dt);
+    } else if (this.state === PlayerState.MINING) {
+      this._updateMining(dt);
     }
 
     this._updateCombat(dt);
+  }
+
+  _cancelGatheringActions() {
+    if (this.chopTarget && this.chopTarget.state === 'BEING_CHOPPED') {
+      this.chopTarget.state = 'ALIVE';
+    }
+    if (this.mineTarget && this.mineTarget.state === 'BEING_MINED') {
+      this.mineTarget.state = 'ALIVE';
+    }
+
+    this.chopTarget = null;
+    this.mineTarget = null;
+
+    if (this.state === PlayerState.CHOPPING || this.state === PlayerState.MINING) {
+      this.state = PlayerState.IDLE;
+    }
   }
 
   _updateWalking(dt) {
@@ -145,6 +207,9 @@ class Player {
       if (this._pendingAction) {
         if (this._pendingAction.type === 'CHOP') {
           this._beginChop(this._pendingAction.tree);
+        }
+        if (this._pendingAction.type === 'MINE') {
+          this._beginMining(this._pendingAction.oreNode);
         }
         this._pendingAction = null;
       }
@@ -197,6 +262,21 @@ class Player {
     }
   }
 
+  _updateMining(dt) {
+    if (!this.mineTarget || this.mineTarget.state === 'DEPLETED') {
+      this.state = PlayerState.IDLE;
+      this.mineTarget = null;
+      return;
+    }
+
+    this.mineTimer += dt;
+
+    if (this.mineTimer >= this.mineInterval) {
+      this.mineTimer = 0;
+      this.mineTarget.mine(this);
+    }
+  }
+
   _updateCombat(dt) {
     if (!this.targetMonster) return;
 
@@ -205,8 +285,8 @@ class Player {
       return;
     }
 
-    // Chopping should always cancel combat intent.
-    if (this.state === PlayerState.CHOPPING) return;
+    // Gathering actions should always cancel combat intent.
+    if (this.state === PlayerState.CHOPPING || this.state === PlayerState.MINING) return;
 
     this._combatRepathTimer -= dt;
     if (!this._isMonsterInMeleeRange(this.targetMonster)) {
@@ -318,7 +398,7 @@ class Player {
     // Basic death handling for first combat milestone.
     this.currentHitpoints = this.maxHitpoints;
     this.targetMonster = null;
-    this.chopTarget = null;
+    this._cancelGatheringActions();
     this._pendingAction = null;
     this.path = [];
     this.state = PlayerState.IDLE;
@@ -370,6 +450,7 @@ class Player {
     this.pathProgress = 0;
     this._pendingAction = null;
     this.chopTarget = null;
+    this.mineTarget = null;
     this.targetMonster = null;
     this.attackTimer = 0;
     this._combatRepathTimer = 0;

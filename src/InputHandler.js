@@ -211,6 +211,12 @@ class InputHandler {
       return;
     }
 
+    const oreNode = this.world.getOreNodeAt(col, row);
+    if (oreNode) {
+      this.player.mineOreNode(oreNode);
+      return;
+    }
+
     // Ground — walk there
     const wPos = this.camera.screenToWorld(sx, sy);
     this.clickMarker = { x: wPos.x, y: wPos.y, alpha: 1.0 };
@@ -261,15 +267,24 @@ class InputHandler {
       });
     }
 
+    const oreNode = this.world.getOreNodeAt(col, row);
+    if (oreNode) {
+      items.push({
+        label: `Mine ${oreNode.name.toLowerCase()}`,
+        color: '#90a4ae',
+        action: () => this.player.mineOreNode(oreNode),
+      });
+    }
+
     // "Walk here" — navigate to nearest walkable tile
     items.push({
       label: 'Walk here',
       color: '#ffcc44',
       action: () => {
-        if (tree) {
-          // Walk to adjacent tile instead
+        const blockedTarget = tree || oreNode;
+        if (blockedTarget) {
           const adj = Pathfinder.findAdjacentTile(
-            this.player.col, this.player.row, tree.col, tree.row, this.world
+            this.player.col, this.player.row, blockedTarget.col, blockedTarget.row, this.world
           );
           if (adj) {
             const wPos = this.camera.screenToWorld(sx, sy);

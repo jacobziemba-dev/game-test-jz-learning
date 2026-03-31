@@ -558,6 +558,102 @@ ItemRegistry.register({
   },
 });
 
+ItemRegistry.register({
+  id: 'copper_ore',
+  name: 'Copper Ore',
+  description: 'Ore mined from a copper rock. Used for smithing.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    const r = size * 0.34;
+
+    ctx.fillStyle = '#6d7b80';
+    ctx.beginPath();
+    ctx.moveTo(cx - r * 0.9, cy + r * 0.2);
+    ctx.lineTo(cx - r * 0.55, cy - r * 0.6);
+    ctx.lineTo(cx + r * 0.1, cy - r * 0.8);
+    ctx.lineTo(cx + r * 0.8, cy - r * 0.25);
+    ctx.lineTo(cx + r * 0.7, cy + r * 0.5);
+    ctx.lineTo(cx, cy + r * 0.85);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#b87333';
+    ctx.beginPath();
+    ctx.arc(cx - r * 0.2, cy - r * 0.04, r * 0.18, 0, Math.PI * 2);
+    ctx.arc(cx + r * 0.25, cy + r * 0.18, r * 0.15, 0, Math.PI * 2);
+    ctx.fill();
+  },
+});
+
+ItemRegistry.register({
+  id: 'tin_ore',
+  name: 'Tin Ore',
+  description: 'Ore mined from a tin rock. Used for bronze smithing.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    const r = size * 0.34;
+
+    ctx.fillStyle = '#60727a';
+    ctx.beginPath();
+    ctx.moveTo(cx - r * 0.85, cy + r * 0.22);
+    ctx.lineTo(cx - r * 0.45, cy - r * 0.62);
+    ctx.lineTo(cx + r * 0.18, cy - r * 0.76);
+    ctx.lineTo(cx + r * 0.82, cy - r * 0.12);
+    ctx.lineTo(cx + r * 0.56, cy + r * 0.58);
+    ctx.lineTo(cx - r * 0.05, cy + r * 0.82);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#cfd8dc';
+    ctx.beginPath();
+    ctx.arc(cx - r * 0.2, cy - r * 0.05, r * 0.15, 0, Math.PI * 2);
+    ctx.arc(cx + r * 0.24, cy + r * 0.14, r * 0.14, 0, Math.PI * 2);
+    ctx.fill();
+  },
+});
+
+ItemRegistry.register({
+  id: 'bronze_bar',
+  name: 'Bronze Bar',
+  description: 'A bronze bar ready to smith into basic equipment.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 1000,
+  draw(ctx, x, y, size) {
+    const pad = size * 0.14;
+    const w = size - pad * 2;
+    const h = size * 0.42;
+    const x0 = x + pad;
+    const y0 = y + (size - h) / 2;
+
+    const grad = ctx.createLinearGradient(x0, y0, x0, y0 + h);
+    grad.addColorStop(0, '#d8a05d');
+    grad.addColorStop(1, '#b87333');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.roundRect(x0, y0, w, h, 4);
+    ctx.fill();
+
+    ctx.strokeStyle = '#8d5524';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.beginPath();
+    ctx.moveTo(x0 + 4, y0 + 4);
+    ctx.lineTo(x0 + w - 4, y0 + 4);
+    ctx.stroke();
+  },
+});
+
 // ─── Future items (add as new skills are implemented) ────────────────────────
 // ItemRegistry.register({ id: 'iron_ore',  name: 'Iron Ore',   type: 'resource', ... });
 // ItemRegistry.register({ id: 'raw_fish',  name: 'Raw Fish',   type: 'resource', ... });

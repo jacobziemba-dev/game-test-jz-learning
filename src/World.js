@@ -1,6 +1,7 @@
 const TILE = {
   GRASS: 0,
   TREE: 1,
+  ROCK: 2,
 };
 
 const TILE_SIZE = 48;
@@ -10,6 +11,7 @@ const WORLD_ROWS = 40;
 // How many trees to scatter (avoid 5x5 spawn area in center)
 const TREE_COUNT = 80;
 const MONSTER_COUNT = 16;
+const ORE_NODE_COUNT = 18;
 
 class World {
   constructor() {
@@ -32,6 +34,10 @@ class World {
     // Monsters list
     this.monsters = [];
     this._spawnMonsters();
+
+    // Ore nodes list
+    this.oreNodes = [];
+    this._spawnOreNodes();
 
     // Ground loot objects
     this.groundLoot = [];
@@ -100,6 +106,38 @@ class World {
     }
   }
 
+  _spawnOreNodes() {
+    const spawnCol = Math.floor(this.cols / 2);
+    const spawnRow = Math.floor(this.rows / 2);
+    let placed = 0;
+    let attempts = 0;
+
+    while (placed < ORE_NODE_COUNT && attempts < ORE_NODE_COUNT * 45) {
+      attempts++;
+      const col = Math.floor(Math.random() * this.cols);
+      const row = Math.floor(Math.random() * this.rows);
+
+      const dc = Math.abs(col - spawnCol);
+      const dr = Math.abs(row - spawnRow);
+      if (dc <= 4 && dr <= 4) continue;
+
+      if (this.grid[row][col] !== TILE.GRASS) continue;
+      if (this.monsters.some(m => m.col === col && m.row === row)) continue;
+      if (this.oreNodes.some(n => n.col === col && n.row === row)) continue;
+
+      const isTin = placed % 2 === 1;
+      const node = new OreNode(col, row, this, {
+        name: isTin ? 'Tin Rock' : 'Copper Rock',
+        oreItemId: isTin ? 'tin_ore' : 'copper_ore',
+        xp: isTin ? 18 : 17,
+      });
+
+      this.oreNodes.push(node);
+      this.grid[row][col] = TILE.ROCK;
+      placed++;
+    }
+  }
+
   isWalkable(col, row) {
     if (col < 0 || row < 0 || col >= this.cols || row >= this.rows) return false;
     return this.grid[row][col] === TILE.GRASS;
@@ -111,6 +149,10 @@ class World {
 
   getMonsterAt(col, row) {
     return this.monsters.find(m => m.col === col && m.row === row && m.isAlive) || null;
+  }
+
+  getOreNodeAt(col, row) {
+    return this.oreNodes.find(n => n.col === col && n.row === row && n.state !== 'DEPLETED') || null;
   }
 
   getLootAt(col, row) {
@@ -181,6 +223,10 @@ class World {
       monster.update(dt, player);
     }
 
+    for (const oreNode of this.oreNodes) {
+      oreNode.update(dt, this);
+    }
+
     for (const loot of this.groundLoot) {
       loot.update(dt);
     }
@@ -226,6 +272,15 @@ class World {
       monster.render(ctx, camera);
     }
 
+    const visibleOreNodes = this.oreNodes.filter(n =>
+      n.col >= startCol - 1 && n.col <= endCol + 1 &&
+      n.row >= startRow - 1 && n.row <= endRow + 1
+    );
+    visibleOreNodes.sort((a, b) => a.row - b.row);
+    for (const oreNode of visibleOreNodes) {
+      oreNode.render(ctx, camera, ts);
+    }
+
     const visibleLoot = this.groundLoot.filter(l =>
       l.col >= startCol - 1 && l.col <= endCol + 1 &&
       l.row >= startRow - 1 && l.row <= endRow + 1
@@ -269,6 +324,16 @@ class World {
         respawnTimer: t.respawnTimer,
       })),
       monsters: this.monsters.map(m => m.serialize()),
+      oreNodes: this.oreNodes.map(n => ({
+        col: n.col,
+        row: n.row,
+        name: n.name,
+        oreItemId: n.oreItemId,
+        xp: n.xp,
+        state: n.state,
+        health: n.health,
+        respawnTimer: n.respawnTimer,
+      })),
       groundLoot: this.groundLoot.map(l => ({
         col: l.col,
         row: l.row,
@@ -314,6 +379,23 @@ class World {
           monster.currentHitpoints = Math.max(0, Math.min(monster.maxHitpoints, Math.floor(m.currentHitpoints ?? monster.maxHitpoints)));
           monster.respawnTimer = Math.max(0, Number(m.respawnTimer ?? 0));
           return monster;
+        });
+    }
+
+    if (Array.isArray(data.oreNodes)) {
+      this.oreNodes = data.oreNodes
+        .filter(n => Number.isFinite(n?.col) && Number.isFinite(n?.row) && n?.oreItemId)
+        .map(n => {
+          const node = new OreNode(Math.floor(n.col), Math.floor(n.row), this, {
+            name: n.name,
+            oreItemId: n.oreItemId,
+            xp: n.xp,
+          });
+          node.state = n.state === 'DEPLETED' ? 'DEPLETED' : 'ALIVE';
+          node.health = Math.max(1, Math.floor(n.health ?? node.health));
+          node.respawnTimer = Math.max(0, Number(n.respawnTimer ?? 0));
+          this.grid[node.row][node.col] = node.state === 'DEPLETED' ? TILE.GRASS : TILE.ROCK;
+          return node;
         });
     }
 

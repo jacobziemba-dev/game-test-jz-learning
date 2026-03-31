@@ -79,6 +79,28 @@ RecipeRegistry.register({
   grantXP:        [{ skillId: 'woodcutting', amount: 50 }],
 });
 
+// ─── Smithing Recipes ─────────────────────────────────────────────────────────
+
+RecipeRegistry.register({
+  id:             'bronze_bar',
+  name:           'Smelt Bronze Bar',
+  category:       'Smithing',
+  inputs:         [{ itemId: 'copper_ore', qty: 1 }, { itemId: 'tin_ore', qty: 1 }],
+  outputs:        [{ itemId: 'bronze_bar', qty: 1 }],
+  requiredSkills: [{ skillId: 'smithing', level: 1 }],
+  grantXP:        [{ skillId: 'smithing', amount: 12 }],
+});
+
+RecipeRegistry.register({
+  id:             'bronze_bar_batch',
+  name:           'Smelt Bronze Batch',
+  category:       'Smithing',
+  inputs:         [{ itemId: 'copper_ore', qty: 3 }, { itemId: 'tin_ore', qty: 3 }],
+  outputs:        [{ itemId: 'bronze_bar', qty: 3 }],
+  requiredSkills: [{ skillId: 'smithing', level: 4 }],
+  grantXP:        [{ skillId: 'smithing', amount: 40 }],
+});
+
 // ─── Future recipe categories (add when those skills exist) ──────────────────
 // RecipeRegistry.register({ id: 'iron_bar', name: 'Iron Bar', category: 'Smithing', ... });
 // RecipeRegistry.register({ id: 'cooked_fish', name: 'Cooked Fish', category: 'Cooking', ... });
