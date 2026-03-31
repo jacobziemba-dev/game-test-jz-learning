@@ -217,6 +217,13 @@ class Player {
     const dir = this._directionSuffix();
     let nextClip = `idle_${dir}`;
 
+    const attackingInMelee =
+      this.targetMonster &&
+      this.targetMonster.isAlive &&
+      this._isMonsterInMeleeRange(this.targetMonster) &&
+      this.attackTimer > this.attackSpeed - 0.18;
+
+    if (attackingInMelee) nextClip = 'attack';
     if (this.state === PlayerState.WALKING) nextClip = `walk_${dir}`;
     if (this.state === PlayerState.MINING || this.state === PlayerState.CHOPPING) nextClip = `mining_${dir}`;
 
@@ -631,10 +638,11 @@ class Player {
     const drawSize = ts * (clipConfig.drawScale ?? 1.4);
 
     const shadowR = ts * 0.28;
+    const groundY = sy + ts * 0.245;
     ctx.save();
     ctx.fillStyle = 'rgba(0,0,0,0.22)';
     ctx.beginPath();
-    ctx.ellipse(sx, sy + ts * 0.23, shadowR, shadowR * 0.34, 0, 0, Math.PI * 2);
+    ctx.ellipse(sx, groundY + ts * 0.008, shadowR, shadowR * 0.34, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 
@@ -643,10 +651,10 @@ class Player {
       clipConfig.atlasId,
       frameKey,
       sx,
-      sy + ts * 0.28,
+      groundY,
       drawSize,
       drawSize,
-      { anchorX: 0.5, anchorY: 1, pixelPerfect: true }
+      { anchorX: 0.5, anchorY: 0.62, pixelPerfect: true }
     );
 
     if (!drawn) return false;

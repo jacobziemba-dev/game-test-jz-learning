@@ -125,12 +125,18 @@ class Vendor {
   render(ctx, camera, tileSize) {
     const x = this.col * tileSize - camera.x;
     const y = this.row * tileSize - camera.y;
+    const clipConfig = SpriteManifest?.clips?.vendor;
+    const hasSpriteRuntime = !!clipConfig && !!this.world?.spriteSystem;
+    const drawScale = clipConfig?.drawScale ?? 4.2;
+    const drawSize = tileSize * drawScale;
+    const groundY = y + tileSize * 0.745;
+    const spriteTop = groundY - drawSize * 0.62;
 
     ctx.save();
 
     ctx.fillStyle = 'rgba(0, 0, 0, 0.24)';
     ctx.beginPath();
-    ctx.ellipse(x + tileSize * 0.5, y + tileSize * 0.8, tileSize * 0.24, tileSize * 0.1, 0, 0, Math.PI * 2);
+    ctx.ellipse(x + tileSize * 0.5, groundY + tileSize * 0.008, tileSize * 0.24, tileSize * 0.1, 0, 0, Math.PI * 2);
     ctx.fill();
 
     if (!this._renderSprite(ctx, camera, tileSize, x, y)) {
@@ -153,7 +159,8 @@ class Vendor {
     ctx.font = 'bold 10px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    ctx.fillText(this.shopType === 'crafting' ? 'Artisan' : 'Shop', x + tileSize * 0.5, y + tileSize * 0.02);
+    const labelY = hasSpriteRuntime ? spriteTop - 12 : y + tileSize * 0.02;
+    ctx.fillText(this.shopType === 'crafting' ? 'Artisan' : 'Shop', x + tileSize * 0.5, labelY);
 
     ctx.restore();
   }
@@ -167,15 +174,16 @@ class Vendor {
     if (!frameKey) return false;
 
     const drawSize = tileSize * (clipConfig.drawScale ?? 1.2);
+    const groundY = y + tileSize * 0.745;
     return spriteSystem.drawFrame(
       ctx,
       clipConfig.atlasId,
       frameKey,
       x + tileSize * 0.5,
-      y + tileSize * 0.78,
+      groundY,
       drawSize,
       drawSize,
-      { anchorX: 0.5, anchorY: 1, pixelPerfect: true }
+      { anchorX: 0.5, anchorY: 0.62, pixelPerfect: true }
     );
   }
 }

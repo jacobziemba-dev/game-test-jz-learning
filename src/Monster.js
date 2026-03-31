@@ -33,6 +33,9 @@ class Monster {
 
     this.attackTimer = 0;
     this.attackSpeed = 1.8;
+    this._attackAnimTimer = 0;
+    this._hurtAnimTimer = 0;
+    this._deathAnimTimer = 0;
 
     this._pendingHitsplats = [];
     this._visual = {
@@ -61,6 +64,7 @@ class Monster {
 
     this.currentHitpoints -= dmg;
     this._queueHitsplat(dmg, '#ffd54f');
+    this._hurtAnimTimer = 0.28;
 
     if (this.currentHitpoints <= 0) {
       this.currentHitpoints = 0;
@@ -72,7 +76,15 @@ class Monster {
   }
 
   update(dt, player) {
-    this._visual.anim.setClip('idle');
+    this._attackAnimTimer = Math.max(0, this._attackAnimTimer - dt);
+    this._hurtAnimTimer = Math.max(0, this._hurtAnimTimer - dt);
+    this._deathAnimTimer = Math.max(0, this._deathAnimTimer - dt);
+
+    if (!this.isAlive) this._visual.anim.setClip('death');
+    else if (this._hurtAnimTimer > 0) this._visual.anim.setClip('hurt');
+    else if (this._attackAnimTimer > 0) this._visual.anim.setClip('attack');
+    else this._visual.anim.setClip('idle');
+
     this._visual.anim.update(dt);
 
     for (const hs of this._pendingHitsplats) hs.ttl -= dt;
@@ -95,6 +107,7 @@ class Monster {
     if (this.attackTimer > 0) return;
 
     this.attackTimer = this.attackSpeed;
+    this._attackAnimTimer = 0.22;
     const hitChance = this._rollHitChanceAgainstPlayer(player);
     if (Math.random() > hitChance) {
       player.takeDamage(0);
@@ -107,22 +120,29 @@ class Monster {
   }
 
   render(ctx, camera) {
-    if (!this.isAlive) return;
+    if (!this.isAlive && this._deathAnimTimer <= 0) return;
 
     const sx = this.x - camera.x;
     const sy = this.y - camera.y;
     const r = this.tileSize * 0.3;
+    const clipConfig = SpriteManifest?.clips?.monster;
+    const hasSpriteRuntime = !!clipConfig && !!this.world?.spriteSystem;
+    const drawScale = clipConfig?.drawScale ?? 4.6;
+    const drawSize = this.tileSize * drawScale;
+    const groundY = sy + this.tileSize * 0.225;
+    const spriteTop = groundY - drawSize * 0.62;
 
     ctx.save();
 
     // Shadow
     ctx.fillStyle = 'rgba(0,0,0,0.28)';
     ctx.beginPath();
-    ctx.ellipse(sx, sy + r * 0.7, r * 0.8, r * 0.28, 0, 0, Math.PI * 2);
+    ctx.ellipse(sx, groundY + this.tileSize * 0.008, r * 0.8, r * 0.28, 0, 0, Math.PI * 2);
     ctx.fill();
 
     // Body
-    if (!this._renderSprite(ctx, camera, sx, sy, r)) {
+    const drewSprite = this._renderSprite(ctx, camera, sx, sy);
+    if (!drewSprite) {
       ctx.fillStyle = '#8bc34a';
       ctx.beginPath();
       ctx.arc(sx, sy, r, 0, Math.PI * 2);
@@ -141,23 +161,27 @@ class Monster {
     }
 
     // HP bar
-    const bw = this.tileSize * 0.65;
-    const bh = 6;
-    const bx = sx - bw / 2;
-    const by = sy - r - 12;
-    const hpPct = this.currentHitpoints / this.maxHitpoints;
+    if (this.isAlive) {
+      const bw = this.tileSize * 0.65;
+      const bh = 6;
+      const bx = sx - bw / 2;
+      const by = drewSprite && hasSpriteRuntime
+        ? spriteTop - 12
+        : sy - r - 12;
+      const hpPct = this.currentHitpoints / this.maxHitpoints;
 
-    ctx.fillStyle = 'rgba(0,0,0,0.55)';
-    ctx.fillRect(bx, by, bw, bh);
-    ctx.fillStyle = '#e53935';
-    ctx.fillRect(bx + 1, by + 1, (bw - 2) * hpPct, bh - 2);
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.fillRect(bx, by, bw, bh);
+      ctx.fillStyle = '#e53935';
+      ctx.fillRect(bx + 1, by + 1, (bw - 2) * hpPct, bh - 2);
 
-    // Label
-    ctx.fillStyle = '#f5f5f5';
-    ctx.font = '10px monospace';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText(`${this.name} (Lv ${this.level})`, sx, by - 2);
+      // Label
+      ctx.fillStyle = '#f5f5f5';
+      ctx.font = '10px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(`${this.name} (Lv ${this.level})`, sx, by - 2);
+    }
 
     // Hitsplats
     for (const hs of this._pendingHitsplats) {
@@ -186,15 +210,16 @@ class Monster {
     const ts = this.tileSize;
     const drawSize = ts * (clipConfig.drawScale ?? 1.2);
 
+    const groundY = sy + ts * 0.225;
     return spriteSystem.drawFrame(
       ctx,
       clipConfig.atlasId,
       frameKey,
       sx,
-      sy + ts * 0.26,
+      groundY,
       drawSize,
       drawSize,
-      { anchorX: 0.5, anchorY: 1, pixelPerfect: true }
+      { anchorX: 0.5, anchorY: 0.62, pixelPerfect: true }
     );
   }
 
@@ -202,6 +227,10 @@ class Monster {
     this.world.spawnDropsForMonster(this);
     this.state = MonsterState.DEAD;
     this.respawnTimer = this.respawnMin + Math.random() * (this.respawnMax - this.respawnMin);
+    this._deathAnimTimer = 0.55;
+    this._attackAnimTimer = 0;
+    this._hurtAnimTimer = 0;
+    this._visual.anim.setClip('death', true);
   }
 
   _respawn() {
@@ -209,6 +238,10 @@ class Monster {
     this.currentHitpoints = this.maxHitpoints;
     this.attackTimer = 0;
     this.respawnTimer = 0;
+    this._deathAnimTimer = 0;
+    this._attackAnimTimer = 0;
+    this._hurtAnimTimer = 0;
+    this._visual.anim.setClip('idle', true);
   }
 
   _queueHitsplat(value, color) {
