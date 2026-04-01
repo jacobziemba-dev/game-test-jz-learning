@@ -1,3 +1,4 @@
+const ORE_HITS_TO_DEPLETION = { min: 2, max: 4 };
 const ORE_RESPAWN_TIME = 16; // seconds
 
 const OreNodeState = {
@@ -17,19 +18,24 @@ class OreNode {
     this.xp = Math.max(1, Math.floor(config.xp ?? 18));
 
     this.state = OreNodeState.ALIVE;
+    this.health = this._randomHealth();
     this.respawnTimer = 0;
 
     this.scale = 0.9 + Math.random() * 0.2;
     this.shake = 0;
   }
 
+  _randomHealth() {
+    return ORE_HITS_TO_DEPLETION.min + Math.floor(Math.random() * (ORE_HITS_TO_DEPLETION.max - ORE_HITS_TO_DEPLETION.min + 1));
+  }
+
   mine(player) {
     if (this.state !== OreNodeState.BEING_MINED) return;
 
     this.shake = 0.12;
+    this.health--;
 
-    const chance = 0.25 + (player.skills.getLevel('mining') * 0.02);
-    if (CryptoUtils.secureRandom() <= chance) {
+    if (this.health <= 0) {
       this._deplete(player);
     }
   }
@@ -44,9 +50,6 @@ class OreNode {
 
     player.state = PlayerState.IDLE;
     player.mineTarget = null;
-
-    const item = ItemRegistry?.get(this.oreItemId) || { name: this.oreItemId };
-    player.addFloatingText(`+1 ${item.name}`, '#ffcc80');
   }
 
   update(dt, world) {
@@ -63,6 +66,7 @@ class OreNode {
 
   _respawn(world) {
     this.state = OreNodeState.ALIVE;
+    this.health = this._randomHealth();
     world.grid[this.row][this.col] = TILE.ROCK;
   }
 

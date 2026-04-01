@@ -1,3 +1,4 @@
+const CHOPS_TO_FELL = { min: 3, max: 5 };
 const RESPAWN_TIME = 20; // seconds
 const XP_PER_TREE = 25;
 
@@ -12,6 +13,7 @@ class Tree {
     this.col = col;
     this.row = row;
     this.state = TreeState.ALIVE;
+    this.health = this._randomHealth();
     this.respawnTimer = 0;
 
     // Slight random size variation for visual variety
@@ -20,12 +22,16 @@ class Tree {
     this.wobbleDir = 1;
   }
 
+  _randomHealth() {
+    return CHOPS_TO_FELL.min + Math.floor(Math.random() * (CHOPS_TO_FELL.max - CHOPS_TO_FELL.min + 1));
+  }
+
   /** Called by Player each chop interval */
   chop(player) {
     if (this.state !== TreeState.BEING_CHOPPED) return;
     this.wobble = 0.18; // trigger wobble animation
-    const chance = 0.30 + (player.skills.getLevel('woodcutting') * 0.02);
-    if (CryptoUtils.secureRandom() <= chance) {
+    this.health--;
+    if (this.health <= 0) {
       this._fell(player);
     }
   }
@@ -44,7 +50,6 @@ class Tree {
     // Stop player chopping
     player.state = PlayerState.IDLE;
     player.chopTarget = null;
-    player.addFloatingText('+1 Log', '#a5d6a7');
   }
 
   update(dt, world) {
@@ -64,6 +69,7 @@ class Tree {
 
   _respawn(world) {
     this.state = TreeState.ALIVE;
+    this.health = this._randomHealth();
     world.grid[this.row][this.col] = TILE.TREE;
   }
 

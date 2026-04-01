@@ -1,0 +1,13 @@
+--- src/Player.js	2024-05-24 16:00:00.000000000 -0400
++++ src/Player.js	2024-05-24 16:00:00.000000000 -0400
+@@ -569,6 +569,10 @@
+     this._lootPickupQueue = [];
+   }
+
++  addFloatingText(text, color = '#ffffff', yOffset = 0) {
++    this.floatingTexts.push({ text, color, life: 1.5, yOffset });
++  }
++
+   render(ctx, camera) {
+     const ts = this.tileSize;
+     const radius = ts * 0.35;
