@@ -3,6 +3,7 @@ class SkillJournalUI {
     this.skillManager = skillManager;
     this.isOpen = false;
 
+    // Dimensions determined dynamically in render
     this.panelW = 560;
     this.panelH = 430;
     this.headerH = 34;
@@ -23,14 +24,16 @@ class SkillJournalUI {
       sy >= this._py && sy <= this._py + this.panelH;
     if (!inside) return false;
 
+    const isPortrait = this.panelH > this.panelW;
     const listX = this._px + 12;
     const listY = this._py + this.headerH + 10;
+    const listW = isPortrait ? this.panelW - 24 : 190;
     const rowH = 28;
     const skills = this.skillManager.all();
 
     for (let i = 0; i < skills.length; i++) {
       const y = listY + i * rowH;
-      if (sx >= listX && sx <= listX + 180 && sy >= y && sy <= y + rowH - 2) {
+      if (sx >= listX && sx <= listX + listW && sy >= y && sy <= y + rowH - 2) {
         this._selectedSkillId = skills[i].id;
         return true;
       }
@@ -41,6 +44,9 @@ class SkillJournalUI {
 
   render(ctx, canvasW, canvasH) {
     if (!this.isOpen) return;
+
+    this.panelW = Math.min(canvasW - 16, 560);
+    this.panelH = Math.min(canvasH - 16, 430);
 
     this._px = Math.round((canvasW - this.panelW) / 2);
     this._py = Math.round((canvasH - this.panelH) / 2);
@@ -75,9 +81,10 @@ class SkillJournalUI {
   }
 
   _renderSkillList(ctx) {
+    const isPortrait = this.panelH > this.panelW;
     const listX = this._px + 12;
     const listY = this._py + this.headerH + 10;
-    const listW = 190;
+    const listW = isPortrait ? this.panelW - 24 : 190;
     const rowH = 28;
 
     const skills = this.skillManager.all();
@@ -110,10 +117,11 @@ class SkillJournalUI {
   }
 
   _renderMilestonePane(ctx) {
-    const paneX = this._px + 220;
-    const paneY = this._py + this.headerH + 10;
-    const paneW = this.panelW - 232;
-    const paneH = this.panelH - this.headerH - 28;
+    const isPortrait = this.panelH > this.panelW;
+    const paneX = isPortrait ? this._px + 12 : this._px + 220;
+    const paneY = isPortrait ? this._py + this.headerH + 10 + (this.skillManager.all().length * 28) + 10 : this._py + this.headerH + 10;
+    const paneW = isPortrait ? this.panelW - 24 : this.panelW - 232;
+    const paneH = this.panelH - (paneY - this._py) - 18;
 
     const skill = this.skillManager.getSkill(this._selectedSkillId);
     if (!skill) return;

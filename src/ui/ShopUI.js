@@ -88,7 +88,7 @@ class ShopUI {
       return true;
     }
 
-    const qtyY = bodyY + 218;
+    const qtyY = this._detailBounds.y + this._detailBounds.h - 70;
     for (let i = 0; i < this.quantityOptions.length; i++) {
       const x = this._detailBounds.x + 12 + i * 64;
       if (this._inside(sx, sy, x, qtyY, 56, 24)) {
@@ -97,7 +97,7 @@ class ShopUI {
       }
     }
 
-    const actionY = bodyY + 262;
+    const actionY = this._detailBounds.y + this._detailBounds.h - 38;
     const actionLabel = this.mode === 'buy' ? 'Buy' : 'Sell';
     if (this._inside(sx, sy, this._detailBounds.x + 12, actionY, 120, 30)) {
       this._tradeSelected();
@@ -143,12 +143,16 @@ class ShopUI {
     const bodyH = this.panelH - this.headerH - this.tabH - this.footerH;
     const footerY = bodyY + bodyH;
 
-    const listW = Math.min(320, this.panelW * 0.45);
-    const detailX = this._px + listW + 8;
-    const detailW = this.panelW - listW - 16;
+    const isPortrait = this.panelH > this.panelW;
+    const listW = isPortrait ? this.panelW - 16 : Math.min(320, this.panelW * 0.45);
+    const detailX = isPortrait ? this._px + 8 : this._px + listW + 8;
+    const detailW = isPortrait ? this.panelW - 16 : this.panelW - listW - 16;
+    const listH = isPortrait ? Math.floor(bodyH * 0.45) : bodyH - 16;
+    const detailY = isPortrait ? bodyY + listH + 8 : bodyY + 8;
+    const detailH = isPortrait ? bodyH - listH - 16 : bodyH - 16;
 
-    this._listBounds = { x: this._px + 8, y: bodyY + 8, w: listW - 16, h: bodyH - 16 };
-    this._detailBounds = { x: detailX, y: bodyY + 8, w: detailW, h: bodyH - 16 };
+    this._listBounds = { x: this._px + 8, y: bodyY + 8, w: listW, h: listH };
+    this._detailBounds = { x: detailX, y: detailY, w: detailW, h: detailH };
 
     const selected = this.entries[this.selectedIndex] ?? null;
     const nearVendor = this._isNearVendor();
@@ -247,29 +251,29 @@ class ShopUI {
     ctx.fillStyle = '#fff';
     ctx.font = 'bold 16px sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText(entry.item.name, b.x + 12, bodyY + 34);
+    ctx.fillText(entry.item.name, b.x + 12, b.y + 26);
 
     ctx.fillStyle = '#b0bec5';
     ctx.font = '12px sans-serif';
-    ctx.fillText(entry.item.description || 'No description.', b.x + 12, bodyY + 58);
+    ctx.fillText(entry.item.description || 'No description.', b.x + 12, b.y + 46);
 
     ctx.fillStyle = '#ffcc80';
-    ctx.fillText(`Price each: ${each} gp`, b.x + 12, bodyY + 94);
+    ctx.fillText(`Price each: ${each} gp`, b.x + 12, b.y + 70);
 
     if (this.mode === 'buy') {
-      ctx.fillText(`Shop stock: ${entry.stock}`, b.x + 12, bodyY + 114);
+      ctx.fillText(`Shop stock: ${entry.stock}`, b.x + 12, b.y + 86);
     } else {
-      ctx.fillText(`You own: ${entry.owned}`, b.x + 12, bodyY + 114);
+      ctx.fillText(`You own: ${entry.owned}`, b.x + 12, b.y + 86);
     }
 
     ctx.fillStyle = '#81c784';
-    ctx.fillText(`Your coins: ${this.player.inventory.countItem('coins')}`, b.x + 12, bodyY + 134);
+    ctx.fillText(`Your coins: ${this.player.inventory.countItem('coins')}`, b.x + 12, b.y + 102);
 
     ctx.fillStyle = '#c8a45a';
     ctx.font = 'bold 12px sans-serif';
-    ctx.fillText('Quantity', b.x + 12, bodyY + 202);
+    ctx.fillText('Quantity', b.x + 12, b.y + b.h - 86);
 
-    const qtyY = bodyY + 218;
+    const qtyY = b.y + b.h - 70;
     for (let i = 0; i < this.quantityOptions.length; i++) {
       const x = b.x + 12 + i * 64;
       const active = i === this.quantityIndex;
@@ -289,26 +293,16 @@ class ShopUI {
     ctx.fillStyle = '#90caf9';
     ctx.font = '12px sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText(`Selected: ${desiredQty}  Total: ${total} gp`, b.x + 12, bodyY + 252);
+    ctx.fillText(`Selected: ${desiredQty}  Total: ${total} gp`, b.x + 12, b.y + b.h - 52);
 
-    const actionY = bodyY + 262;
+    const actionY = b.y + b.h - 38;
     const canTrade = nearVendor && desiredQty > 0;
     const actionLabel = this.mode === 'buy' ? 'Buy selected' : 'Sell selected';
 
     this._drawActionButton(ctx, b.x + 12, actionY, 120, 30, actionLabel, canTrade ? '#81c784' : '#666');
     this._drawActionButton(ctx, b.x + 142, actionY, 120, 30, 'Swap mode', '#90caf9');
 
-    if (this._feedback) {
-      ctx.fillStyle = this._feedback.color;
-      ctx.font = 'bold 12px sans-serif';
-      ctx.fillText(this._feedback.text, b.x + 12, bodyY + 312);
-    }
-
-    if (!nearVendor) {
-      ctx.fillStyle = '#ffab91';
-      ctx.font = 'bold 12px sans-serif';
-      ctx.fillText('Move next to the vendor to trade.', b.x + 12, bodyY + 332);
-    }
+    // Feedback moved to action bounds logic above
   }
 
   _drawFooter(ctx, y, nearVendor) {
