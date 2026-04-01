@@ -113,7 +113,11 @@ class OreNode {
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    ctx.fillStyle = this.oreItemId === 'tin_ore' ? '#b0bec5' : '#b87333';
+    let fillColor = '#b87333'; // copper
+    if (this.oreItemId === 'tin_ore') fillColor = '#b0bec5';
+    if (this.oreItemId === 'rune_essence') fillColor = '#e0e0e0';
+    
+    ctx.fillStyle = fillColor;
     ctx.beginPath();
     ctx.arc(-r * 0.18, -r * 0.05, r * 0.16, 0, Math.PI * 2);
     ctx.arc(r * 0.22, r * 0.18, r * 0.14, 0, Math.PI * 2);

@@ -90,6 +90,8 @@ class Player {
     this.inventory.addItem('necklace_mould', 1);
     this.inventory.addItem('amulet_mould', 1);
     this.inventory.addItem('coins', 120);
+    this.inventory.addItem('air_talisman', 1);
+    this.inventory.addItem('mind_talisman', 1);
 
     // Equipment — items worn by the player
     this.equipment = new Equipment();
@@ -109,6 +111,7 @@ class Player {
     this.skills.register('mining', 'Mining', '#90a4ae');
     this.skills.register('smithing', 'Smithing', '#b0bec5');
     this.skills.register('crafting', 'Crafting', '#d7ccc8');
+    this.skills.register('runecrafting', 'Runecrafting', '#a29bfe');
   }
 
   /** Called by InputHandler when player clicks ground */

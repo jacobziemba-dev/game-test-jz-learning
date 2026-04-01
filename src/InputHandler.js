@@ -207,6 +207,7 @@ class InputHandler {
     if (this.playerUI.onClick(sx, sy))    return;
     if (this.helpUI.onClick(sx, sy))      return;
     if (this.hotbarUI.onClick(sx, sy))    return;
+    if (this.spellbookUI && this.spellbookUI.onClick(sx, sy)) return;
 
     // If context menu is open, let it consume the click
     if (this.menu.visible) {
@@ -396,6 +397,7 @@ class InputHandler {
     this.lootFilterUI.onMouseMove(sx, sy);
     this.playerUI.onMouseMove(sx, sy);
     this.hotbarUI.onMouseMove(sx, sy);
+    if (this.spellbookUI) this.spellbookUI.onMouseMove(sx, sy);
   }
 
   _onWheel(e) {

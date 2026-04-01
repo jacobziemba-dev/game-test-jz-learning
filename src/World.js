@@ -269,11 +269,25 @@ class World {
       if (this.monsters.some(m => m.col === col && m.row === row)) continue;
       if (this.oreNodes.some(n => n.col === col && n.row === row)) continue;
 
-      const isTin = placed % 2 === 1;
+      const type = placed % 3;
+      let name = 'Copper Rock';
+      let oreItemId = 'copper_ore';
+      let xp = 17;
+
+      if (type === 1) {
+        name = 'Tin Rock';
+        oreItemId = 'tin_ore';
+        xp = 18;
+      } else if (type === 2) {
+        name = 'Rune Essence Rock';
+        oreItemId = 'rune_essence';
+        xp = 5;
+      }
+
       const node = new OreNode(col, row, this, {
-        name: isTin ? 'Tin Rock' : 'Copper Rock',
-        oreItemId: isTin ? 'tin_ore' : 'copper_ore',
-        xp: isTin ? 18 : 17,
+        name,
+        oreItemId,
+        xp,
       });
 
       this.oreNodes.push(node);
@@ -674,6 +688,20 @@ class World {
         vendor.applyState(raw);
         this.grid[row][col] = TILE.NPC;
         this.vendors.push(vendor);
+      }
+    }
+
+    // Backwards compatibility: inject Rune Essence rocks into old saves lacking them.
+    if (this.oreNodes.length > 0 && !this.oreNodes.some(n => n.oreItemId === 'rune_essence')) {
+      const convertCount = Math.max(1, Math.floor(this.oreNodes.length / 3));
+      for (let i = 0; i < convertCount; i++) {
+        // Find a random non-rune_essence node
+        const candidates = this.oreNodes.filter(n => n.oreItemId !== 'rune_essence');
+        if (candidates.length === 0) break;
+        const nodeToConvert = candidates[Math.floor(Math.random() * candidates.length)];
+        nodeToConvert.oreItemId = 'rune_essence';
+        nodeToConvert.name = 'Rune Essence Rock';
+        nodeToConvert.xp = 5;
       }
     }
   }

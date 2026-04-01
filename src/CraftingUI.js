@@ -228,8 +228,15 @@ class CraftingUI {
     const maxCraftable = recipe.maxCraftable(this.inventory, this.skillManager, this.selectedStation);
     const selectedQty = this.quantityOptions[this.quantityIndex];
     const requested = selectedQty === 'MAX' ? maxCraftable : selectedQty;
-    if (requested <= 0) {
-      this._feedback = { text: "Cannot craft: requirements not met", color: "#ef9a9a", ttl: 2.2 };
+
+    if (maxCraftable <= 0) {
+      const state = recipe.canCraftDetailed(this.inventory, this.skillManager, this.selectedStation);
+      if (state.missingSkills.length > 0) {
+        const req = state.missingSkills[0];
+        this._feedback = { text: `Cannot craft: Need Level ${req.level} ${req.skillId}`, color: "#ef9a9a", ttl: 2.5 };
+      } else {
+        this._feedback = { text: "Cannot craft: requirements not met", color: "#ef9a9a", ttl: 2.5 };
+      }
       return;
     }
 

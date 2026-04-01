@@ -597,3 +597,60 @@ RecipeRegistry.register({
   requiredSkills: [{ skillId: 'crafting', level: 70 }],
   grantXP: [{ skillId: 'crafting', amount: 4 }],
 });
+
+// ─── Runecrafting ───────────────────────────────────────────────────────────
+
+RecipeRegistry.register({
+  id: 'craft_air_rune',
+  name: 'Air Rune',
+  category: 'Runecrafting',
+  station: 'any',
+  inputs: [{ itemId: 'rune_essence', qty: 1 }],
+  outputs: [{ itemId: 'air_rune', qty: 1 }],
+  requiredSkills: [{ skillId: 'runecrafting', level: 1 }],
+  grantXP: [{ skillId: 'runecrafting', amount: 5 }],
+});
+
+RecipeRegistry.register({
+  id: 'craft_mind_rune',
+  name: 'Mind Rune',
+  category: 'Runecrafting',
+  station: 'any',
+  inputs: [{ itemId: 'rune_essence', qty: 1 }],
+  outputs: [{ itemId: 'mind_rune', qty: 1 }],
+  requiredSkills: [{ skillId: 'runecrafting', level: 2 }],
+  grantXP: [{ skillId: 'runecrafting', amount: 5.5 }],
+});
+
+RecipeRegistry.register({
+  id: 'craft_water_rune',
+  name: 'Water Rune',
+  category: 'Runecrafting',
+  station: 'any',
+  inputs: [{ itemId: 'rune_essence', qty: 1 }],
+  outputs: [{ itemId: 'water_rune', qty: 1 }],
+  requiredSkills: [{ skillId: 'runecrafting', level: 5 }],
+  grantXP: [{ skillId: 'runecrafting', amount: 6 }],
+});
+
+RecipeRegistry.register({
+  id: 'craft_earth_rune',
+  name: 'Earth Rune',
+  category: 'Runecrafting',
+  station: 'any',
+  inputs: [{ itemId: 'rune_essence', qty: 1 }],
+  outputs: [{ itemId: 'earth_rune', qty: 1 }],
+  requiredSkills: [{ skillId: 'runecrafting', level: 9 }],
+  grantXP: [{ skillId: 'runecrafting', amount: 6.5 }],
+});
+
+RecipeRegistry.register({
+  id: 'craft_fire_rune',
+  name: 'Fire Rune',
+  category: 'Runecrafting',
+  station: 'any',
+  inputs: [{ itemId: 'rune_essence', qty: 1 }],
+  outputs: [{ itemId: 'fire_rune', qty: 1 }],
+  requiredSkills: [{ skillId: 'runecrafting', level: 14 }],
+  grantXP: [{ skillId: 'runecrafting', amount: 7 }],
+});

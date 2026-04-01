@@ -1161,3 +1161,182 @@ ItemRegistry.register({
     ctx.fillRect(cx - r * 0.1, cy, r * 0.2, r * 0.4);
   },
 });
+
+ItemRegistry.register({
+  id: 'water_rune',
+  name: 'Water Rune',
+  description: 'A rune pulsating with liquid magic.',
+  type: 'rune',
+  stackable: true,
+  maxStack: 1000000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2, cy = y + size / 2, r = size * 0.4;
+    ctx.fillStyle = '#90a4ae';
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#546e7a'; ctx.lineWidth = 1; ctx.stroke();
+    // Water drop
+    ctx.fillStyle = '#42a5f5';
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - r * 0.4);
+    ctx.arc(cx, cy + r * 0.1, r * 0.3, 0, Math.PI);
+    ctx.closePath();
+    ctx.fill();
+  },
+});
+
+ItemRegistry.register({
+  id: 'earth_rune',
+  name: 'Earth Rune',
+  description: 'A heavy rune filled with terrestrial power.',
+  type: 'rune',
+  stackable: true,
+  maxStack: 1000000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2, cy = y + size / 2, r = size * 0.4;
+    ctx.fillStyle = '#90a4ae';
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#546e7a'; ctx.lineWidth = 1; ctx.stroke();
+    // Earth diamond
+    ctx.fillStyle = '#8d6e63';
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - r * 0.3);
+    ctx.lineTo(cx + r * 0.3, cy);
+    ctx.lineTo(cx, cy + r * 0.3);
+    ctx.lineTo(cx - r * 0.3, cy);
+    ctx.closePath();
+    ctx.fill();
+  },
+});
+
+ItemRegistry.register({
+  id: 'fire_rune',
+  name: 'Fire Rune',
+  description: 'A hot rune burning with inner fire.',
+  type: 'rune',
+  stackable: true,
+  maxStack: 1000000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2, cy = y + size / 2, r = size * 0.4;
+    ctx.fillStyle = '#90a4ae';
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#546e7a'; ctx.lineWidth = 1; ctx.stroke();
+    // Fire flame
+    ctx.fillStyle = '#ef5350';
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - r * 0.4);
+    ctx.quadraticCurveTo(cx - r * 0.4, cy, cx, cy + r * 0.4);
+    ctx.quadraticCurveTo(cx + r * 0.4, cy, cx, cy - r * 0.4);
+    ctx.fill();
+  },
+});
+
+// ─── Runecrafting Materials ──────────────────────────────────────────────────
+
+ItemRegistry.register({
+  id: 'rune_essence',
+  name: 'Rune Essence',
+  description: 'Uncharged magical stone. Use at an altar to craft runes.',
+  type: 'resource',
+  stackable: true,
+  maxStack: 10000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2, cy = y + size / 2, r = size * 0.35;
+    ctx.fillStyle = '#e0e0e0';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, r, r * 0.8, Math.PI / 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#9e9e9e';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    // Shiny spot
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(cx - r * 0.2, cy - r * 0.2, r * 0.15, 0, Math.PI * 2);
+    ctx.fill();
+  },
+});
+
+ItemRegistry.register({
+  id: 'air_talisman',
+  name: 'Air Talisman',
+  description: 'A glowing talisman that pulls towards the Air Altar.',
+  type: 'tool',
+  stackable: false,
+  maxStack: 1,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2, cy = y + size / 2, r = size * 0.3;
+    ctx.fillStyle = '#546e7a';
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#e0f7fa';
+    ctx.beginPath(); ctx.arc(cx, cy, r * 0.4, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#eceff1'; ctx.lineWidth = 1; ctx.stroke();
+  },
+});
+
+ItemRegistry.register({
+  id: 'mind_talisman',
+  name: 'Mind Talisman',
+  description: 'A glowing talisman that pulls towards the Mind Altar.',
+  type: 'tool',
+  stackable: false,
+  maxStack: 1,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2, cy = y + size / 2, r = size * 0.3;
+    ctx.fillStyle = '#546e7a';
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffcc80';
+    ctx.beginPath(); ctx.arc(cx, cy, r * 0.4, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#eceff1'; ctx.lineWidth = 1; ctx.stroke();
+  },
+});
+
+ItemRegistry.register({
+  id: 'water_talisman',
+  name: 'Water Talisman',
+  description: 'A glowing talisman that pulls towards the Water Altar.',
+  type: 'tool',
+  stackable: false,
+  maxStack: 1,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2, cy = y + size / 2, r = size * 0.3;
+    ctx.fillStyle = '#546e7a';
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#42a5f5';
+    ctx.beginPath(); ctx.arc(cx, cy, r * 0.4, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#eceff1'; ctx.lineWidth = 1; ctx.stroke();
+  },
+});
+
+ItemRegistry.register({
+  id: 'earth_talisman',
+  name: 'Earth Talisman',
+  description: 'A glowing talisman that pulls towards the Earth Altar.',
+  type: 'tool',
+  stackable: false,
+  maxStack: 1,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2, cy = y + size / 2, r = size * 0.3;
+    ctx.fillStyle = '#546e7a';
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#8d6e63';
+    ctx.beginPath(); ctx.arc(cx, cy, r * 0.4, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#eceff1'; ctx.lineWidth = 1; ctx.stroke();
+  },
+});
+
+ItemRegistry.register({
+  id: 'fire_talisman',
+  name: 'Fire Talisman',
+  description: 'A glowing talisman that pulls towards the Fire Altar.',
+  type: 'tool',
+  stackable: false,
+  maxStack: 1,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2, cy = y + size / 2, r = size * 0.3;
+    ctx.fillStyle = '#546e7a';
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ef5350';
+    ctx.beginPath(); ctx.arc(cx, cy, r * 0.4, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#eceff1'; ctx.lineWidth = 1; ctx.stroke();
+  },
+});
