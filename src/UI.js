@@ -76,7 +76,8 @@ class UI {
   }
 
   _renderSkillBar(ctx, player) {
-    const skill   = player.skills.getSkill('woodcutting');
+    const activeSkillId = player.skills.lastGainedSkill || 'woodcutting';
+    const skill   = player.skills.getSkill(activeSkillId);
     if (!skill) return;
 
     const padding = 12;
@@ -93,12 +94,28 @@ class UI {
     ctx.fill();
     ctx.stroke();
 
+    const icons = {
+      woodcutting: '🪓',
+      mining: '⛏️',
+      smithing: '🔨',
+      crafting: '🧵',
+      runecrafting: '🔮',
+      attack: '⚔️',
+      strength: '💪',
+      defence: '🛡️',
+      hitpoints: '❤️',
+      ranged: '🏹',
+      prayer: '✨',
+      magic: '🧙'
+    };
+    const icon = icons[skill.id] || '⭐';
+
     // Skill name + level
     ctx.fillStyle    = skill.color;
     ctx.font         = 'bold 12px monospace';
     ctx.textAlign    = 'left';
     ctx.textBaseline = 'top';
-    ctx.fillText(`🪓 ${skill.name}`, panelX + 10, panelY + 8);
+    ctx.fillText(`${icon} ${skill.name}`, panelX + 10, panelY + 8);
 
     ctx.fillStyle = '#fff';
     ctx.font      = 'bold 12px monospace';

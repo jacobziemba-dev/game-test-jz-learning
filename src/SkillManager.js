@@ -27,6 +27,7 @@ class SkillManager {
   }
 
   gainXP(skillId, amount) {
+    this.lastGainedSkill = skillId;
     const skill = this._skills[skillId];
     if (!skill) { console.warn(`SkillManager: unknown skill '${skillId}'`); return; }
     const result = skill.gainXP(amount);
