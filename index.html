@@ -12,54 +12,54 @@
   <canvas id="gameCanvas"></canvas>
 
   <!-- Core data systems (no dependencies) -->
-  <script src="src/CryptoUtils.js"></script>
+  <script src="src/systems/CryptoUtils.js"></script>
 
-  <script src="src/Item.js"></script>
-  <script src="src/ItemRegistry.js"></script>
-  <script src="src/DropTableRegistry.js"></script>
-  <script src="src/Inventory.js"></script>
-  <script src="src/Equipment.js"></script>
-  <script src="src/Skill.js"></script>
-  <script src="src/SkillUnlockRegistry.js"></script>
-  <script src="src/SkillManager.js"></script>
-  <script src="src/Recipe.js"></script>
-  <script src="src/RecipeRegistry.js"></script>
+  <script src="src/data/Item.js"></script>
+  <script src="src/data/ItemRegistry.js"></script>
+  <script src="src/data/DropTableRegistry.js"></script>
+  <script src="src/systems/Inventory.js"></script>
+  <script src="src/systems/Equipment.js"></script>
+  <script src="src/data/Skill.js"></script>
+  <script src="src/data/SkillUnlockRegistry.js"></script>
+  <script src="src/systems/SkillManager.js"></script>
+  <script src="src/data/Recipe.js"></script>
+  <script src="src/data/RecipeRegistry.js"></script>
 
   <!-- World & gameplay -->
-  <script src="src/Pathfinder.js"></script>
-  <script src="src/Camera.js"></script>
-  <script src="src/AnimationStateMachine.js"></script>
-  <script src="src/SpriteSystem.js"></script>
-  <script src="src/sprites/SpriteManifest.js"></script>
-  <script src="src/SaveSystem.js"></script>
-  <script src="src/GroundLoot.js"></script>
-  <script src="src/Vendor.js"></script>
-  <script src="src/World.js"></script>
-  <script src="src/Tree.js"></script>
-  <script src="src/OreNode.js"></script>
-  <script src="src/Monster.js"></script>
-  <script src="src/Player.js"></script>
+  <script src="src/systems/Pathfinder.js"></script>
+  <script src="src/systems/Camera.js"></script>
+  <script src="src/systems/AnimationStateMachine.js"></script>
+  <script src="src/systems/SpriteSystem.js"></script>
+  <script src="src/data/SpriteManifest.js"></script>
+  <script src="src/systems/SaveSystem.js"></script>
+  <script src="src/entities/GroundLoot.js"></script>
+  <script src="src/entities/Vendor.js"></script>
+  <script src="src/core/World.js"></script>
+  <script src="src/entities/Tree.js"></script>
+  <script src="src/entities/OreNode.js"></script>
+  <script src="src/entities/Monster.js"></script>
+  <script src="src/entities/Player.js"></script>
 
   <!-- UI panels -->
-  <script src="src/DrawingUtils.js"></script>
-  <script src="src/UI.js"></script>
-  <script src="src/InventoryUI.js"></script>
-  <script src="src/SkillsUI.js"></script>
-  <script src="src/SkillJournalUI.js"></script>
-  <script src="src/LootFilterUI.js"></script>
-  <script src="src/CraftingUI.js"></script>
-  <script src="src/ShopPricing.js"></script>
-  <script src="src/ShopService.js"></script>
-  <script src="src/ShopUI.js"></script>
-  <script src="src/PlayerUI.js"></script>
-  <script src="src/HelpUI.js"></script>
-  <script src="src/SpellbookUI.js"></script>
-  <script src="src/HotbarUI.js"></script>
+  <script src="src/systems/DrawingUtils.js"></script>
+  <script src="src/ui/UI.js"></script>
+  <script src="src/ui/InventoryUI.js"></script>
+  <script src="src/ui/SkillsUI.js"></script>
+  <script src="src/ui/SkillJournalUI.js"></script>
+  <script src="src/ui/LootFilterUI.js"></script>
+  <script src="src/ui/CraftingUI.js"></script>
+  <script src="src/systems/ShopPricing.js"></script>
+  <script src="src/systems/ShopService.js"></script>
+  <script src="src/ui/ShopUI.js"></script>
+  <script src="src/ui/PlayerUI.js"></script>
+  <script src="src/ui/HelpUI.js"></script>
+  <script src="src/ui/SpellbookUI.js"></script>
+  <script src="src/ui/HotbarUI.js"></script>
 
   <!-- Input, game loop, entry point -->
-  <script src="src/InputHandler.js"></script>
-  <script src="src/Game.js"></script>
-  <script src="src/main.js"></script>
+  <script src="src/core/InputHandler.js"></script>
+  <script src="src/core/Game.js"></script>
+  <script src="src/core/main.js"></script>
 </body>
 
 </html>
