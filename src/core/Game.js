@@ -77,8 +77,8 @@ class Game {
   }
 
   resize() {
-    this.canvas.width  = window.innerWidth;
-    this.canvas.height = window.innerHeight;
+    this.canvas.width  = document.body.clientWidth;
+    this.canvas.height = document.body.clientHeight;
     if (this.camera) {
       this.camera.width  = this.canvas.width;
       this.camera.height = this.canvas.height;
