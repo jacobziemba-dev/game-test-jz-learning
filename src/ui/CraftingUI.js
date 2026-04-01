@@ -96,6 +96,10 @@ class CraftingUI {
   render(ctx, canvasW, canvasH) {
     if (!this.isOpen) return;
 
+    this.panelW = Math.min(canvasW - 16, 760);
+    this.panelH = Math.min(canvasH - 16, 460);
+    if (!this.isOpen) return;
+
     this._px = Math.round((canvasW - this.panelW) / 2);
     this._py = Math.round((canvasH - this.panelH) / 2);
 
@@ -105,12 +109,16 @@ class CraftingUI {
     const bodyH = this.panelH - this.headerH - this.tabH - this.stationH - this.footerH;
     const footerY = bodyY + bodyH;
 
-    const listW = 320;
-    const detailX = this._px + listW + 8;
-    const detailW = this.panelW - listW - 16;
+    const isPortrait = this.panelH > this.panelW;
+    const listW = isPortrait ? this.panelW - 16 : 320;
+    const detailX = isPortrait ? this._px + 8 : this._px + listW + 8;
+    const detailW = isPortrait ? this.panelW - 16 : this.panelW - listW - 16;
+    const listH = isPortrait ? Math.floor(bodyH * 0.4) : bodyH - 16;
+    const detailY = isPortrait ? bodyY + listH + 8 : bodyY + 8;
+    const detailH = isPortrait ? bodyH - listH - 16 : bodyH - 16;
 
-    this._listBounds = { x: this._px + 8, y: bodyY + 8, w: listW - 16, h: bodyH - 16 };
-    this._detailBounds = { x: detailX, y: bodyY + 8, w: detailW, h: bodyH - 16 };
+    this._listBounds = { x: this._px + 8, y: bodyY + 8, w: listW, h: listH };
+    this._detailBounds = { x: detailX, y: detailY, w: detailW, h: detailH };
 
     ctx.save();
 

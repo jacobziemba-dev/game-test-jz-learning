@@ -182,7 +182,7 @@ class UI {
     const h = 24;
     const x = ctx.canvas.width - w - 12;
     // Push down if screen is too narrow so it doesn't overlap the skill bar
-    const y = ctx.canvas.width < 400 ? 92 : 12;
+    const y = ctx.canvas.width < 500 ? 92 : 12;
 
     const fade = this._saveStatus.maxTtl > 0
       ? Math.max(0.45, this._saveStatus.ttl / this._saveStatus.maxTtl)

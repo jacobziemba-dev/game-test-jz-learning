@@ -3,8 +3,9 @@ class HotbarUI {
     this.slots = slots;
     this.isOpen = true;
 
-    this.slotW = 92;
-    this.slotH = 34;
+    // We use a getter now so it responds to resize/orientation correctly
+    this.baseSlotW = 92;
+    this.baseSlotH = 34;
     this.gap = 6;
 
     this._slotsLayout = []; // Cache bounds of each slot {x, y, w, h}
@@ -51,11 +52,17 @@ class HotbarUI {
     ctx.save();
 
     // Determine safe margin and calculate items per row
+    const isMobile = window.game && window.game.isMobile;
+    const slotW = isMobile ? Math.min(110, Math.floor((canvasW - 24) / 4) - this.gap) : 92;
+    const slotH = isMobile ? 42 : 34;
+
     const sideMargin = 12;
     const maxAvailableWidth = canvasW - (sideMargin * 2);
 
-    // We want as many items per row as will fit, up to the total amount
-    let slotsPerRow = Math.floor((maxAvailableWidth + this.gap) / (this.slotW + this.gap));
+    // Force max 4 columns on mobile so it forms a nice 4x2 grid, or let it flow
+    let maxCols = isMobile ? 4 : this.slots.length;
+    let slotsPerRow = Math.floor((maxAvailableWidth + this.gap) / (slotW + this.gap));
+    if (slotsPerRow > maxCols) slotsPerRow = maxCols;
     if (slotsPerRow < 1) slotsPerRow = 1;
     if (slotsPerRow > this.slots.length) slotsPerRow = this.slots.length;
 
@@ -63,7 +70,7 @@ class HotbarUI {
     const rows = Math.ceil(this.slots.length / slotsPerRow);
 
     // Total height of the entire hotbar block
-    const blockHeight = (rows * this.slotH) + ((rows - 1) * this.gap);
+    const blockHeight = (rows * slotH) + ((rows - 1) * this.gap);
     const startY = canvasH - blockHeight - 18;
 
     for (let i = 0; i < this.slots.length; i++) {
@@ -72,14 +79,14 @@ class HotbarUI {
 
       // Calculate how many items are actually in THIS row (last row might be shorter)
       const itemsInThisRow = Math.min(slotsPerRow, this.slots.length - (row * slotsPerRow));
-      const rowWidth = (itemsInThisRow * this.slotW) + ((itemsInThisRow - 1) * this.gap);
+      const rowWidth = (itemsInThisRow * slotW) + ((itemsInThisRow - 1) * this.gap);
 
       const startX = Math.round((canvasW - rowWidth) / 2);
 
-      const x = startX + (col * (this.slotW + this.gap));
-      const y = startY + (row * (this.slotH + this.gap));
+      const x = startX + (col * (slotW + this.gap));
+      const y = startY + (row * (slotH + this.gap));
 
-      this._slotsLayout.push({ x, y, w: this.slotW, h: this.slotH });
+      this._slotsLayout.push({ x, y, w: slotW, h: slotH });
 
       const slot = this.slots[i];
       const hovered = i === this._hoverSlot;
@@ -87,7 +94,7 @@ class HotbarUI {
       ctx.fillStyle = hovered ? 'rgba(200,164,90,0.22)' : 'rgba(18,12,6,0.9)';
       ctx.strokeStyle = hovered ? '#c8a45a' : '#ffffff20';
       ctx.lineWidth = 1;
-      DrawingUtils.rrect(ctx, x, y, this.slotW, this.slotH, 5);
+      DrawingUtils.rrect(ctx, x, y, slotW, slotH, 5);
       ctx.fill();
       ctx.stroke();
 
@@ -98,11 +105,12 @@ class HotbarUI {
       ctx.fillText(`${slot.key}`, x + 6, y + 4);
 
       ctx.fillStyle = '#f1f1f1';
-      ctx.font = '10px sans-serif';
+      // scale font slightly if slot is tiny
+      ctx.font = slotW < 70 ? '8px sans-serif' : '10px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const label = typeof slot.label === 'function' ? slot.label() : slot.label;
-      ctx.fillText(label, x + this.slotW / 2 + 6, y + this.slotH / 2 + 1);
+      ctx.fillText(label, x + slotW / 2 + 6, y + slotH / 2 + 1);
     }
 
     ctx.restore();
