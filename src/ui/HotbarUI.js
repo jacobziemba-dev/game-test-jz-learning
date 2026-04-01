@@ -7,8 +7,7 @@ class HotbarUI {
     this.slotH = 34;
     this.gap = 6;
 
-    this._x = 0;
-    this._y = 0;
+    this._slotsLayout = []; // Cache bounds of each slot {x, y, w, h}
     this._hoverSlot = -1;
   }
 
@@ -48,16 +47,41 @@ class HotbarUI {
   render(ctx, canvasW, canvasH) {
     if (!this.isOpen || this.slots.length === 0) return;
 
-    const totalW = this.slots.length * this.slotW + (this.slots.length - 1) * this.gap;
-    this._x = Math.round((canvasW - totalW) / 2);
-    this._y = canvasH - this.slotH - 18;
-
+    this._slotsLayout = [];
     ctx.save();
 
+    // Determine safe margin and calculate items per row
+    const sideMargin = 12;
+    const maxAvailableWidth = canvasW - (sideMargin * 2);
+
+    // We want as many items per row as will fit, up to the total amount
+    let slotsPerRow = Math.floor((maxAvailableWidth + this.gap) / (this.slotW + this.gap));
+    if (slotsPerRow < 1) slotsPerRow = 1;
+    if (slotsPerRow > this.slots.length) slotsPerRow = this.slots.length;
+
+    // Number of rows required
+    const rows = Math.ceil(this.slots.length / slotsPerRow);
+
+    // Total height of the entire hotbar block
+    const blockHeight = (rows * this.slotH) + ((rows - 1) * this.gap);
+    const startY = canvasH - blockHeight - 18;
+
     for (let i = 0; i < this.slots.length; i++) {
+      const row = Math.floor(i / slotsPerRow);
+      const col = i % slotsPerRow;
+
+      // Calculate how many items are actually in THIS row (last row might be shorter)
+      const itemsInThisRow = Math.min(slotsPerRow, this.slots.length - (row * slotsPerRow));
+      const rowWidth = (itemsInThisRow * this.slotW) + ((itemsInThisRow - 1) * this.gap);
+
+      const startX = Math.round((canvasW - rowWidth) / 2);
+
+      const x = startX + (col * (this.slotW + this.gap));
+      const y = startY + (row * (this.slotH + this.gap));
+
+      this._slotsLayout.push({ x, y, w: this.slotW, h: this.slotH });
+
       const slot = this.slots[i];
-      const x = this._x + i * (this.slotW + this.gap);
-      const y = this._y;
       const hovered = i === this._hoverSlot;
 
       ctx.fillStyle = hovered ? 'rgba(200,164,90,0.22)' : 'rgba(18,12,6,0.9)';
@@ -85,13 +109,11 @@ class HotbarUI {
   }
 
   _slotAt(sx, sy) {
-    const totalW = this.slots.length * this.slotW + (this.slots.length - 1) * this.gap;
-    if (sx < this._x || sx > this._x + totalW) return -1;
-    if (sy < this._y || sy > this._y + this.slotH) return -1;
-
-    for (let i = 0; i < this.slots.length; i++) {
-      const x = this._x + i * (this.slotW + this.gap);
-      if (sx >= x && sx <= x + this.slotW) return i;
+    for (let i = 0; i < this._slotsLayout.length; i++) {
+      const rect = this._slotsLayout[i];
+      if (sx >= rect.x && sx <= rect.x + rect.w && sy >= rect.y && sy <= rect.y + rect.h) {
+        return i;
+      }
     }
     return -1;
   }

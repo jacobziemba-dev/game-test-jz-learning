@@ -160,6 +160,9 @@ class UI {
   }
 
   _renderKeybindHints(ctx, player) {
+    // Hide keybinds on small screens
+    if (ctx.canvas.width < 700) return;
+
     const hints = ['[I] Inventory', '[C] Crafting', '[K] Skills', '[J] Journal', '[F] Loot Filter', '[1..8] Hotbar', '[B] Toggle bar', '[O] Save', '[L] Load'];
     ctx.save();
     ctx.fillStyle    = 'rgba(255,255,255,0.3)';
@@ -178,7 +181,8 @@ class UI {
     const w = 176;
     const h = 24;
     const x = ctx.canvas.width - w - 12;
-    const y = 12;
+    // Push down if screen is too narrow so it doesn't overlap the skill bar
+    const y = ctx.canvas.width < 400 ? 92 : 12;
 
     const fade = this._saveStatus.maxTtl > 0
       ? Math.max(0.45, this._saveStatus.ttl / this._saveStatus.maxTtl)

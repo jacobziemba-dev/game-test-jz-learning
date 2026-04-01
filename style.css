@@ -10,10 +10,13 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
+  touch-action: none;
 }
 
 #gameCanvas {
   display: block;
   cursor: pointer;
+  touch-action: none;
 }
