@@ -79,6 +79,26 @@ const SpriteManifest = (() => {
         orc_death_3: frame(3, 5),
       },
     },
+    tree_1: {
+      imagePath: 'The Fan-tasy Tileset (Free)/Art/Trees and Bushes/Tree_Emerald_1.png',
+      frames: { default: { x: 0, y: 0, w: 64, h: 63 } },
+    },
+    tree_2: {
+      imagePath: 'The Fan-tasy Tileset (Free)/Art/Trees and Bushes/Tree_Emerald_2.png',
+      frames: { default: { x: 0, y: 0, w: 46, h: 63 } },
+    },
+    tree_3: {
+      imagePath: 'The Fan-tasy Tileset (Free)/Art/Trees and Bushes/Tree_Emerald_3.png',
+      frames: { default: { x: 0, y: 0, w: 52, h: 92 } },
+    },
+    tree_4: {
+      imagePath: 'The Fan-tasy Tileset (Free)/Art/Trees and Bushes/Tree_Emerald_4.png',
+      frames: { default: { x: 0, y: 0, w: 48, h: 93 } },
+    },
+    stump: {
+      imagePath: 'The Fan-tasy Tileset (Free)/Art/Props/Chopped_Tree_1.png',
+      frames: { default: { x: 0, y: 0, w: 32, h: 31 } },
+    },
   };
 
   const clips = {

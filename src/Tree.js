@@ -15,9 +15,12 @@ class Tree {
     this.respawnTimer = 0;
 
     // Slight random size variation for visual variety
-    this.scale = 0.85 + Math.random() * 0.3;
+    this.scale = 1.0 + Math.random() * 0.15;
     this.wobble = 0;
     this.wobbleDir = 1;
+
+    const treeTypes = ['tree_1', 'tree_2', 'tree_3', 'tree_4'];
+    this.spriteId = treeTypes[Math.floor(Math.random() * treeTypes.length)];
   }
 
   /** Called by Player each chop interval */
@@ -76,15 +79,36 @@ class Tree {
 
     ctx.save();
     ctx.translate(cx, cy);
-    ctx.scale(this.scale, this.scale);
+
+    const hasSpriteSystem = window.game && window.game.spriteSystem;
 
     if (this.state === TreeState.STUMP) {
-      this._drawStump(ctx, ts);
+      if (hasSpriteSystem && window.game.spriteSystem.isAtlasReady('stump')) {
+        window.game.spriteSystem.drawFrame(ctx, 'stump', 'default', 0, ts * 0.2, 32 * this.scale * 1.5, 31 * this.scale * 1.5, { anchorX: 0.5, anchorY: 0.9 });
+      } else {
+        ctx.scale(this.scale, this.scale);
+        this._drawStump(ctx, ts);
+      }
     } else {
       if (this.wobble > 0) {
         ctx.rotate(Math.sin(Date.now() * 0.025) * this.wobble);
       }
-      this._drawTree(ctx, ts);
+      
+      if (hasSpriteSystem && window.game.spriteSystem.isAtlasReady(this.spriteId)) {
+        const dims = {
+          tree_1: { w: 64, h: 63 },
+          tree_2: { w: 46, h: 63 },
+          tree_3: { w: 52, h: 92 },
+          tree_4: { w: 48, h: 93 },
+        };
+        const dim = dims[this.spriteId];
+        const w = dim.w * this.scale * 1.2;
+        const h = dim.h * this.scale * 1.2;
+        window.game.spriteSystem.drawFrame(ctx, this.spriteId, 'default', 0, ts * 0.45, w, h, { anchorX: 0.5, anchorY: 0.95 });
+      } else {
+        ctx.scale(this.scale, this.scale);
+        this._drawTree(ctx, ts);
+      }
     }
 
     ctx.restore();
