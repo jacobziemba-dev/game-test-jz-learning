@@ -1,0 +1,9 @@
+--- src/main.js	2024-05-24 16:00:00.000000000 -0400
++++ src/main.js	2024-05-24 16:00:00.000000000 -0400
+@@ -1,5 +1,6 @@
+ window.addEventListener('load', () => {
+   const canvas = document.getElementById('gameCanvas');
+   const game = new Game(canvas);
++  window.game = game; // Make game globally accessible
+   game.start();
+ });

@@ -281,10 +281,8 @@ class Player {
 
     this.chopTarget = null;
     this.mineTarget = null;
-    this.craftTarget = null;
-    this.craftQuantity = 0;
 
-    if (this.state === PlayerState.CHOPPING || this.state === PlayerState.MINING || this.state === PlayerState.CRAFTING) {
+    if (this.state === PlayerState.CHOPPING || this.state === PlayerState.MINING) {
       this.state = PlayerState.IDLE;
     }
   }
@@ -401,7 +399,7 @@ class Player {
     }
 
     // Gathering actions should always cancel combat intent.
-    if (this.state === PlayerState.CHOPPING || this.state === PlayerState.MINING || this.state === PlayerState.CRAFTING) return;
+    if (this.state === PlayerState.CHOPPING || this.state === PlayerState.MINING) return;
 
     this._combatRepathTimer -= dt;
     if (!this._isMonsterInMeleeRange(this.targetMonster)) {

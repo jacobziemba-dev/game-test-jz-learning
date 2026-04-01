@@ -1,0 +1,21 @@
+--- src/Player.js	2024-05-24 16:00:00.000000000 -0400
++++ src/Player.js	2024-05-24 16:00:00.000000000 -0400
+@@ -666,6 +666,19 @@
+     ctx.textAlign = 'center';
+     ctx.textBaseline = 'bottom';
+     ctx.fillText(`Player (Lv ${this.getCombatLevel()})`, sx, by - 2);
++
++    // Render floating texts
++    for (const ft of this.floatingTexts) {
++      const progress = 1 - ft.life / 1.5;
++      const textY = by - 10 - ft.yOffset - (progress * 20);
++      ctx.globalAlpha = ft.life > 0.5 ? 1 : ft.life * 2;
++      ctx.fillStyle = '#000000';
++      ctx.fillText(ft.text, sx + 1, textY + 1);
++      ctx.fillStyle = ft.color;
++      ctx.fillText(ft.text, sx, textY);
++      ctx.globalAlpha = 1;
++    }
++
+     ctx.restore();
+   }
