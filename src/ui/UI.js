@@ -16,8 +16,9 @@ class UI {
 
   /** Call this when a level-up event fires (from Game.js polling player.skills.popLevelUps()). */
   pushLevelUp(skillName, level) {
+    const capitalizedSkill = skillName.charAt(0).toUpperCase() + skillName.slice(1);
     this._toasts.push({
-      text:   `⬆ ${skillName} level up! (${level})`,
+      text:   `⬆ ${capitalizedSkill} level up! (${level})`,
       color:  '#ffd54f',
       ttl:    3.5,
       maxTtl: 3.5,
@@ -138,7 +139,7 @@ class UI {
 
     // XP text
     const xpText = skill.level < 99
-      ? `${skill.xpInCurrentLevel} / ${skill.xpToNextLevel} XP`
+      ? `${skill.xpInCurrentLevel.toLocaleString()} / ${skill.xpToNextLevel.toLocaleString()} XP`
       : 'MAX';
     ctx.fillStyle    = '#999';
     ctx.font         = '9px monospace';
@@ -165,7 +166,7 @@ class UI {
 
     const hints = ['[I] Inventory', '[C] Crafting', '[K] Skills', '[J] Journal', '[F] Loot Filter', '[1..8] Hotbar', '[B] Toggle bar', '[O] Save', '[L] Load'];
     ctx.save();
-    ctx.fillStyle    = 'rgba(255,255,255,0.3)';
+    ctx.fillStyle    = 'rgba(255,255,255,0.6)';
     ctx.font         = '10px monospace';
     ctx.textAlign    = 'right';
     ctx.textBaseline = 'bottom';
