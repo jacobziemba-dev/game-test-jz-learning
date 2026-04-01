@@ -6,6 +6,7 @@ class ShopUI {
     this.isOpen = false;
     this.vendor = null;
 
+    // W/H are dynamic based on screen size now
     this.panelW = 760;
     this.panelH = 500;
     this.headerH = 36;
@@ -129,6 +130,11 @@ class ShopUI {
   render(ctx, canvasW, canvasH) {
     if (!this.isOpen || !this.vendor) return;
 
+    // Dynamic sizing for mobile
+    this.panelW = Math.min(canvasW - 16, 760);
+    this.panelH = Math.min(canvasH - 16, 500);
+    if (!this.isOpen || !this.vendor) return;
+
     this._px = Math.round((canvasW - this.panelW) / 2);
     this._py = Math.round((canvasH - this.panelH) / 2);
 
@@ -137,7 +143,7 @@ class ShopUI {
     const bodyH = this.panelH - this.headerH - this.tabH - this.footerH;
     const footerY = bodyY + bodyH;
 
-    const listW = 320;
+    const listW = Math.min(320, this.panelW * 0.45);
     const detailX = this._px + listW + 8;
     const detailW = this.panelW - listW - 16;
 
