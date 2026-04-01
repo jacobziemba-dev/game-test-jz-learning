@@ -6,13 +6,17 @@ const TILE = {
 };
 
 const TILE_SIZE = 48;
-const WORLD_COLS = 40;
-const WORLD_ROWS = 40;
+const BASE_WORLD_COLS = 40;
+const BASE_WORLD_ROWS = 40;
+const VIEWPORT_TILE_PADDING = 6;
 
 // How many trees to scatter (avoid 5x5 spawn area in center)
-const TREE_COUNT = 80;
-const MONSTER_COUNT = 16;
-const ORE_NODE_COUNT = 18;
+const TREE_DENSITY = 0.05;
+const MONSTER_DENSITY = 0.01;
+const ORE_NODE_DENSITY = 0.012;
+const MIN_TREE_COUNT = 80;
+const MIN_MONSTER_COUNT = 16;
+const MIN_ORE_NODE_COUNT = 18;
 
 const VENDOR_LAYOUT = [
   {
@@ -110,10 +114,15 @@ const MONSTER_ARCHETYPES = [
 class World {
   constructor() {
     this.tileSize = TILE_SIZE;
-    this.cols = WORLD_COLS;
-    this.rows = WORLD_ROWS;
+    this.cols = this._resolveCols();
+    this.rows = this._resolveRows();
     this.width = this.cols * this.tileSize;
     this.height = this.rows * this.tileSize;
+
+    const totalTiles = this.cols * this.rows;
+    this.treeTarget = Math.max(MIN_TREE_COUNT, Math.floor(totalTiles * TREE_DENSITY));
+    this.monsterTarget = Math.max(MIN_MONSTER_COUNT, Math.floor(totalTiles * MONSTER_DENSITY));
+    this.oreNodeTarget = Math.max(MIN_ORE_NODE_COUNT, Math.floor(totalTiles * ORE_NODE_DENSITY));
 
     // 2D grid: grid[row][col]
     this.grid = [];
@@ -143,12 +152,24 @@ class World {
     this._spawnVendors();
   }
 
+  _resolveCols() {
+    const viewportCols = Math.ceil((window.innerWidth || 0) / this.tileSize) + VIEWPORT_TILE_PADDING;
+    return Math.max(BASE_WORLD_COLS, viewportCols);
+  }
+
+  _resolveRows() {
+    const viewportRows = Math.ceil((window.innerHeight || 0) / this.tileSize) + VIEWPORT_TILE_PADDING;
+    return Math.max(BASE_WORLD_ROWS, viewportRows);
+  }
+
   _spawnTrees() {
     const spawnCol = Math.floor(this.cols / 2);
     const spawnRow = Math.floor(this.rows / 2);
     let placed = 0;
+    let attempts = 0;
 
-    while (placed < TREE_COUNT) {
+    while (placed < this.treeTarget && attempts < this.treeTarget * 40) {
+      attempts++;
       const col = Math.floor(Math.random() * this.cols);
       const row = Math.floor(Math.random() * this.rows);
 
@@ -189,7 +210,7 @@ class World {
     let placed = 0;
     let attempts = 0;
 
-    while (placed < MONSTER_COUNT && attempts < MONSTER_COUNT * 40) {
+    while (placed < this.monsterTarget && attempts < this.monsterTarget * 40) {
       attempts++;
       const col = Math.floor(Math.random() * this.cols);
       const row = Math.floor(Math.random() * this.rows);
@@ -233,7 +254,7 @@ class World {
     let placed = 0;
     let attempts = 0;
 
-    while (placed < ORE_NODE_COUNT && attempts < ORE_NODE_COUNT * 45) {
+    while (placed < this.oreNodeTarget && attempts < this.oreNodeTarget * 45) {
       attempts++;
       const col = Math.floor(Math.random() * this.cols);
       const row = Math.floor(Math.random() * this.rows);
