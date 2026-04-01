@@ -96,6 +96,10 @@ class CraftingUI {
   render(ctx, canvasW, canvasH) {
     if (!this.isOpen) return;
 
+    this.panelW = Math.min(canvasW - 16, 760);
+    this.panelH = Math.min(canvasH - 16, 460);
+    if (!this.isOpen) return;
+
     this._px = Math.round((canvasW - this.panelW) / 2);
     this._py = Math.round((canvasH - this.panelH) / 2);
 

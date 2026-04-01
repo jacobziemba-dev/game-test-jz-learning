@@ -73,15 +73,26 @@ class Game {
     this._loadFromSave();
 
     this.lastTime = 0;
+    this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || ('ontouchstart' in window);
     this.loop = this.loop.bind(this);
   }
 
   resize() {
-    this.canvas.width  = document.body.clientWidth;
-    this.canvas.height = document.body.clientHeight;
+    const dpr = window.devicePixelRatio || 1;
+    const rect = document.body.getBoundingClientRect();
+
+    this.canvas.width  = rect.width * dpr;
+    this.canvas.height = rect.height * dpr;
+
+    this.canvas.style.width  = `${rect.width}px`;
+    this.canvas.style.height = `${rect.height}px`;
+
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset
+    this.ctx.scale(dpr, dpr);
+
     if (this.camera) {
-      this.camera.width  = this.canvas.width;
-      this.camera.height = this.canvas.height;
+      this.camera.width  = rect.width;
+      this.camera.height = rect.height;
     }
   }
 
@@ -137,7 +148,9 @@ class Game {
 
   render() {
     const ctx = this.ctx;
-    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    const logicW = parseInt(this.canvas.style.width, 10);
+    const logicH = parseInt(this.canvas.style.height, 10);
+    ctx.clearRect(0, 0, logicW, logicH);
 
     this.world.render(ctx, this.camera);
     this.input.renderMarker(ctx, this.camera);
@@ -147,16 +160,16 @@ class Game {
     this.ui.render(ctx, this.player);
 
     // Toggleable panels — render last so they sit on top
-    this.inventoryUI.render(ctx, this.canvas.width, this.canvas.height);
-    this.craftingUI.render(ctx, this.canvas.width, this.canvas.height);
-    this.shopUI.render(ctx, this.canvas.width, this.canvas.height);
-    this.skillsUI.render(ctx, this.canvas.width, this.canvas.height);
-    this.skillJournalUI.render(ctx, this.canvas.width, this.canvas.height);
-    this.lootFilterUI.render(ctx, this.canvas.width, this.canvas.height);
-    this.playerUI.render(ctx, this.canvas.width, this.canvas.height);
-    this.helpUI.render(ctx, this.canvas.width, this.canvas.height);
-    this.spellbookUI.render(ctx, this.canvas.width, this.canvas.height);
-    this.hotbarUI.render(ctx, this.canvas.width, this.canvas.height);
+    this.inventoryUI.render(ctx, logicW, logicH);
+    this.craftingUI.render(ctx, logicW, logicH);
+    this.shopUI.render(ctx, logicW, logicH);
+    this.skillsUI.render(ctx, logicW, logicH);
+    this.skillJournalUI.render(ctx, logicW, logicH);
+    this.lootFilterUI.render(ctx, logicW, logicH);
+    this.playerUI.render(ctx, logicW, logicH);
+    this.helpUI.render(ctx, logicW, logicH);
+    this.spellbookUI.render(ctx, logicW, logicH);
+    this.hotbarUI.render(ctx, logicW, logicH);
   }
 
   _markDirty() {

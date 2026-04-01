@@ -3,8 +3,8 @@ class HotbarUI {
     this.slots = slots;
     this.isOpen = true;
 
-    this.slotW = 92;
-    this.slotH = 34;
+    this.slotW = window.game && window.game.isMobile ? 110 : 92;
+    this.slotH = window.game && window.game.isMobile ? 42 : 34;
     this.gap = 6;
 
     this._slotsLayout = []; // Cache bounds of each slot {x, y, w, h}

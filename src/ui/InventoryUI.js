@@ -13,8 +13,8 @@ class InventoryUI {
     this.isOpen      = false;
 
     // Layout constants
-    this.slotSize    = 44;  // px per slot cell
-    this.slotGap     = 4;   // gap between cells
+    this.slotSize    = window.game && window.game.isMobile ? 52 : 44; // Larger on mobile
+    this.slotGap     = window.game && window.game.isMobile ? 6 : 4;  // Larger gap on mobile
     this.panelPad    = 14;  // inner padding
     this.headerH     = 32;  // title bar height
     this.footerH     = 8;   // bottom padding
