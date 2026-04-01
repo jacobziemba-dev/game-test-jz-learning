@@ -1099,3 +1099,65 @@ ItemRegistry.register({ id: 'diamond_amulet', name: 'Diamond Amulet', descriptio
 // ItemRegistry.register({ id: 'iron_ore',  name: 'Iron Ore',   type: 'resource', ... });
 // ItemRegistry.register({ id: 'raw_fish',  name: 'Raw Fish',   type: 'resource', ... });
 // ItemRegistry.register({ id: 'iron_bar',  name: 'Iron Bar',   type: 'resource', ... });
+
+// ─── Runes ───────────────────────────────────────────────────────────────────
+
+ItemRegistry.register({
+  id: 'air_rune',
+  name: 'Air Rune',
+  description: 'One of the four basic elemental runes.',
+  type: 'rune',
+  stackable: true,
+  maxStack: 1000000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    const r = size * 0.4;
+
+    // Rune stone
+    ctx.fillStyle = '#90a4ae';
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#546e7a';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Air symbol (swirl)
+    ctx.strokeStyle = '#e0f7fa';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r * 0.5, Math.PI * 0.8, Math.PI * 2.8);
+    ctx.stroke();
+  },
+});
+
+ItemRegistry.register({
+  id: 'mind_rune',
+  name: 'Mind Rune',
+  description: 'A rune used for basic combat spells.',
+  type: 'rune',
+  stackable: true,
+  maxStack: 1000000,
+  draw(ctx, x, y, size) {
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    const r = size * 0.4;
+
+    // Rune stone
+    ctx.fillStyle = '#90a4ae';
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#546e7a';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Mind symbol
+    ctx.fillStyle = '#ffcc80';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy - r * 0.2, r * 0.4, r * 0.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillRect(cx - r * 0.1, cy, r * 0.2, r * 0.4);
+  },
+});

@@ -7,7 +7,7 @@ const PlayerState = {
 };
 
 const WALK_SPEED = 5.5; // tiles per second
-const COMBAT_STYLES = ['balanced', 'attack', 'strength', 'defence'];
+const COMBAT_STYLES = ['balanced', 'attack', 'strength', 'defence', 'magic'];
 
 class Player {
   constructor(world) {
@@ -30,6 +30,7 @@ class Player {
 
     // Combat
     this.targetMonster = null;
+    this.activeSpell = null;
     this.attackTimer = 0;
     // Slightly slower cadence feels closer to classic melee pacing.
     this.attackSpeed = 1.8;
@@ -426,13 +427,58 @@ class Player {
       this.direction = dr > 0 ? 'DOWN' : 'UP';
     }
 
-    const hitChance = this._rollHitChanceAgainstMonster(this.targetMonster);
-    const landed = CryptoUtils.secureRandom() <= hitChance;
-    const damage = landed ? this._rollMaxHit() : 0;
+    let damage = 0;
+    let landed = false;
+    let usedMagic = false;
+
+    if (this.combatStyle === 'magic' && this.activeSpell) {
+      // Check runes
+      let hasRunes = true;
+      for (const rune of this.activeSpell.runes) {
+        if (this.inventory.countItem(rune.id) < rune.qty) {
+          hasRunes = false;
+          break;
+        }
+      }
+
+      if (hasRunes && this.skills.getLevel('magic') >= this.activeSpell.levelReq) {
+        // Consume runes
+        for (const rune of this.activeSpell.runes) {
+          this.inventory.removeItem(rune.id, rune.qty);
+        }
+
+        usedMagic = true;
+        // Magic hit logic
+        const hitChance = this._rollHitChanceAgainstMonsterMagic(this.targetMonster);
+        landed = CryptoUtils.secureRandom() <= hitChance;
+        damage = landed ? Math.floor(CryptoUtils.secureRandom() * (this.activeSpell.maxHit + 1)) : 0;
+
+        // Base casting XP (even if splash)
+        this.skills.gainXP('magic', this.activeSpell.maxHit * 2);
+      } else {
+        // Fallback to melee if no runes or level
+        const hitChance = this._rollHitChanceAgainstMonster(this.targetMonster);
+        landed = CryptoUtils.secureRandom() <= hitChance;
+        damage = landed ? this._rollMaxHit() : 0;
+      }
+    } else {
+      // Standard melee
+      const hitChance = this._rollHitChanceAgainstMonster(this.targetMonster);
+      landed = CryptoUtils.secureRandom() <= hitChance;
+      damage = landed ? this._rollMaxHit() : 0;
+    }
+
+    // Spawn projectile effect
+    if (usedMagic) {
+        this.world.spawnProjectile(this.x, this.y, this.targetMonster.x, this.targetMonster.y, '#7b9cd6');
+    }
+
     const died = this.targetMonster.takeDamage(damage);
 
     if (damage > 0) {
-      if (this.combatStyle === 'attack') {
+      if (usedMagic) {
+        this.skills.gainXP('magic', damage * 2);
+      } else if (this.combatStyle === 'attack') {
         this.skills.gainXP('attack', damage * 4);
       } else if (this.combatStyle === 'strength') {
         this.skills.gainXP('strength', damage * 4);
@@ -473,6 +519,13 @@ class Player {
   _rollMaxHit() {
     const maxHit = Math.max(1, Math.floor(this.getEffectiveStrength() / 4));
     return 1 + Math.floor(CryptoUtils.secureRandom() * maxHit);
+  }
+
+  _rollHitChanceAgainstMonsterMagic(monster) {
+    const attackScore = this.skills.getLevel('magic') + this.equipment.getBonuses().magic || 0;
+    const defenceScore = Math.max(1, monster.defence + monster.level * 0.75);
+    const raw = attackScore / (attackScore + defenceScore);
+    return Math.max(0.2, Math.min(0.92, raw));
   }
 
   getEffectiveAttack() {
@@ -563,6 +616,7 @@ class Player {
       currentHitpoints: this.currentHitpoints,
       maxHitpoints: this.maxHitpoints,
       combatStyle: this.combatStyle,
+      activeSpellId: this.activeSpell?.id,
       lootFilter: this.lootFilter,
       deathVersion: this.deathVersion,
       inventory: this.inventory.serialize(),
@@ -586,6 +640,9 @@ class Player {
     this.maxHitpoints = Math.max(1, Math.floor(data.maxHitpoints ?? this.maxHitpoints));
     this.currentHitpoints = Math.max(1, Math.min(this.maxHitpoints, Math.floor(data.currentHitpoints ?? this.maxHitpoints)));
     this.combatStyle = COMBAT_STYLES.includes(data.combatStyle) ? data.combatStyle : this.combatStyle;
+    if (data.activeSpellId && this.world.game && this.world.game.spellbookUI) {
+      this.activeSpell = this.world.game.spellbookUI.spells.find(s => s.id === data.activeSpellId) || null;
+    }
     if (data.lootFilter && typeof data.lootFilter === 'object') {
       this.lootFilter.enabled = !!data.lootFilter.enabled;
       if (data.lootFilter.allow && typeof data.lootFilter.allow === 'object') {

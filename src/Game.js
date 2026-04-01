@@ -10,6 +10,7 @@ class Game {
     this.spriteSystem = new SpriteSystem({ basePath: 'assets/sprites/' });
     this.spriteSystem.registerManifest(SpriteManifest.atlases);
     this.world.spriteSystem = this.spriteSystem;
+    this.world.game = this;
     this.camera      = new Camera(this.canvas.width, this.canvas.height, this.world);
     this.player      = new Player(this.world);
     this.ui          = new UI();
@@ -26,6 +27,7 @@ class Game {
     this.lootFilterUI = new LootFilterUI(this.player);
     this.playerUI    = new PlayerUI(this.player);
     this.helpUI      = new HelpUI();
+    this.spellbookUI = new SpellbookUI(this.player);
     this.hotbarUI    = new HotbarUI([
       { key: '1', label: 'Save', action: () => this.manualSave() },
       { key: '2', label: 'Load', action: () => this.manualLoad() },
@@ -49,10 +51,11 @@ class Game {
         },
       },
       { key: '8', label: 'Character', action: () => this.playerUI.toggle() },
+      { key: 'M', label: 'Spells', action: () => this.spellbookUI.toggle() },
     ]);
     this.input       = new InputHandler(
       this.canvas, this.camera, this.world, this.player,
-      this.inventoryUI, this.craftingUI, this.shopUI, this.skillsUI, this.skillJournalUI, this.lootFilterUI, this.playerUI, this.helpUI, this.hotbarUI,
+      this.inventoryUI, this.craftingUI, this.shopUI, this.skillsUI, this.skillJournalUI, this.lootFilterUI, this.playerUI, this.helpUI, this.hotbarUI, this.spellbookUI,
       {
         onManualSave: () => this.manualSave(),
         onManualLoad: () => this.manualLoad(),
@@ -102,6 +105,7 @@ class Game {
     this.ui.update(dt);
     this.craftingUI.update(dt);
     this.shopUI.update(dt);
+    this.spellbookUI.update(dt);
 
     // Poll for level-up events and push them to the toast system
     for (const evt of this.player.skills.popLevelUps()) {
@@ -151,6 +155,7 @@ class Game {
     this.lootFilterUI.render(ctx, this.canvas.width, this.canvas.height);
     this.playerUI.render(ctx, this.canvas.width, this.canvas.height);
     this.helpUI.render(ctx, this.canvas.width, this.canvas.height);
+    this.spellbookUI.render(ctx, this.canvas.width, this.canvas.height);
     this.hotbarUI.render(ctx, this.canvas.width, this.canvas.height);
   }
 
