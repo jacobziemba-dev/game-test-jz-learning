@@ -50,7 +50,7 @@ class CraftingUI {
     this.selectedStation = stationType;
   }
 
-  onMouseMove() {}
+  onMouseMove() { }
 
   onWheel(deltaY) {
     if (!this.isOpen || !this._listBounds) return false;
@@ -167,7 +167,15 @@ class CraftingUI {
 
   _handleCategoryClick(sx, sy, tabY) {
     if (sy < tabY || sy > tabY + this.tabH) return false;
-    const tabW = (this.panelW - 16) / Math.max(1, this.categories.length);
+
+    // Match the drawing logic:
+    const minTabW = 70;
+    const totalTabsW = this.panelW - 16;
+    const tabW = Math.max(minTabW, totalTabsW / Math.max(1, this.categories.length));
+
+    // Quick bounds check if mouse is within the total clipped area (for overflowing tabs)
+    if (sx < this._px + 8 || sx > this._px + 8 + totalTabsW) return false;
+
     for (let i = 0; i < this.categories.length; i++) {
       const x = this._px + 8 + i * tabW;
       if (sx >= x && sx <= x + tabW) {
@@ -247,7 +255,17 @@ class CraftingUI {
   }
 
   _drawCategoryTabs(ctx, y) {
-    const tabW = (this.panelW - 16) / Math.max(1, this.categories.length);
+    const minTabW = 70; // Ensure tabs aren't microscopically thin
+    const totalTabsW = this.panelW - 16;
+    const tabW = Math.max(minTabW, totalTabsW / Math.max(1, this.categories.length));
+
+    // Quick and dirty manual "scroll" offset if they exceed width, though normally they fit now.
+    // For now we just draw them; if they overflow panel bounds, clip them.
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(this._px + 8, y, totalTabsW, this.tabH);
+    ctx.clip();
+
     for (let i = 0; i < this.categories.length; i++) {
       const x = this._px + 8 + i * tabW;
       const active = i === this.activeCategory;
@@ -264,8 +282,11 @@ class CraftingUI {
       ctx.font = active ? 'bold 11px sans-serif' : '11px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(this.categories[i], x + tabW / 2, y + this.tabH / 2 + 1);
+      const label = this.categories[i].replace(/^Crafting:\s*/i, '');
+      ctx.fillText(label, x + tabW / 2, y + this.tabH / 2 + 1);
     }
+
+    ctx.restore();
   }
 
   _drawStationButtons(ctx, y) {
