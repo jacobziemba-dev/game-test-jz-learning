@@ -141,6 +141,8 @@ class World {
     // Town vendors (starter economy)
     this.vendors = [];
     this._spawnVendors();
+
+    this.projectiles = [];
   }
 
   _spawnTrees() {
@@ -296,6 +298,10 @@ class World {
       });
   }
 
+  spawnProjectile(sx, sy, tx, ty, color) {
+    this.projectiles.push({ sx, sy, tx, ty, color, t: 0 });
+  }
+
   spawnGroundLoot(col, row, itemId, quantity) {
     if (quantity <= 0) return;
 
@@ -392,6 +398,12 @@ class World {
       this.groundLoot = this.groundLoot.filter(l => !l.isExpired);
       this._visibleLootCache = null;
     }
+
+    for (let i = this.projectiles.length - 1; i >= 0; i--) {
+      const p = this.projectiles[i];
+      p.t += dt * 4; // speed
+      if (p.t >= 1) this.projectiles.splice(i, 1);
+    }
   }
 
   render(ctx, camera) {
@@ -463,6 +475,22 @@ class World {
 
     for (const loot of this._visibleLootCache) {
       loot.render(ctx, camera, ts);
+    }
+
+    // Projectiles
+    for (const p of this.projectiles) {
+      const px = p.sx + (p.tx - p.sx) * p.t - camera.x;
+      const py = p.sy + (p.ty - p.sy) * p.t - camera.y - (Math.sin(p.t * Math.PI) * 15);
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(px, py, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Magic trail
+      ctx.fillStyle = 'rgba(123, 156, 214, 0.4)';
+      ctx.beginPath();
+      ctx.arc(px - (p.tx - p.sx)*0.05, py - (p.ty - p.sy)*0.05, 4, 0, Math.PI * 2);
+      ctx.fill();
     }
   }
 

@@ -121,7 +121,7 @@ class ContextMenu {
 // ─────────────────────────────────────────────
 
 class InputHandler {
-  constructor(canvas, camera, world, player, inventoryUI, craftingUI, shopUI, skillsUI, skillJournalUI, lootFilterUI, playerUI, helpUI, hotbarUI, actions = {}) {
+  constructor(canvas, camera, world, player, inventoryUI, craftingUI, shopUI, skillsUI, skillJournalUI, lootFilterUI, playerUI, helpUI, hotbarUI, spellbookUI, actions = {}) {
     this.canvas      = canvas;
     this.camera      = camera;
     this.world       = world;
@@ -135,6 +135,7 @@ class InputHandler {
     this.playerUI    = playerUI;
     this.helpUI      = helpUI;
     this.hotbarUI    = hotbarUI;
+    this.spellbookUI = spellbookUI;
     this.actions     = actions;
 
     this.clickMarker = null; // { x, y, alpha }
@@ -156,6 +157,9 @@ class InputHandler {
     if (key === 'p') { this.playerUI.toggle();    this.menu.close(); }
     if (key === 'h') { this.helpUI.toggle();      this.menu.close(); }
     if (key === 'f') { this.lootFilterUI.toggle(); this.menu.close(); }
+    if (key === 'm') {
+      this.spellbookUI.toggle();
+    }
     if (key === 'o') {
       this.actions.onManualSave?.();
       this.menu.close();
@@ -181,6 +185,7 @@ class InputHandler {
       this.playerUI.close();
       this.helpUI.close();
       this.menu.close();
+      if(this.spellbookUI) this.spellbookUI.isVisible = false;
     }
   }
 

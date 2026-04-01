@@ -20,7 +20,7 @@ const DropTableRegistry = (() => {
 })();
 
 DropTableRegistry.register('goblin_common', {
-  guaranteed: [{ itemId: 'coins', min: 2, max: 10 }],
+  guaranteed: [{ itemId: 'coins', min: 2, max: 10 }, { itemId: 'air_rune', min: 2, max: 6 }, { itemId: 'mind_rune', min: 1, max: 4 }],
   random: [
     { itemId: 'log', min: 1, max: 1, weight: 42 },
     { itemId: 'arrow_shaft', min: 2, max: 7, weight: 36 },
@@ -36,7 +36,7 @@ DropTableRegistry.register('goblin_common', {
 });
 
 DropTableRegistry.register('skeleton_guard', {
-  guaranteed: [{ itemId: 'coins', min: 6, max: 18 }],
+  guaranteed: [{ itemId: 'coins', min: 6, max: 18 }, { itemId: 'air_rune', min: 5, max: 12 }, { itemId: 'mind_rune', min: 3, max: 8 }],
   random: [
     { itemId: 'arrow_shaft', min: 6, max: 12, weight: 32 },
     { itemId: 'gold_bar', min: 1, max: 1, weight: 20 },
@@ -50,7 +50,7 @@ DropTableRegistry.register('skeleton_guard', {
 });
 
 DropTableRegistry.register('bandit_raider', {
-  guaranteed: [{ itemId: 'coins', min: 16, max: 42 }],
+  guaranteed: [{ itemId: 'coins', min: 16, max: 42 }, { itemId: 'air_rune', min: 15, max: 30 }, { itemId: 'mind_rune', min: 10, max: 20 }],
   random: [
     { itemId: 'bronze_bar', min: 1, max: 3, weight: 34 },
     { itemId: 'gold_bar', min: 1, max: 2, weight: 24 },
