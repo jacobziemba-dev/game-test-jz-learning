@@ -59,6 +59,13 @@ const SkillUnlockRegistry = (() => {
       { level: 50, title: 'Jewellery Tier III', desc: 'Ruby amulet crafting unlocked.' },
       { level: 70, title: 'Jewellery Tier IV', desc: 'Diamond amulet crafting unlocked.' },
     ],
+    runecrafting: [
+      { level: 1, title: 'Air Runes', desc: 'Craft basic air runes.' },
+      { level: 2, title: 'Mind Runes', desc: 'Unlock mind runes for magic.' },
+      { level: 5, title: 'Water Runes', desc: 'Craft water runes.' },
+      { level: 9, title: 'Earth Runes', desc: 'Craft earth runes.' },
+      { level: 14, title: 'Fire Runes', desc: 'Craft fire runes.' },
+    ],
   };
 
   function milestonesFor(skillId) {
